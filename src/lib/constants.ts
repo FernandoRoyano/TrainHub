@@ -39,6 +39,13 @@ export const EXERCISE_CATEGORIES = [
   "balance",
 ] as const;
 
+export const BLOCK_TYPES = [
+  "warmup",
+  "cooldown",
+  "circuit",
+  "custom",
+] as const;
+
 export const DIFFICULTY_LEVELS = [
   "beginner",
   "intermediate",

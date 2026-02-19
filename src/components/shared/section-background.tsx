@@ -6,6 +6,7 @@ const sectionHues: Record<string, number> = {
   "/dashboard": 105,
   "/clients": 200,
   "/exercises": 270,
+  "/blocks": 310,
   "/routines": 35,
   "/messages": 210,
   "/calendar": 170,

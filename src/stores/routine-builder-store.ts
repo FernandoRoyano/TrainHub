@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { Exercise } from "@/services/exercises.service";
+import type { BlockExercise } from "@/services/blocks.service";
 
 export interface BuilderExercise {
   id: string; // temp id for UI
@@ -42,6 +43,8 @@ interface RoutineBuilderState {
   ) => void;
   moveExercise: (dayIndex: number, from: number, to: number) => void;
   toggleSuperset: (dayIndex: number, exerciseIndex: number) => void;
+  addExercisesFromBlock: (dayIndex: number, blockExercises: BlockExercise[]) => void;
+  reorderExercise: (dayIndex: number, oldIndex: number, newIndex: number) => void;
 
   // Reset
   reset: () => void;
@@ -203,6 +206,50 @@ export const useRoutineBuilderStore = create<RoutineBuilderState>(
 
       const newDays = [...days];
       newDays[dayIndex] = { ...day, exercises: newExercises };
+      set({ days: newDays });
+    },
+
+    addExercisesFromBlock: (dayIndex, blockExercises) => {
+      const { days } = get();
+      const day = days[dayIndex];
+      if (!day) return;
+
+      const newExercises = blockExercises.map((bex, i) => ({
+        id: tempId(),
+        exercise_id: bex.exercise_id,
+        exercise: bex.exercise,
+        order_index: day.exercises.length + i,
+        sets: bex.sets,
+        reps: bex.reps,
+        rest_seconds: bex.rest_seconds,
+        notes: bex.notes ?? "",
+        superset_group: bex.superset_group,
+      }));
+
+      const newDays = [...days];
+      newDays[dayIndex] = {
+        ...day,
+        exercises: [...day.exercises, ...newExercises],
+      };
+      set({ days: newDays });
+    },
+
+    reorderExercise: (dayIndex, oldIndex, newIndex) => {
+      const { days } = get();
+      const day = days[dayIndex];
+      if (!day) return;
+      if (newIndex < 0 || newIndex >= day.exercises.length) return;
+
+      const newExercises = [...day.exercises];
+      const [moved] = newExercises.splice(oldIndex, 1);
+      newExercises.splice(newIndex, 0, moved);
+      const reindexed = newExercises.map((e, i) => ({
+        ...e,
+        order_index: i,
+      }));
+
+      const newDays = [...days];
+      newDays[dayIndex] = { ...day, exercises: reindexed };
       set({ days: newDays });
     },
 

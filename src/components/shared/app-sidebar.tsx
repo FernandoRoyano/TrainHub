@@ -17,6 +17,7 @@ import {
   Settings,
   LogOut,
   ChevronLeft,
+  Puzzle,
 } from "lucide-react";
 import { useUIStore } from "@/stores/ui-store";
 
@@ -24,6 +25,7 @@ const navItems = [
   { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
   { key: "clients", href: "/clients", icon: Users },
   { key: "exercises", href: "/exercises", icon: Dumbbell },
+  { key: "blocks", href: "/blocks", icon: Puzzle },
   { key: "routines", href: "/routines", icon: ClipboardList },
   { key: "messages", href: "/messages", icon: MessageSquare },
   { key: "calendar", href: "/calendar", icon: CalendarDays },

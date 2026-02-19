@@ -18,6 +18,7 @@ import {
   Settings,
   LogOut,
   Menu,
+  Puzzle,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -25,6 +26,7 @@ const navItems = [
   { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
   { key: "clients", href: "/clients", icon: Users },
   { key: "exercises", href: "/exercises", icon: Dumbbell },
+  { key: "blocks", href: "/blocks", icon: Puzzle },
   { key: "routines", href: "/routines", icon: ClipboardList },
   { key: "messages", href: "/messages", icon: MessageSquare },
   { key: "calendar", href: "/calendar", icon: CalendarDays },
