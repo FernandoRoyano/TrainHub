@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,22 +22,7 @@ export function LocaleSwitcher() {
   const router = useRouter();
 
   function switchLocale(newLocale: string) {
-    // Remove current locale prefix if present
-    let path = pathname;
-    for (const l of locales) {
-      if (path.startsWith(`/${l.code}/`)) {
-        path = path.slice(l.code.length + 1);
-        break;
-      }
-      if (path === `/${l.code}`) {
-        path = "/";
-        break;
-      }
-    }
-
-    // Build new path
-    const newPath = newLocale === "es" ? path : `/${newLocale}${path}`;
-    router.push(newPath);
+    router.replace(pathname, { locale: newLocale });
   }
 
   return (

@@ -9,6 +9,7 @@
     "loading": "Loading...",
     "noResults": "No results found",
     "confirm": "Confirm",
+    "notFound": "Not found",
     "back": "Back",
     "next": "Next",
     "previous": "Previous",
@@ -67,7 +68,8 @@
     "myMessages": "My Messages",
     "myProfile": "My Profile",
     "myMeasurements": "Measurements",
-    "logout": "Log out"
+    "logout": "Log out",
+    "trainer": "Trainer"
   },
   "dashboard": {
     "title": "Dashboard",

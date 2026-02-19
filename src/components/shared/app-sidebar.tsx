@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
@@ -117,7 +117,7 @@ export function AppSidebar() {
           {sidebarOpen && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">
-                {profile?.full_name || "Entrenador"}
+                {profile?.full_name || t("trainer")}
                 {isAdmin && (
                   <span className="ml-1.5 inline-flex items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
                     Admin

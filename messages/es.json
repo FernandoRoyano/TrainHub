@@ -9,6 +9,7 @@
     "loading": "Cargando...",
     "noResults": "No se encontraron resultados",
     "confirm": "Confirmar",
+    "notFound": "No encontrado",
     "back": "Volver",
     "next": "Siguiente",
     "previous": "Anterior",
@@ -67,7 +68,8 @@
     "myMessages": "Mis Mensajes",
     "myProfile": "Mi Perfil",
     "myMeasurements": "Mediciones",
-    "logout": "Cerrar sesion"
+    "logout": "Cerrar sesion",
+    "trainer": "Entrenador"
   },
   "dashboard": {
     "title": "Panel de control",

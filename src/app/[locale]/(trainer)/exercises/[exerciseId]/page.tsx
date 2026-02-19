@@ -44,7 +44,7 @@ export default function ExerciseDetailPage() {
   }
 
   if (!exercise) {
-    return <p className="text-muted-foreground">Exercise not found</p>;
+    return <p className="text-muted-foreground">{tc("notFound")}</p>;
   }
 
   const canEdit = !!exercise.trainer_id || isAdmin;
