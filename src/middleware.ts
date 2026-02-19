@@ -1,0 +1,95 @@
+import createMiddleware from "next-intl/middleware";
+import { NextResponse, type NextRequest } from "next/server";
+import { routing } from "./i18n/routing";
+import { updateSession } from "./lib/supabase/middleware";
+import { PUBLIC_ROUTES } from "./lib/constants";
+
+const intlMiddleware = createMiddleware(routing);
+
+function isPublicRoute(pathname: string): boolean {
+  return (
+    PUBLIC_ROUTES.some(
+      (route) =>
+        pathname === route ||
+        pathname.endsWith(route) ||
+        pathname.includes(`${route}/`)
+    ) ||
+    pathname === "/" ||
+    routing.locales.some((locale) => pathname === `/${locale}`)
+  );
+}
+
+export async function middleware(request: NextRequest) {
+  // 1. Run next-intl middleware first (handles locale routing)
+  const intlResponse = intlMiddleware(request);
+
+  // 2. Run Supabase session refresh on the intl response
+  const { user, response } = await updateSession(request, intlResponse);
+
+  const pathname = request.nextUrl.pathname;
+
+  // 3. Auth guards
+  if (!user && !isPublicRoute(pathname)) {
+    const locale = routing.locales.find((l) => pathname.startsWith(`/${l}`));
+    const loginUrl = new URL(
+      locale ? `/${locale}/login` : "/login",
+      request.url
+    );
+    return NextResponse.redirect(loginUrl);
+  }
+
+  const isLandingPage =
+    pathname === "/" ||
+    routing.locales.some((locale) => pathname === `/${locale}`);
+
+  if (user && isPublicRoute(pathname) && !isLandingPage) {
+    const locale = routing.locales.find((l) => pathname.startsWith(`/${l}`));
+    const isClient = user.user_metadata?.role === "client";
+    const homeUrl = new URL(
+      locale
+        ? `/${locale}/${isClient ? "my-routine" : "dashboard"}`
+        : isClient
+          ? "/my-routine"
+          : "/dashboard",
+      request.url
+    );
+    return NextResponse.redirect(homeUrl);
+  }
+
+  // 4. Role-based route protection
+  if (user) {
+    const isClient = user.user_metadata?.role === "client";
+    const isTrainerRoute =
+      pathname.includes("/dashboard") ||
+      pathname.includes("/clients") ||
+      pathname.includes("/exercises") ||
+      pathname.includes("/routines") ||
+      pathname.includes("/messages") ||
+      pathname.includes("/settings");
+    const isClientRoute =
+      pathname.includes("/my-routine") ||
+      pathname.includes("/my-progress") ||
+      pathname.includes("/my-messages") ||
+      pathname.includes("/my-profile");
+
+    if (isClient && isTrainerRoute) {
+      const locale = routing.locales.find((l) => pathname.startsWith(`/${l}`));
+      return NextResponse.redirect(
+        new URL(locale ? `/${locale}/my-routine` : "/my-routine", request.url)
+      );
+    }
+
+    if (!isClient && isClientRoute) {
+      const locale = routing.locales.find((l) => pathname.startsWith(`/${l}`));
+      return NextResponse.redirect(
+        new URL(locale ? `/${locale}/dashboard` : "/dashboard", request.url)
+      );
+    }
+  }
+
+  return response;
+}
+
+export const config = {
+  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
+};

@@ -1,4 +1,16 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {};
+import createNextIntlPlugin from "next-intl/plugin";
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    turbo: {
+      resolveAlias: {
+        "next-intl/config": "./src/i18n/request.ts",
+      },
+    },
+  },
+};
+
+export default withNextIntl(nextConfig);

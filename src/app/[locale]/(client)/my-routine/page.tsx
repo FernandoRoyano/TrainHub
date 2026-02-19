@@ -1,0 +1,225 @@
+"use client";
+
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useMyRoutine, useMyClient, useWorkoutLogs, useStartWorkout, useCompleteWorkout, useLogExercise } from "@/hooks/use-client-app";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/shared/empty-state";
+import { Dumbbell, Check, Play } from "lucide-react";
+
+export default function MyRoutinePage() {
+  const t = useTranslations("clientApp");
+  const te = useTranslations("exercises");
+  const tr = useTranslations("routines");
+  const { data: routine, isLoading } = useMyRoutine();
+  const { data: client } = useMyClient();
+  const { data: logs } = useWorkoutLogs(routine?.id ?? "");
+  const startWorkout = useStartWorkout();
+  const completeWorkout = useCompleteWorkout();
+  const logExercise = useLogExercise();
+
+  const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+  const [activeWorkoutId, setActiveWorkoutId] = useState<string | null>(null);
+  const [exerciseData, setExerciseData] = useState<
+    Record<string, { sets: number; weight: string }>
+  >({});
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  if (!routine) {
+    return (
+      <EmptyState
+        icon={Dumbbell}
+        title={t("noRoutineAssigned")}
+        description={t("noRoutineDescription")}
+      />
+    );
+  }
+
+  const days = routine.routine?.days ?? [];
+  const activeDay = days[selectedDayIndex];
+
+  const today = new Date().toISOString().split("T")[0];
+  const todayLog = logs?.find(
+    (l) => l.date === today && l.routine_day_id === activeDay?.id
+  );
+
+  const handleStartWorkout = () => {
+    if (!client || !activeDay) return;
+    startWorkout.mutate(
+      {
+        clientId: client.id,
+        clientRoutineId: routine.id,
+        routineDayId: activeDay.id,
+      },
+      {
+        onSuccess: (log) => setActiveWorkoutId(log.id),
+      }
+    );
+  };
+
+  const handleLogExercise = (routineExerciseId: string) => {
+    const workoutId = activeWorkoutId ?? todayLog?.id;
+    if (!workoutId) return;
+    const data = exerciseData[routineExerciseId];
+    logExercise.mutate({
+      workoutLogId: workoutId,
+      routineExerciseId,
+      data: {
+        sets_completed: data?.sets ?? 0,
+        weight_used: data?.weight ? parseFloat(data.weight) : undefined,
+      },
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <h1 className="text-2xl font-bold">{t("myRoutine")}</h1>
+      <p className="text-muted-foreground">{routine.routine?.name}</p>
+
+      {/* Day selector */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {days.map((day, i) => (
+          <Button
+            key={day.id}
+            variant={i === selectedDayIndex ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSelectedDayIndex(i)}
+            className="shrink-0"
+          >
+            {tr("day", { number: day.day_number })}
+            {day.name && (
+              <span className="ml-1 text-xs opacity-70">- {day.name}</span>
+            )}
+          </Button>
+        ))}
+      </div>
+
+      {activeDay && (
+        <div className="space-y-3">
+          {!todayLog && !activeWorkoutId ? (
+            <Button onClick={handleStartWorkout} className="w-full">
+              <Play className="mr-2 h-4 w-4" />
+              {t("startWorkout")}
+            </Button>
+          ) : todayLog?.completed ? (
+            <div className="text-center py-2">
+              <Badge variant="secondary" className="text-sm">
+                <Check className="mr-1 h-3 w-3" />
+                {t("workoutCompleted")}
+              </Badge>
+            </div>
+          ) : (
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={() => {
+                const id = activeWorkoutId ?? todayLog?.id;
+                if (id) completeWorkout.mutate(id);
+              }}
+            >
+              <Check className="mr-2 h-4 w-4" />
+              {t("completeWorkout")}
+            </Button>
+          )}
+
+          <div className="space-y-2">
+            {activeDay.exercises.map((ex) => {
+              const exData = exerciseData[ex.id] ?? { sets: ex.sets, weight: "" };
+              const inSuperset = ex.superset_group !== null;
+
+              return (
+                <Card key={ex.id} className={inSuperset ? "border-primary/30" : ""}>
+                  <CardContent className="p-3">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm">
+                          {ex.exercise?.name ?? "Exercise"}
+                        </p>
+                        <div className="flex gap-1 mt-1">
+                          {ex.exercise?.muscle_groups?.slice(0, 2).map((mg) => (
+                            <Badge
+                              key={mg}
+                              variant="outline"
+                              className="text-[10px] px-1 py-0"
+                            >
+                              {te(`muscle_${mg}` as Parameters<typeof te>[0])}
+                            </Badge>
+                          ))}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {ex.sets}x{ex.reps} - {ex.rest_seconds}s
+                        </p>
+                      </div>
+
+                      {(activeWorkoutId || (todayLog && !todayLog.completed)) && (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="text-center">
+                            <label className="text-[10px] text-muted-foreground block">
+                              {t("setsCompleted")}
+                            </label>
+                            <Input
+                              type="number"
+                              min={0}
+                              max={20}
+                              value={exData.sets}
+                              onChange={(e) =>
+                                setExerciseData((prev) => ({
+                                  ...prev,
+                                  [ex.id]: { ...exData, sets: parseInt(e.target.value) || 0 },
+                                }))
+                              }
+                              className="h-7 w-14 text-xs text-center"
+                            />
+                          </div>
+                          <div className="text-center">
+                            <label className="text-[10px] text-muted-foreground block">
+                              {t("weightUsed")}
+                            </label>
+                            <Input
+                              type="number"
+                              step="0.5"
+                              value={exData.weight}
+                              onChange={(e) =>
+                                setExerciseData((prev) => ({
+                                  ...prev,
+                                  [ex.id]: { ...exData, weight: e.target.value },
+                                }))
+                              }
+                              className="h-7 w-14 text-xs text-center"
+                              placeholder="kg"
+                            />
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-2"
+                            onClick={() => handleLogExercise(ex.id)}
+                          >
+                            <Check className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
