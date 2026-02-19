@@ -40,7 +40,6 @@ export function useUpdateMeasurement() {
   return useMutation({
     mutationFn: ({
       id,
-      clientId,
       data,
     }: {
       id: string;
@@ -63,7 +62,7 @@ export function useDeleteMeasurement() {
   const queryClient = useQueryClient();
   const t = useTranslations("measurements");
   return useMutation({
-    mutationFn: ({ id, clientId }: { id: string; clientId: string }) =>
+    mutationFn: ({ id }: { id: string; clientId: string }) =>
       measurementsService.deleteMeasurement(id),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({

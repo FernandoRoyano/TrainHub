@@ -119,10 +119,6 @@ export function SessionsCalendar() {
               const dateStr = format(day, "yyyy-MM-dd");
               const dayEvents = eventsByDate.get(dateStr);
               const hasEvents = !!dayEvents && dayEvents.length > 0;
-              const allCompleted =
-                hasEvents && dayEvents.every((e) => e.completed);
-              const someCompleted =
-                hasEvents && dayEvents.some((e) => e.completed);
               const isSelected = selectedDate && isSameDay(day, selectedDate);
 
               return (

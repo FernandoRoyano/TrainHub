@@ -40,7 +40,7 @@ export function useDeleteSessionNote() {
   const queryClient = useQueryClient();
   const t = useTranslations("sessionNotes");
   return useMutation({
-    mutationFn: ({ id, clientId }: { id: string; clientId: string }) =>
+    mutationFn: ({ id }: { id: string; clientId: string }) =>
       sessionNotesService.deleteNote(id),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({

@@ -12,8 +12,6 @@ import {
   ArrowLeft,
   Pencil,
   Trash2,
-  Play,
-  Image as ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";

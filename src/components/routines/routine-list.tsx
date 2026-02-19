@@ -25,7 +25,6 @@ import {
   Pencil,
   Trash2,
   Copy,
-  Users,
   Calendar,
   Dumbbell,
 } from "lucide-react";

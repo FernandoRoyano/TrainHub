@@ -33,7 +33,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, ArrowLeft, Upload, X, Play } from "lucide-react";
+import { Loader2, ArrowLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 
 interface ExerciseFormProps {

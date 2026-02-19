@@ -40,8 +40,6 @@ const METRIC_FIELDS = [
   "calf_cm",
 ] as const;
 
-type MetricField = (typeof METRIC_FIELDS)[number];
-
 export function MeasurementsTab({ clientId }: MeasurementsTabProps) {
   const t = useTranslations("measurements");
   const tc = useTranslations("common");
