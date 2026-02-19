@@ -30,10 +30,10 @@ const activityIcons = {
 } as const;
 
 const kpiConfig = [
-  { key: "activeClients", icon: Users, color: "text-emerald-400", bg: "bg-emerald-400/10" },
-  { key: "totalRoutines", icon: ClipboardList, color: "text-blue-400", bg: "bg-blue-400/10" },
-  { key: "unreadMessages", icon: MessageSquare, color: "text-amber-400", bg: "bg-amber-400/10" },
-  { key: "recentActivity", icon: Activity, color: "text-purple-400", bg: "bg-purple-400/10" },
+  { key: "activeClients", icon: Users, color: "text-emerald-400", bg: "bg-emerald-400/10", glow: "shadow-emerald-500/10" },
+  { key: "totalRoutines", icon: ClipboardList, color: "text-blue-400", bg: "bg-blue-400/10", glow: "shadow-blue-500/10" },
+  { key: "unreadMessages", icon: MessageSquare, color: "text-amber-400", bg: "bg-amber-400/10", glow: "shadow-amber-500/10" },
+  { key: "recentActivity", icon: Activity, color: "text-purple-400", bg: "bg-purple-400/10", glow: "shadow-purple-500/10" },
 ] as const;
 
 export default function DashboardPage() {
@@ -72,7 +72,7 @@ export default function DashboardPage() {
         {kpiConfig.map((kpi, i) => {
           const Icon = kpi.icon;
           return (
-            <Card key={kpi.key} className="border-border/50">
+            <Card key={kpi.key} className={`glass-elevated shadow-lg ${kpi.glow}`}>
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>

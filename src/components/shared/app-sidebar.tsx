@@ -48,7 +48,7 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col bg-card/50 border-r border-border/50 transition-all duration-300 scrollbar-thin",
+        "hidden md:flex flex-col glass-sidebar transition-all duration-300 scrollbar-thin",
         sidebarOpen ? "w-64" : "w-[68px]"
       )}
     >
