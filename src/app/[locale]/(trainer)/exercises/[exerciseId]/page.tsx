@@ -30,6 +30,7 @@ export default function ExerciseDetailPage() {
   const router = useRouter();
   const { data: exercise, isLoading } = useExercise(exerciseId);
   const deleteExercise = useDeleteExercise();
+  const { isAdmin } = useAuth();
   const [showDelete, setShowDelete] = useState(false);
 
   if (isLoading) {
@@ -46,7 +47,6 @@ export default function ExerciseDetailPage() {
     return <p className="text-muted-foreground">Exercise not found</p>;
   }
 
-  const { isAdmin } = useAuth();
   const canEdit = !!exercise.trainer_id || isAdmin;
 
   return (
