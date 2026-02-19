@@ -30,10 +30,10 @@ const activityIcons = {
 } as const;
 
 const kpiConfig = [
-  { key: "activeClients", icon: Users, color: "text-emerald-400", bg: "bg-emerald-400/10", glow: "shadow-emerald-500/10" },
-  { key: "totalRoutines", icon: ClipboardList, color: "text-blue-400", bg: "bg-blue-400/10", glow: "shadow-blue-500/10" },
-  { key: "unreadMessages", icon: MessageSquare, color: "text-amber-400", bg: "bg-amber-400/10", glow: "shadow-amber-500/10" },
-  { key: "recentActivity", icon: Activity, color: "text-purple-400", bg: "bg-purple-400/10", glow: "shadow-purple-500/10" },
+  { key: "activeClients", icon: Users, color: "text-emerald-400", bg: "bg-emerald-400/15", glow: "shadow-emerald-500/20 hover:shadow-emerald-500/30" },
+  { key: "totalRoutines", icon: ClipboardList, color: "text-blue-400", bg: "bg-blue-400/15", glow: "shadow-blue-500/20 hover:shadow-blue-500/30" },
+  { key: "unreadMessages", icon: MessageSquare, color: "text-amber-400", bg: "bg-amber-400/15", glow: "shadow-amber-500/20 hover:shadow-amber-500/30" },
+  { key: "recentActivity", icon: Activity, color: "text-purple-400", bg: "bg-purple-400/15", glow: "shadow-purple-500/20 hover:shadow-purple-500/30" },
 ] as const;
 
 export default function DashboardPage() {
@@ -72,7 +72,7 @@ export default function DashboardPage() {
         {kpiConfig.map((kpi, i) => {
           const Icon = kpi.icon;
           return (
-            <Card key={kpi.key} className={`glass-elevated shadow-lg ${kpi.glow}`}>
+            <Card key={kpi.key} className={`glass-elevated shadow-xl transition-all duration-300 ${kpi.glow}`}>
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -81,8 +81,8 @@ export default function DashboardPage() {
                     </p>
                     <p className="text-3xl font-bold mt-1">{kpiValues[i]}</p>
                   </div>
-                  <div className={`h-10 w-10 rounded-lg ${kpi.bg} flex items-center justify-center`}>
-                    <Icon className={`h-5 w-5 ${kpi.color}`} />
+                  <div className={`h-12 w-12 rounded-xl ${kpi.bg} flex items-center justify-center`}>
+                    <Icon className={`h-6 w-6 ${kpi.color}`} />
                   </div>
                 </div>
               </CardContent>

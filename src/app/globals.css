@@ -34,29 +34,29 @@
 
   /* Dark mode - the default for this app */
   .dark {
-    --background: 224 50% 5%;
+    --background: 228 50% 4%;
     --foreground: 210 40% 98%;
-    --card: 224 40% 8%;
+    --card: 226 45% 7%;
     --card-foreground: 210 40% 98%;
-    --popover: 224 40% 8%;
+    --popover: 226 45% 7%;
     --popover-foreground: 210 40% 98%;
     --primary: 105 58% 59%;
-    --primary-foreground: 224 50% 5%;
-    --secondary: 220 30% 13%;
+    --primary-foreground: 228 50% 4%;
+    --secondary: 224 30% 12%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 220 25% 13%;
+    --muted: 224 25% 12%;
     --muted-foreground: 215 20% 55%;
-    --accent: 220 25% 15%;
+    --accent: 224 25% 14%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
-    --border: 220 20% 18%;
-    --input: 220 20% 16%;
+    --border: 224 20% 16%;
+    --input: 224 20% 14%;
     --ring: 105 58% 59%;
     --radius: 0.75rem;
 
-    --glass-bg: 224 40% 10%;
-    --glass-border: 220 20% 22%;
+    --glass-bg: 226 40% 9%;
+    --glass-border: 224 25% 25%;
     --glass-highlight: 0 0% 100%;
     --section-hue: 105;
   }
@@ -90,19 +90,20 @@
 
   /* Glass card base */
   .glass {
-    background: hsl(var(--glass-bg) / 0.6);
-    backdrop-filter: blur(20px) saturate(1.5);
-    -webkit-backdrop-filter: blur(20px) saturate(1.5);
-    border: 1px solid hsl(var(--glass-border) / 0.3);
+    background: hsl(var(--glass-bg) / 0.45);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border: 1px solid hsl(var(--glass-border) / 0.4);
     box-shadow:
-      0 0 0 1px hsl(var(--glass-highlight) / 0.03) inset,
-      0 1px 0 0 hsl(var(--glass-highlight) / 0.05) inset,
-      0 4px 16px -2px hsl(224 50% 0% / 0.4);
+      0 0 0 1px hsl(var(--glass-highlight) / 0.05) inset,
+      0 1px 0 0 hsl(var(--glass-highlight) / 0.08) inset,
+      0 4px 24px -4px hsl(228 50% 0% / 0.5);
   }
 
   /* Iridescent top-edge shimmer */
   .glass-shimmer {
     position: relative;
+    overflow: hidden;
   }
   .glass-shimmer::before {
     content: '';
@@ -114,9 +115,9 @@
     background: linear-gradient(
       90deg,
       transparent 0%,
-      hsl(var(--glass-highlight) / 0.08) 20%,
-      hsl(var(--glass-highlight) / 0.15) 50%,
-      hsl(var(--glass-highlight) / 0.08) 80%,
+      hsl(var(--glass-highlight) / 0.12) 15%,
+      hsl(var(--glass-highlight) / 0.25) 50%,
+      hsl(var(--glass-highlight) / 0.12) 85%,
       transparent 100%
     );
     border-radius: inherit;
@@ -126,48 +127,53 @@
 
   /* Elevated glass for KPI cards */
   .glass-elevated {
-    background: hsl(var(--glass-bg) / 0.7);
-    backdrop-filter: blur(24px) saturate(1.6);
-    -webkit-backdrop-filter: blur(24px) saturate(1.6);
-    border: 1px solid hsl(var(--glass-border) / 0.35);
+    background: hsl(var(--glass-bg) / 0.55);
+    backdrop-filter: blur(32px) saturate(2);
+    -webkit-backdrop-filter: blur(32px) saturate(2);
+    border: 1px solid hsl(var(--glass-border) / 0.5);
     box-shadow:
-      0 0 0 1px hsl(var(--glass-highlight) / 0.04) inset,
-      0 1px 0 0 hsl(var(--glass-highlight) / 0.06) inset,
-      0 8px 32px -4px hsl(224 50% 0% / 0.5),
-      0 2px 8px -2px hsl(224 50% 0% / 0.3);
+      0 0 0 1px hsl(var(--glass-highlight) / 0.06) inset,
+      0 1px 0 0 hsl(var(--glass-highlight) / 0.1) inset,
+      0 8px 40px -4px hsl(228 50% 0% / 0.6),
+      0 4px 12px -2px hsl(228 50% 0% / 0.3);
   }
 
   /* Mesh gradient background per section */
   .mesh-gradient-bg {
     background:
       radial-gradient(
-        ellipse 80% 60% at 20% 30%,
-        hsl(var(--section-hue) 50% 15% / 0.15) 0%,
-        transparent 70%
+        ellipse 80% 50% at 10% 20%,
+        hsl(var(--section-hue) 60% 20% / 0.3) 0%,
+        transparent 60%
       ),
       radial-gradient(
-        ellipse 60% 80% at 80% 70%,
-        hsl(calc(var(--section-hue) + 60) 40% 12% / 0.1) 0%,
-        transparent 70%
+        ellipse 50% 70% at 85% 75%,
+        hsl(calc(var(--section-hue) + 60) 50% 18% / 0.2) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 70% 40% at 50% 100%,
+        hsl(calc(var(--section-hue) + 30) 40% 10% / 0.15) 0%,
+        transparent 50%
       ),
       hsl(var(--background));
-    transition: background 0.5s ease;
+    transition: background 0.6s ease;
   }
 
   /* Glass sidebar */
   .glass-sidebar {
-    background: hsl(var(--glass-bg) / 0.5);
-    backdrop-filter: blur(24px) saturate(1.4);
-    -webkit-backdrop-filter: blur(24px) saturate(1.4);
-    border-right: 1px solid hsl(var(--glass-border) / 0.2);
+    background: hsl(var(--glass-bg) / 0.4);
+    backdrop-filter: blur(32px) saturate(1.6);
+    -webkit-backdrop-filter: blur(32px) saturate(1.6);
+    border-right: 1px solid hsl(var(--glass-border) / 0.3);
   }
 
   /* Glass topbar */
   .glass-topbar {
-    background: hsl(var(--glass-bg) / 0.4);
-    backdrop-filter: blur(20px) saturate(1.5);
-    -webkit-backdrop-filter: blur(20px) saturate(1.5);
-    border-bottom: 1px solid hsl(var(--glass-border) / 0.2);
-    box-shadow: 0 1px 0 0 hsl(var(--glass-highlight) / 0.03);
+    background: hsl(var(--glass-bg) / 0.35);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border-bottom: 1px solid hsl(var(--glass-border) / 0.3);
+    box-shadow: 0 1px 0 0 hsl(var(--glass-highlight) / 0.05);
   }
 }
