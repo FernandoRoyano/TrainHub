@@ -123,8 +123,7 @@ export const exercisesService = {
         video_url: data.video_url || null,
         thumbnail_url: data.thumbnail_url || null,
       })
-      .eq("id", id)
-      .eq("trainer_id", user.id);
+      .eq("id", id);
     if (error) throw error;
   },
 
@@ -138,8 +137,7 @@ export const exercisesService = {
     const { error } = await supabase
       .from("exercises")
       .delete()
-      .eq("id", id)
-      .eq("trainer_id", user.id);
+      .eq("id", id);
     if (error) throw error;
   },
 

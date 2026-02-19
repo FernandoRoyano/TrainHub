@@ -48,6 +48,7 @@ export function useAuth() {
     isLoading,
     error,
     isAuthenticated: !!profile,
+    isAdmin: profile?.role === "admin",
     signOut: signOutMutation.mutate,
     isSigningOut: signOutMutation.isPending,
   };

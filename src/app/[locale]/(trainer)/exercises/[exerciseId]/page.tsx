@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useExercise, useDeleteExercise } from "@/hooks/use-exercises";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,7 +46,8 @@ export default function ExerciseDetailPage() {
     return <p className="text-muted-foreground">Exercise not found</p>;
   }
 
-  const isOwn = !!exercise.trainer_id;
+  const { isAdmin } = useAuth();
+  const canEdit = !!exercise.trainer_id || isAdmin;
 
   return (
     <div className="space-y-4">
@@ -60,11 +62,11 @@ export default function ExerciseDetailPage() {
           <div>
             <h1 className="text-2xl font-bold">{exercise.name}</h1>
             <p className="text-sm text-muted-foreground">
-              {isOwn ? t("createdBy") : t("platformExercise")}
+              {exercise.trainer_id ? t("createdBy") : t("platformExercise")}
             </p>
           </div>
         </div>
-        {isOwn && (
+        {canEdit && (
           <div className="flex gap-2">
             <Button variant="outline" asChild>
               <Link href={`/exercises/${exercise.id}/edit`}>

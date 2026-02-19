@@ -34,7 +34,7 @@ const navItems = [
 export function MobileSidebar() {
   const t = useTranslations("nav");
   const pathname = usePathname();
-  const { profile, signOut, isSigningOut } = useAuth();
+  const { profile, signOut, isSigningOut, isAdmin } = useAuth();
   const [open, setOpen] = useState(false);
 
   const initials = profile?.full_name
@@ -100,6 +100,11 @@ export function MobileSidebar() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
                   {profile?.full_name || "Entrenador"}
+                  {isAdmin && (
+                    <span className="ml-1.5 inline-flex items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                      Admin
+                    </span>
+                  )}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
                   {profile?.email}
