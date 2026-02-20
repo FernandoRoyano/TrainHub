@@ -83,7 +83,7 @@ export function BlockPicker({ open, onOpenChange, onSelect }: BlockPickerProps) 
             />
           </div>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full sm:w-[140px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

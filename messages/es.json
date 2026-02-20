@@ -280,7 +280,9 @@
     "noMessages": "No hay mensajes",
     "noMessagesDescription": "Inicia una conversacion con un cliente",
     "unread": "{count} sin leer",
-    "sendError": "Error al enviar mensaje"
+    "sendError": "Error al enviar mensaje",
+    "backToConversations": "Volver a conversaciones",
+    "selectConversation": "Selecciona una conversacion"
   },
   "settings": {
     "title": "Configuracion",

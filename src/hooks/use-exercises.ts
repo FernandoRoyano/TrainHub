@@ -17,6 +17,7 @@ export function useExercises(filters?: ExerciseFilters) {
   return useQuery({
     queryKey: ["exercises", filters],
     queryFn: () => exercisesService.getExercises(filters),
+    staleTime: 2 * 60 * 1000,
   });
 }
 
@@ -25,6 +26,7 @@ export function useExercise(id: string) {
     queryKey: ["exercises", id],
     queryFn: () => exercisesService.getExerciseById(id),
     enabled: !!id,
+    staleTime: 2 * 60 * 1000,
   });
 }
 

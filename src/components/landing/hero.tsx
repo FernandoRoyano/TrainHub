@@ -85,8 +85,8 @@ export function Hero() {
                   trainhub.app/dashboard
                 </span>
               </div>
-              <div className="aspect-[16/9] bg-gradient-to-br from-card via-card to-primary/5 flex items-center justify-center p-8">
-                <div className="grid grid-cols-3 gap-4 w-full max-w-xl">
+              <div className="aspect-[16/9] bg-gradient-to-br from-card via-card to-primary/5 flex items-center justify-center p-4 sm:p-8">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-xl">
                   {[
                     { label: t("previewActiveClients"), value: "24" },
                     { label: t("previewRoutinesCreated"), value: "156" },

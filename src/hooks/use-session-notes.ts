@@ -10,6 +10,7 @@ export function useSessionNotes(clientId: string) {
     queryKey: ["session-notes", clientId],
     queryFn: () => sessionNotesService.getNotes(clientId),
     enabled: !!clientId,
+    staleTime: 60 * 1000,
   });
 }
 

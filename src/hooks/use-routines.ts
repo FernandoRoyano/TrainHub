@@ -17,6 +17,7 @@ export function useRoutines(filters?: RoutineFilters) {
   return useQuery({
     queryKey: ["routines", filters],
     queryFn: () => routinesService.getRoutines(filters),
+    staleTime: 60 * 1000,
   });
 }
 
@@ -25,6 +26,7 @@ export function useRoutine(id: string) {
     queryKey: ["routines", id],
     queryFn: () => routinesService.getRoutineById(id),
     enabled: !!id,
+    staleTime: 60 * 1000,
   });
 }
 
@@ -113,5 +115,6 @@ export function useClientRoutines(clientId: string) {
     queryKey: ["client-routines", clientId],
     queryFn: () => routinesService.getClientRoutines(clientId),
     enabled: !!clientId,
+    staleTime: 30 * 1000,
   });
 }

@@ -116,7 +116,7 @@ export function Features() {
                     <div className={`h-16 w-16 rounded-xl ${feature.bg} flex items-center justify-center mb-6`}>
                       <Icon className={`h-8 w-8 ${feature.color}`} />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {bullets.map((bullet) => (
                         <div
                           key={bullet}

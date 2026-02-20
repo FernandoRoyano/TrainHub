@@ -280,7 +280,9 @@
     "noMessages": "No messages",
     "noMessagesDescription": "Start a conversation with a client",
     "unread": "{count} unread",
-    "sendError": "Error sending message"
+    "sendError": "Error sending message",
+    "backToConversations": "Back to conversations",
+    "selectConversation": "Select a conversation"
   },
   "settings": {
     "title": "Settings",

@@ -94,19 +94,22 @@ export const clientAppService = {
     if (assignError) throw assignError;
     if (!assignment) return null;
 
-    // Get routine with days and exercises
-    const { data: routine, error: routineError } = await supabase
-      .from("routines")
-      .select("*")
-      .eq("id", assignment.routine_id)
-      .single();
-    if (routineError) throw routineError;
-
-    const { data: days } = await supabase
-      .from("routine_days")
-      .select("*")
-      .eq("routine_id", routine.id)
-      .order("day_number");
+    // Fetch routine + days in parallel
+    const [routineResult, daysResult] = await Promise.all([
+      supabase
+        .from("routines")
+        .select("*")
+        .eq("id", assignment.routine_id)
+        .single(),
+      supabase
+        .from("routine_days")
+        .select("*")
+        .eq("routine_id", assignment.routine_id)
+        .order("day_number"),
+    ]);
+    if (routineResult.error) throw routineResult.error;
+    const routine = routineResult.data;
+    const days = daysResult.data;
 
     const dayIds = (days ?? []).map((d) => d.id);
     let exercises: RoutineExercise[] = [];

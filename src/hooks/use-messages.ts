@@ -14,6 +14,7 @@ export function useConversations() {
   return useQuery({
     queryKey: ["conversations"],
     queryFn: () => messagesService.getConversations(),
+    staleTime: 30 * 1000,
   });
 }
 
@@ -96,5 +97,6 @@ export function useClientConversation() {
   return useQuery({
     queryKey: ["client-conversation"],
     queryFn: () => messagesService.getClientConversation(),
+    staleTime: 30 * 1000,
   });
 }

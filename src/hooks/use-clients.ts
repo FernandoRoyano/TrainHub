@@ -14,6 +14,7 @@ export function useClients(filters?: ClientFilters) {
   return useQuery({
     queryKey: ["clients", filters],
     queryFn: () => clientsService.getClients(filters),
+    staleTime: 30 * 1000,
   });
 }
 
@@ -22,6 +23,7 @@ export function useClient(id: string) {
     queryKey: ["clients", id],
     queryFn: () => clientsService.getClientById(id),
     enabled: !!id,
+    staleTime: 30 * 1000,
   });
 }
 
@@ -29,6 +31,7 @@ export function useClientStats() {
   return useQuery({
     queryKey: ["clients", "stats"],
     queryFn: () => clientsService.getClientStats(),
+    staleTime: 60 * 1000,
   });
 }
 

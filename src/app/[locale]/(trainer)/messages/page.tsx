@@ -52,9 +52,65 @@ export default function MessagesPage() {
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">{t("title")}</h1>
 
-      <div className="flex gap-4 h-[calc(100vh-12rem)]">
-        {/* Conversation list */}
-        <div className="w-80 shrink-0 border rounded-lg overflow-y-auto hidden md:block">
+      {/* Mobile layout: show list OR thread */}
+      <div className="md:hidden h-[calc(100vh-12rem)]">
+        {selectedId ? (
+          <div className="h-full border rounded-lg overflow-hidden">
+            <button
+              onClick={() => setSelectedId(null)}
+              className="w-full flex items-center gap-2 p-3 text-sm text-muted-foreground hover:bg-accent border-b"
+            >
+              ← {t("backToConversations")}
+            </button>
+            <div className="h-[calc(100%-3rem)]">
+              <MessageThread conversationId={selectedId} />
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {conversations.map((conv) => {
+              const client = conv.client as { id: string; full_name: string } | undefined;
+              const initials = client?.full_name
+                ?.split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 2) ?? "?";
+
+              return (
+                <button
+                  key={conv.id}
+                  onClick={() => setSelectedId(conv.id)}
+                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent"
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-sm font-medium truncate">
+                      {client?.full_name ?? "Client"}
+                    </p>
+                    {conv.last_message && (
+                      <p className="text-xs text-muted-foreground truncate">
+                        {conv.last_message.content}
+                      </p>
+                    )}
+                  </div>
+                  {(conv.unread_count ?? 0) > 0 && (
+                    <Badge className="h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+                      {conv.unread_count}
+                    </Badge>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop layout: sidebar + thread */}
+      <div className="hidden md:flex gap-4 h-[calc(100vh-12rem)]">
+        <div className="w-80 shrink-0 border rounded-lg overflow-y-auto">
           {conversations.map((conv) => {
             const client = conv.client as { id: string; full_name: string; email: string | null } | undefined;
             const initials = client?.full_name
@@ -98,58 +154,15 @@ export default function MessagesPage() {
           })}
         </div>
 
-        {/* Mobile: show list or thread */}
-        <div className="flex-1 border rounded-lg overflow-hidden md:block">
+        <div className="flex-1 border rounded-lg overflow-hidden">
           {selectedId ? (
             <MessageThread conversationId={selectedId} />
           ) : (
             <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-              {t("noMessages")}
+              {t("selectConversation")}
             </div>
           )}
         </div>
-
-        {/* Mobile conversation list (when no selection) */}
-        {!selectedId && (
-          <div className="w-full md:hidden space-y-1">
-            {conversations.map((conv) => {
-              const client = conv.client as { id: string; full_name: string } | undefined;
-              const initials = client?.full_name
-                ?.split(" ")
-                .map((n) => n[0])
-                .join("")
-                .toUpperCase()
-                .slice(0, 2) ?? "?";
-
-              return (
-                <button
-                  key={conv.id}
-                  onClick={() => setSelectedId(conv.id)}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent"
-                >
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0 text-left">
-                    <p className="text-sm font-medium truncate">
-                      {client?.full_name ?? "Client"}
-                    </p>
-                    {conv.last_message && (
-                      <p className="text-xs text-muted-foreground truncate">
-                        {conv.last_message.content}
-                      </p>
-                    )}
-                  </div>
-                  {(conv.unread_count ?? 0) > 0 && (
-                    <Badge className="h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-                      {conv.unread_count}
-                    </Badge>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
       </div>
     </div>
   );

@@ -9,5 +9,6 @@ export function useCalendarEvents(monthStart: string, monthEnd: string) {
     queryFn: () =>
       calendarService.getTrainerCalendarEvents(monthStart, monthEnd),
     enabled: !!monthStart && !!monthEnd,
+    staleTime: 60 * 1000,
   });
 }

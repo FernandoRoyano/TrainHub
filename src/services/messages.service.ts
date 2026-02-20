@@ -72,28 +72,49 @@ export const messagesService = {
       .order("last_message_at", { ascending: false });
     if (error) throw error;
 
-    // Get unread counts and last messages
     const conversations = data as Conversation[];
+    if (conversations.length === 0) return conversations;
 
-    for (const conv of conversations) {
-      // Unread count
-      const { count } = await supabase
+    const convIds = conversations.map((c) => c.id);
+
+    // Batch: 2 queries instead of 2N (N+1 fix)
+    const [unreadResult, lastMessagesResult] = await Promise.all([
+      supabase
         .from("messages")
-        .select("*", { count: "exact", head: true })
-        .eq("conversation_id", conv.id)
+        .select("conversation_id")
+        .in("conversation_id", convIds)
         .eq("read", false)
-        .neq("sender_id", user.id);
-      conv.unread_count = count ?? 0;
-
-      // Last message
-      const { data: lastMsg } = await supabase
+        .neq("sender_id", user.id),
+      supabase
         .from("messages")
         .select("*")
-        .eq("conversation_id", conv.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      conv.last_message = lastMsg as Message | undefined;
+        .in("conversation_id", convIds)
+        .order("created_at", { ascending: false }),
+    ]);
+
+    // Build unread count map
+    const unreadMap = new Map<string, number>();
+    if (unreadResult.data) {
+      for (const row of unreadResult.data) {
+        const cid = row.conversation_id;
+        unreadMap.set(cid, (unreadMap.get(cid) ?? 0) + 1);
+      }
+    }
+
+    // Build last message map (first per conversation since ordered desc)
+    const lastMsgMap = new Map<string, Message>();
+    if (lastMessagesResult.data) {
+      for (const msg of lastMessagesResult.data) {
+        const m = msg as Message;
+        if (!lastMsgMap.has(m.conversation_id)) {
+          lastMsgMap.set(m.conversation_id, m);
+        }
+      }
+    }
+
+    for (const conv of conversations) {
+      conv.unread_count = unreadMap.get(conv.id) ?? 0;
+      conv.last_message = lastMsgMap.get(conv.id);
     }
 
     return conversations;

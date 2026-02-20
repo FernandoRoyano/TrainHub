@@ -18,7 +18,7 @@ export function SocialProof() {
   return (
     <section className="py-16 border-y border-border/50 bg-card/30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
           {metricConfigs.map((metric, i) => (
             <motion.div
               key={metric.labelKey}

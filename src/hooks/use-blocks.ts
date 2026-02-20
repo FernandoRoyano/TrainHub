@@ -10,6 +10,7 @@ export function useBlocks(filters?: BlockFilters) {
   return useQuery({
     queryKey: ["blocks", filters],
     queryFn: () => blocksService.getBlocks(filters),
+    staleTime: 2 * 60 * 1000,
   });
 }
 
@@ -18,6 +19,7 @@ export function useBlock(id: string) {
     queryKey: ["blocks", id],
     queryFn: () => blocksService.getBlockById(id),
     enabled: !!id,
+    staleTime: 2 * 60 * 1000,
   });
 }
 

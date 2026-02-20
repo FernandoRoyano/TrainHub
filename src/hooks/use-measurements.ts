@@ -13,6 +13,7 @@ export function useMeasurements(clientId: string) {
     queryKey: ["measurements", clientId],
     queryFn: () => measurementsService.getMeasurements(clientId),
     enabled: !!clientId,
+    staleTime: 60 * 1000,
   });
 }
 
