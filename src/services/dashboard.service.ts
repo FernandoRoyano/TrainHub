@@ -22,26 +22,59 @@ export const dashboardService = {
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
-    // Active clients count
-    const { count: activeClients } = await supabase
-      .from("clients")
-      .select("*", { count: "exact", head: true })
-      .eq("trainer_id", user.id)
-      .eq("status", "active");
+    // Run ALL queries in parallel instead of sequentially
+    const [
+      clientsResult,
+      routinesResult,
+      conversationsResult,
+      recentClientsResult,
+      recentRoutinesResult,
+      recentAssignmentsResult,
+    ] = await Promise.all([
+      // Active clients count
+      supabase
+        .from("clients")
+        .select("*", { count: "exact", head: true })
+        .eq("trainer_id", user.id)
+        .eq("status", "active"),
+      // Total routines count
+      supabase
+        .from("routines")
+        .select("*", { count: "exact", head: true })
+        .eq("trainer_id", user.id),
+      // Conversations (for unread messages)
+      supabase
+        .from("conversations")
+        .select("id")
+        .eq("trainer_id", user.id),
+      // Recent clients
+      supabase
+        .from("clients")
+        .select("id, full_name, created_at")
+        .eq("trainer_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(5),
+      // Recent routines
+      supabase
+        .from("routines")
+        .select("id, name, created_at")
+        .eq("trainer_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(5),
+      // Recent assignments
+      supabase
+        .from("client_routines")
+        .select("id, created_at, client:clients(full_name), routine:routines(name)")
+        .order("created_at", { ascending: false })
+        .limit(5),
+    ]);
 
-    // Total routines count
-    const { count: totalRoutines } = await supabase
-      .from("routines")
-      .select("*", { count: "exact", head: true })
-      .eq("trainer_id", user.id);
+    const activeClients = clientsResult.count ?? 0;
+    const totalRoutines = routinesResult.count ?? 0;
 
-    // Unread messages count
-    const { data: conversations } = await supabase
-      .from("conversations")
-      .select("id")
-      .eq("trainer_id", user.id);
-
+    // Unread messages — single dependent query only if conversations exist
     let unreadMessages = 0;
+    const conversations = conversationsResult.data;
     if (conversations && conversations.length > 0) {
       const convIds = conversations.map((c) => c.id);
       const { count } = await supabase
@@ -53,19 +86,11 @@ export const dashboardService = {
       unreadMessages = count ?? 0;
     }
 
-    // Recent activity (last 10 items)
+    // Build activity list from parallel results
     const activity: ActivityItem[] = [];
 
-    // Recent clients
-    const { data: recentClients } = await supabase
-      .from("clients")
-      .select("id, full_name, created_at")
-      .eq("trainer_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(5);
-
-    if (recentClients) {
-      for (const client of recentClients) {
+    if (recentClientsResult.data) {
+      for (const client of recentClientsResult.data) {
         activity.push({
           id: `client-${client.id}`,
           type: "client_added",
@@ -75,16 +100,8 @@ export const dashboardService = {
       }
     }
 
-    // Recent routines
-    const { data: recentRoutines } = await supabase
-      .from("routines")
-      .select("id, name, created_at")
-      .eq("trainer_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(5);
-
-    if (recentRoutines) {
-      for (const routine of recentRoutines) {
+    if (recentRoutinesResult.data) {
+      for (const routine of recentRoutinesResult.data) {
         activity.push({
           id: `routine-${routine.id}`,
           type: "routine_created",
@@ -94,15 +111,8 @@ export const dashboardService = {
       }
     }
 
-    // Recent assignments
-    const { data: recentAssignments } = await supabase
-      .from("client_routines")
-      .select("id, created_at, client:clients(full_name), routine:routines(name)")
-      .order("created_at", { ascending: false })
-      .limit(5);
-
-    if (recentAssignments) {
-      for (const assign of recentAssignments) {
+    if (recentAssignmentsResult.data) {
+      for (const assign of recentAssignmentsResult.data) {
         const client = assign.client as unknown as { full_name: string } | null;
         const routine = assign.routine as unknown as { name: string } | null;
         activity.push({
@@ -114,7 +124,6 @@ export const dashboardService = {
       }
     }
 
-    // Sort by timestamp descending, take top 10
     activity.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
     return {

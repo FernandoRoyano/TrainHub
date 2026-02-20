@@ -5,6 +5,6 @@ export function useDashboardStats() {
   return useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: () => dashboardService.getStats(),
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 60 * 1000, // 1 minute — avoids refetch on back navigation
   });
 }
