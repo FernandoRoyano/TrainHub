@@ -12,7 +12,15 @@ import {
   useUploadMedia,
 } from "@/hooks/use-exercises";
 import type { Exercise } from "@/services/exercises.service";
-import { MUSCLE_GROUPS, EQUIPMENT, DIFFICULTY_LEVELS, EXERCISE_CATEGORIES } from "@/lib/constants";
+import {
+  MUSCLE_GROUPS,
+  EQUIPMENT,
+  DIFFICULTY_LEVELS,
+  EXERCISE_CATEGORIES,
+  EXERCISE_TYPES,
+  MECHANICS,
+  FORCE_TYPES,
+} from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -65,6 +73,7 @@ export function ExerciseForm({ mode, exercise }: ExerciseFormProps) {
     resolver: zodResolver(createExerciseSchema(tv)),
     defaultValues: {
       name: exercise?.name ?? "",
+      name_es: exercise?.name_es ?? "",
       description: exercise?.description ?? "",
       instructions: exercise?.instructions ?? "",
       video_url: exercise?.video_url ?? "",
@@ -73,6 +82,11 @@ export function ExerciseForm({ mode, exercise }: ExerciseFormProps) {
       equipment: exercise?.equipment ?? [],
       difficulty: (exercise?.difficulty as ExerciseFormData["difficulty"]) ?? "beginner",
       category: (exercise?.category as ExerciseFormData["category"]) ?? "strength",
+      primary_muscles: exercise?.primary_muscles ?? [],
+      secondary_muscles: exercise?.secondary_muscles ?? [],
+      exercise_type: exercise?.exercise_type ?? "",
+      mechanics: exercise?.mechanics ?? "",
+      force: exercise?.force ?? "",
     },
   });
 
@@ -196,6 +210,20 @@ export function ExerciseForm({ mode, exercise }: ExerciseFormProps) {
 
               <FormField
                 control={form.control}
+                name="name_es"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("nameEs")}</FormLabel>
+                    <FormControl>
+                      <Input placeholder={t("nameEsPlaceholder")} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
@@ -224,7 +252,7 @@ export function ExerciseForm({ mode, exercise }: ExerciseFormProps) {
             </CardContent>
           </Card>
 
-          {/* Category & Difficulty */}
+          {/* Category, Difficulty & Extended metadata */}
           <Card>
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -277,11 +305,168 @@ export function ExerciseForm({ mode, exercise }: ExerciseFormProps) {
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="exercise_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("exerciseType")}</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="-" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {EXERCISE_TYPES.map((et) => (
+                            <SelectItem key={et} value={et}>
+                              {t(`type_${et}` as Parameters<typeof t>[0])}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="mechanics"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("mechanics")}</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="-" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {MECHANICS.map((m) => (
+                            <SelectItem key={m} value={m}>
+                              {t(`mechanics_${m}` as Parameters<typeof t>[0])}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="force"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("force")}</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="-" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {FORCE_TYPES.map((f) => (
+                            <SelectItem key={f} value={f}>
+                              {t(`force_${f}` as Parameters<typeof t>[0])}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </CardContent>
           </Card>
 
-          {/* Muscle Groups */}
+          {/* Primary Muscles */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">{t("primaryMuscles")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FormField
+                control={form.control}
+                name="primary_muscles"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      {MUSCLE_GROUPS.map((mg) => (
+                        <label
+                          key={mg}
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <Checkbox
+                            checked={(field.value ?? []).includes(mg)}
+                            onCheckedChange={(checked) => {
+                              const current = field.value ?? [];
+                              if (checked) {
+                                field.onChange([...current, mg]);
+                              } else {
+                                field.onChange(current.filter((v) => v !== mg));
+                              }
+                            }}
+                          />
+                          <span className="text-sm">
+                            {t(`muscle_${mg}` as Parameters<typeof t>[0])}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Secondary Muscles */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">{t("secondaryMuscles")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FormField
+                control={form.control}
+                name="secondary_muscles"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      {MUSCLE_GROUPS.map((mg) => (
+                        <label
+                          key={mg}
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <Checkbox
+                            checked={(field.value ?? []).includes(mg)}
+                            onCheckedChange={(checked) => {
+                              const current = field.value ?? [];
+                              if (checked) {
+                                field.onChange([...current, mg]);
+                              } else {
+                                field.onChange(current.filter((v) => v !== mg));
+                              }
+                            }}
+                          />
+                          <span className="text-sm">
+                            {t(`muscle_${mg}` as Parameters<typeof t>[0])}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Muscle Groups (legacy, kept for backward compat) */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">{t("muscleGroups")}</CardTitle>
@@ -473,6 +658,28 @@ export function ExerciseForm({ mode, exercise }: ExerciseFormProps) {
               )}
             </CardContent>
           </Card>
+
+          {/* Existing images (read-only for imported exercises) */}
+          {exercise?.images && exercise.images.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">{t("images")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {exercise.images.map((img, i) => (
+                    <div key={i} className="rounded-lg overflow-hidden bg-muted">
+                      <img
+                        src={img}
+                        alt={`${exercise.name} ${i + 1}`}
+                        className="w-full h-32 object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Submit */}
           <div className="flex gap-3 justify-end">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useRoutine, useDeleteRoutine, useDuplicateRoutine } from "@/hooks/use-routines";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,8 +18,20 @@ import {
   Copy,
   Users,
   Calendar,
+  Image as ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
+import type { Exercise } from "@/services/exercises.service";
+
+function getExerciseDisplayName(exercise: Exercise, locale: string): string {
+  if (locale === "es" && exercise.name_es) return exercise.name_es;
+  return exercise.name;
+}
+
+function getExerciseFirstImage(exercise: Exercise): string | null {
+  if (exercise.images && exercise.images.length > 0) return exercise.images[0];
+  return exercise.thumbnail_url;
+}
 
 const difficultyColors: Record<string, string> = {
   beginner: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -32,6 +44,7 @@ export default function RoutineDetailPage() {
   const t = useTranslations("routines");
   const te = useTranslations("exercises");
   const tc = useTranslations("common");
+  const locale = useLocale();
   const router = useRouter();
 
   const { data: routine, isLoading } = useRoutine(routineId);
@@ -146,6 +159,17 @@ export default function RoutineDetailPage() {
                   <div className="space-y-2">
                     {day.exercises.map((ex, i) => {
                       const inSuperset = ex.superset_group !== null;
+                      const exData = ex.exercise as Exercise | undefined;
+                      const displayName = exData
+                        ? getExerciseDisplayName(exData, locale)
+                        : ex.exercise_id;
+                      const thumbnail = exData
+                        ? getExerciseFirstImage(exData)
+                        : null;
+                      const muscles = exData?.primary_muscles?.length
+                        ? exData.primary_muscles
+                        : exData?.muscle_groups ?? [];
+
                       return (
                         <div
                           key={ex.id}
@@ -154,13 +178,24 @@ export default function RoutineDetailPage() {
                           <span className="text-xs text-muted-foreground font-mono w-5">
                             {i + 1}
                           </span>
+                          <div className="h-10 w-10 rounded bg-muted flex items-center justify-center shrink-0 overflow-hidden">
+                            {thumbnail ? (
+                              <img
+                                src={thumbnail}
+                                alt=""
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <ImageIcon className="h-4 w-4 text-muted-foreground/40" />
+                            )}
+                          </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">
-                              {ex.exercise?.name ?? ex.exercise_id}
+                              {displayName}
                             </p>
                             <div className="flex gap-1 mt-0.5">
-                              {ex.exercise?.muscle_groups
-                                ?.slice(0, 2)
+                              {muscles
+                                .slice(0, 2)
                                 .map((mg) => (
                                   <Badge
                                     key={mg}

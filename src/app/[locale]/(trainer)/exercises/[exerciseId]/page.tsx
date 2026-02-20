@@ -1,9 +1,10 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useExercise, useDeleteExercise } from "@/hooks/use-exercises";
 import { useAuth } from "@/hooks/use-auth";
+import type { Exercise } from "@/services/exercises.service";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +16,7 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const difficultyColors: Record<string, string> = {
   beginner: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -23,10 +24,56 @@ const difficultyColors: Record<string, string> = {
   advanced: "bg-rose-500/10 text-rose-400 border-rose-500/20",
 };
 
+function getExerciseDisplayName(exercise: Exercise, locale: string): string {
+  if (locale === "es" && exercise.name_es) return exercise.name_es;
+  return exercise.name;
+}
+
+/** Animated display that cycles between exercise images to show the movement */
+function AnimatedExercise({ images, alt }: { images: string[]; alt: string }) {
+  const [index, setIndex] = useState(0);
+
+  const advance = useCallback(() => {
+    setIndex((prev) => (prev + 1) % images.length);
+  }, [images.length]);
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const id = setInterval(advance, 1200);
+    return () => clearInterval(id);
+  }, [images.length, advance]);
+
+  if (images.length === 0) return null;
+
+  return (
+    <div className="relative bg-muted rounded-lg overflow-hidden">
+      <img
+        src={images[index]}
+        alt={alt}
+        className="w-full max-h-96 object-contain transition-opacity duration-300"
+      />
+      {images.length > 1 && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIndex(i)}
+              className={`h-2 w-2 rounded-full transition-colors ${
+                i === index ? "bg-primary" : "bg-white/50"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ExerciseDetailPage() {
   const { exerciseId } = useParams<{ exerciseId: string }>();
   const t = useTranslations("exercises");
   const tc = useTranslations("common");
+  const locale = useLocale();
   const router = useRouter();
   const { data: exercise, isLoading } = useExercise(exerciseId);
   const deleteExercise = useDeleteExercise();
@@ -48,6 +95,10 @@ export default function ExerciseDetailPage() {
   }
 
   const canEdit = !!exercise.trainer_id || isAdmin;
+  const displayName = getExerciseDisplayName(exercise, locale);
+  const hasImages = exercise.images && exercise.images.length > 0;
+  const primaryMuscles = exercise.primary_muscles?.length > 0 ? exercise.primary_muscles : null;
+  const secondaryMuscles = exercise.secondary_muscles?.length > 0 ? exercise.secondary_muscles : null;
 
   return (
     <div className="space-y-4">
@@ -60,9 +111,12 @@ export default function ExerciseDetailPage() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">{exercise.name}</h1>
+            <h1 className="text-2xl font-bold">{displayName}</h1>
+            {locale === "es" && exercise.name_es && (
+              <p className="text-sm text-muted-foreground">{exercise.name}</p>
+            )}
             <p className="text-sm text-muted-foreground">
-              {exercise.trainer_id ? t("createdBy") : t("platformExercise")}
+              {exercise.trainer_id ? t("createdBy") : exercise.source === "free_exercise_db" ? t("sourceImported") : t("platformExercise")}
             </p>
           </div>
         </div>
@@ -82,6 +136,15 @@ export default function ExerciseDetailPage() {
         )}
       </div>
 
+      {/* Animated exercise images showing the movement */}
+      {hasImages && (
+        <Card>
+          <CardContent className="p-0 overflow-hidden rounded-lg">
+            <AnimatedExercise images={exercise.images} alt={displayName} />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Video */}
       {exercise.video_url && (
         <Card>
@@ -96,13 +159,13 @@ export default function ExerciseDetailPage() {
         </Card>
       )}
 
-      {/* Thumbnail (if no video) */}
-      {!exercise.video_url && exercise.thumbnail_url && (
+      {/* Thumbnail (if no video and no images) */}
+      {!exercise.video_url && !hasImages && exercise.thumbnail_url && (
         <Card>
           <CardContent className="p-0 overflow-hidden rounded-lg">
             <img
               src={exercise.thumbnail_url}
-              alt={exercise.name}
+              alt={displayName}
               className="w-full max-h-96 object-cover"
             />
           </CardContent>
@@ -140,7 +203,7 @@ export default function ExerciseDetailPage() {
           <div className="flex flex-wrap gap-2">
             <div className="w-full">
               <p className="text-sm font-medium mb-2">{t("difficulty")} / {t("category")}</p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {exercise.difficulty && (
                   <Badge
                     variant="outline"
@@ -154,11 +217,55 @@ export default function ExerciseDetailPage() {
                     {t(exercise.category as Parameters<typeof t>[0])}
                   </Badge>
                 )}
+                {exercise.exercise_type && (
+                  <Badge variant="outline">
+                    {t(`type_${exercise.exercise_type}` as Parameters<typeof t>[0])}
+                  </Badge>
+                )}
+                {exercise.mechanics && (
+                  <Badge variant="outline">
+                    {t(`mechanics_${exercise.mechanics}` as Parameters<typeof t>[0])}
+                  </Badge>
+                )}
+                {exercise.force && (
+                  <Badge variant="outline">
+                    {t(`force_${exercise.force}` as Parameters<typeof t>[0])}
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
 
-          {exercise.muscle_groups.length > 0 && (
+          {/* Primary muscles */}
+          {primaryMuscles && (
+            <div>
+              <p className="text-sm font-medium mb-2">{t("primaryMuscles")}</p>
+              <div className="flex gap-2 flex-wrap">
+                {primaryMuscles.map((mg) => (
+                  <Badge key={mg} variant="outline">
+                    {t(`muscle_${mg}` as Parameters<typeof t>[0])}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Secondary muscles */}
+          {secondaryMuscles && (
+            <div>
+              <p className="text-sm font-medium mb-2">{t("secondaryMuscles")}</p>
+              <div className="flex gap-2 flex-wrap">
+                {secondaryMuscles.map((mg) => (
+                  <Badge key={mg} variant="outline">
+                    {t(`muscle_${mg}` as Parameters<typeof t>[0])}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Legacy muscle groups (shown if no primary_muscles) */}
+          {!primaryMuscles && exercise.muscle_groups.length > 0 && (
             <div>
               <p className="text-sm font-medium mb-2">{t("muscleGroups")}</p>
               <div className="flex gap-2 flex-wrap">

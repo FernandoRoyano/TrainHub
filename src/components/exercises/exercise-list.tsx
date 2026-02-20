@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useExercises, useDeleteExercise } from "@/hooks/use-exercises";
 import { useDebounce } from "@/hooks/use-debounce";
 import { MUSCLE_GROUPS, EQUIPMENT, DIFFICULTY_LEVELS, EXERCISE_CATEGORIES } from "@/lib/constants";
@@ -37,7 +37,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
-import type { ExerciseFilters } from "@/services/exercises.service";
+import type { Exercise, ExerciseFilters } from "@/services/exercises.service";
 
 const difficultyColors: Record<string, string> = {
   beginner: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -45,9 +45,55 @@ const difficultyColors: Record<string, string> = {
   advanced: "bg-rose-500/10 text-rose-400 border-rose-500/20",
 };
 
+function getExerciseDisplayName(exercise: Exercise, locale: string): string {
+  if (locale === "es" && exercise.name_es) return exercise.name_es;
+  return exercise.name;
+}
+
+function getExerciseImages(exercise: Exercise): string[] {
+  if (exercise.images && exercise.images.length > 0) return exercise.images;
+  if (exercise.thumbnail_url) return [exercise.thumbnail_url];
+  return [];
+}
+
+function getDisplayMuscles(exercise: Exercise): string[] {
+  if (exercise.primary_muscles && exercise.primary_muscles.length > 0) {
+    return exercise.primary_muscles;
+  }
+  return exercise.muscle_groups;
+}
+
+/** Animated thumbnail that cycles between exercise images (start/end positions) */
+function AnimatedThumbnail({ images, alt }: { images: string[]; alt: string }) {
+  const [index, setIndex] = useState(0);
+
+  const advance = useCallback(() => {
+    setIndex((prev) => (prev + 1) % images.length);
+  }, [images.length]);
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const id = setInterval(advance, 1200);
+    return () => clearInterval(id);
+  }, [images.length, advance]);
+
+  if (images.length === 0) {
+    return <ImageIcon className="h-12 w-12 text-muted-foreground/40" />;
+  }
+
+  return (
+    <img
+      src={images[index]}
+      alt={alt}
+      className="h-full w-full object-cover transition-opacity duration-300"
+    />
+  );
+}
+
 export function ExerciseList() {
   const t = useTranslations("exercises");
   const tc = useTranslations("common");
+  const locale = useLocale();
   const router = useRouter();
 
   const [search, setSearch] = useState("");
@@ -194,112 +240,110 @@ export function ExerciseList() {
         />
       ) : (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {exercises.map((exercise) => (
-            <Card
-              key={exercise.id}
-              className="cursor-pointer hover:bg-accent/50 transition-colors overflow-hidden"
-              onClick={() => router.push(`/exercises/${exercise.id}`)}
-            >
-              <CardContent className="p-0">
-                {/* Thumbnail */}
-                <div className="h-40 bg-muted flex items-center justify-center">
-                  {exercise.thumbnail_url ? (
-                    <img
-                      src={exercise.thumbnail_url}
-                      alt={exercise.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <ImageIcon className="h-12 w-12 text-muted-foreground/40" />
-                  )}
-                </div>
+          {exercises.map((exercise) => {
+            const displayName = getExerciseDisplayName(exercise, locale);
+            const images = getExerciseImages(exercise);
+            const muscles = getDisplayMuscles(exercise);
 
-                {/* Info */}
-                <div className="p-4 space-y-2">
-                  <div className="flex items-start justify-between">
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium truncate">{exercise.name}</p>
-                      {exercise.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-1">
-                          {exercise.description}
-                        </p>
+            return (
+              <Card
+                key={exercise.id}
+                className="cursor-pointer hover:bg-accent/50 transition-colors overflow-hidden"
+                onClick={() => router.push(`/exercises/${exercise.id}`)}
+              >
+                <CardContent className="p-0">
+                  {/* Animated thumbnail showing exercise movement */}
+                  <div className="h-40 bg-muted flex items-center justify-center">
+                    <AnimatedThumbnail images={images} alt={displayName} />
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-4 space-y-2">
+                    <div className="flex items-start justify-between">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium truncate">{displayName}</p>
+                        {locale === "es" && exercise.name_es && (
+                          <p className="text-xs text-muted-foreground truncate">
+                            {exercise.name}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Only show actions for own exercises */}
+                      {exercise.trainer_id && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 shrink-0"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/exercises/${exercise.id}/edit`);
+                              }}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              {tc("edit")}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteId(exercise.id);
+                              }}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              {tc("delete")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       )}
                     </div>
 
-                    {/* Only show actions for own exercises */}
-                    {exercise.trainer_id && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 shrink-0"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push(`/exercises/${exercise.id}/edit`);
-                            }}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            {tc("edit")}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteId(exercise.id);
-                            }}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            {tc("delete")}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </div>
-
-                  {/* Badges */}
-                  <div className="flex gap-1 flex-wrap">
-                    {exercise.difficulty && (
-                      <Badge
-                        variant="outline"
-                        className={difficultyColors[exercise.difficulty] || ""}
-                      >
-                        {t(exercise.difficulty as Parameters<typeof t>[0])}
-                      </Badge>
-                    )}
-                    {exercise.category && (
-                      <Badge variant="secondary">
-                        {t(exercise.category as Parameters<typeof t>[0])}
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Muscle groups */}
-                  {exercise.muscle_groups.length > 0 && (
+                    {/* Badges */}
                     <div className="flex gap-1 flex-wrap">
-                      {exercise.muscle_groups.slice(0, 3).map((mg) => (
-                        <Badge key={mg} variant="outline" className="text-xs">
-                          {t(`muscle_${mg}` as Parameters<typeof t>[0])}
+                      {exercise.difficulty && (
+                        <Badge
+                          variant="outline"
+                          className={difficultyColors[exercise.difficulty] || ""}
+                        >
+                          {t(exercise.difficulty as Parameters<typeof t>[0])}
                         </Badge>
-                      ))}
-                      {exercise.muscle_groups.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{exercise.muscle_groups.length - 3}
+                      )}
+                      {exercise.category && (
+                        <Badge variant="secondary">
+                          {t(exercise.category as Parameters<typeof t>[0])}
                         </Badge>
                       )}
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+
+                    {/* Muscle groups */}
+                    {muscles.length > 0 && (
+                      <div className="flex gap-1 flex-wrap">
+                        {muscles.slice(0, 3).map((mg) => (
+                          <Badge key={mg} variant="outline" className="text-xs">
+                            {t(`muscle_${mg}` as Parameters<typeof t>[0])}
+                          </Badge>
+                        ))}
+                        {muscles.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{muscles.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 

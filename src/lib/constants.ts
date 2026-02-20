@@ -52,6 +52,18 @@ export const DIFFICULTY_LEVELS = [
   "advanced",
 ] as const;
 
+export const EXERCISE_TYPES = [
+  "compound",
+  "isolation",
+  "cardio",
+  "stretching",
+  "plyometric",
+] as const;
+
+export const MECHANICS = ["compound", "isolation"] as const;
+
+export const FORCE_TYPES = ["push", "pull", "static"] as const;
+
 export const CLIENT_STATUSES = [
   "active",
   "inactive",
@@ -70,4 +82,5 @@ export const PUBLIC_ROUTES = [
   "/register",
   "/forgot-password",
   "/join",
+  "/auth/callback",
 ];

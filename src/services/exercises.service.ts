@@ -5,14 +5,27 @@ export interface Exercise {
   id: string;
   trainer_id: string | null;
   name: string;
+  name_es: string | null;
+  slug: string | null;
   description: string | null;
+  description_es: string | null;
   instructions: string | null;
+  instructions_es: string | null;
   video_url: string | null;
   thumbnail_url: string | null;
   muscle_groups: string[];
   equipment: string[];
   difficulty: string | null;
   category: string | null;
+  primary_muscles: string[];
+  secondary_muscles: string[];
+  exercise_type: string | null;
+  mechanics: string | null;
+  force: string | null;
+  images: string[];
+  source: string;
+  source_id: string | null;
+  is_public: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -57,7 +70,9 @@ export const exercisesService = {
     }
 
     if (filters?.muscle_group) {
-      query = query.contains("muscle_groups", [filters.muscle_group]);
+      query = query.or(
+        `muscle_groups.cs.{${filters.muscle_group}},primary_muscles.cs.{${filters.muscle_group}}`
+      );
     }
 
     if (filters?.equipment) {
@@ -65,7 +80,9 @@ export const exercisesService = {
     }
 
     if (filters?.search) {
-      query = query.ilike("name", `%${filters.search}%`);
+      query = query.or(
+        `name.ilike.%${filters.search}%,name_es.ilike.%${filters.search}%`
+      );
     }
 
     const { data, count, error } = await query;
@@ -96,10 +113,17 @@ export const exercisesService = {
       .insert({
         ...data,
         trainer_id: user.id,
+        source: "custom",
         description: data.description || null,
         instructions: data.instructions || null,
         video_url: data.video_url || null,
         thumbnail_url: data.thumbnail_url || null,
+        name_es: data.name_es || null,
+        primary_muscles: data.primary_muscles ?? [],
+        secondary_muscles: data.secondary_muscles ?? [],
+        exercise_type: data.exercise_type || null,
+        mechanics: data.mechanics || null,
+        force: data.force || null,
       })
       .select()
       .single();
@@ -122,6 +146,12 @@ export const exercisesService = {
         instructions: data.instructions || null,
         video_url: data.video_url || null,
         thumbnail_url: data.thumbnail_url || null,
+        name_es: data.name_es || null,
+        primary_muscles: data.primary_muscles ?? undefined,
+        secondary_muscles: data.secondary_muscles ?? undefined,
+        exercise_type: data.exercise_type || null,
+        mechanics: data.mechanics || null,
+        force: data.force || null,
       })
       .eq("id", id);
     if (error) throw error;

@@ -11,6 +11,7 @@ export const authService = {
           full_name: fullName,
           role: "trainer",
         },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     if (error) throw error;
@@ -33,6 +34,7 @@ export const authService = {
           role: "client",
           invite_token: inviteToken,
         },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     if (error) throw error;

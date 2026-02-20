@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { createRoutineSchema, type RoutineFormData } from "@/lib/validations/routine";
 import { useCreateRoutine, useUpdateRoutine } from "@/hooks/use-routines";
 import { useRoutineBuilderStore } from "@/stores/routine-builder-store";
@@ -60,8 +60,10 @@ import {
   Link2,
   X,
   Puzzle,
+  Image as ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
+import type { Exercise } from "@/services/exercises.service";
 
 interface RoutineBuilderProps {
   mode: "create" | "edit";
@@ -74,6 +76,7 @@ function SortableExerciseItem({
   exIndex,
   activeDayIndex,
   prevInSameSuperset,
+  locale,
   t,
   te,
   updateExercise,
@@ -84,6 +87,7 @@ function SortableExerciseItem({
   exIndex: number;
   activeDayIndex: number;
   prevInSameSuperset: boolean;
+  locale: string;
   t: ReturnType<typeof useTranslations>;
   te: ReturnType<typeof useTranslations>;
   updateExercise: (di: number, ei: number, data: Partial<BuilderExercise>) => void;
@@ -135,9 +139,25 @@ function SortableExerciseItem({
           <span className="text-xs text-muted-foreground font-mono w-5">
             {exIndex + 1}
           </span>
-          <p className="font-medium text-sm flex-1 truncate">
-            {ex.exercise?.name ?? ex.exercise_id}
-          </p>
+          {(() => {
+            const exData = ex.exercise as Exercise | undefined;
+            const thumb = exData?.images?.[0] ?? exData?.thumbnail_url ?? null;
+            const name = exData
+              ? (locale === "es" && exData.name_es ? exData.name_es : exData.name)
+              : ex.exercise_id;
+            return (
+              <>
+                <div className="h-8 w-8 rounded bg-muted flex items-center justify-center shrink-0 overflow-hidden">
+                  {thumb ? (
+                    <img src={thumb} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <ImageIcon className="h-3 w-3 text-muted-foreground/40" />
+                  )}
+                </div>
+                <p className="font-medium text-sm flex-1 truncate">{name}</p>
+              </>
+            );
+          })()}
           <div className="flex items-center gap-1">
             {exIndex > 0 && (
               <Button
@@ -250,6 +270,7 @@ export function RoutineBuilder({ mode, routine }: RoutineBuilderProps) {
   const tc = useTranslations("common");
   const tb = useTranslations("blocks");
   const tv = useTranslations("validation");
+  const locale = useLocale();
   const router = useRouter();
   const createRoutine = useCreateRoutine();
   const updateRoutine = useUpdateRoutine();
@@ -639,6 +660,7 @@ export function RoutineBuilder({ mode, routine }: RoutineBuilderProps) {
                                 exIndex={exIndex}
                                 activeDayIndex={activeDayIndex}
                                 prevInSameSuperset={prevInSameSuperset}
+                                locale={locale}
                                 t={t}
                                 te={te}
                                 updateExercise={updateExercise}
