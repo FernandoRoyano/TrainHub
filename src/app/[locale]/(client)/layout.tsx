@@ -3,11 +3,12 @@
 import { usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { Dumbbell, BarChart3, Ruler, MessageCircle, User } from "lucide-react";
+import { Dumbbell, UtensilsCrossed, BarChart3, Ruler, MessageCircle, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/my-routine", icon: Dumbbell, labelKey: "myRoutine" as const },
+  { href: "/my-nutrition", icon: UtensilsCrossed, labelKey: "myNutrition" as const },
   { href: "/my-progress", icon: BarChart3, labelKey: "myProgress" as const },
   { href: "/my-measurements", icon: Ruler, labelKey: "myMeasurements" as const },
   { href: "/my-messages", icon: MessageCircle, labelKey: "myMessages" as const },

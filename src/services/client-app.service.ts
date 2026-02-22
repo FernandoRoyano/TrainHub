@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type { Routine, RoutineDay, RoutineExercise } from "./routines.service";
 import type { BodyMeasurement } from "./measurements.service";
+import type { MealPlan, MealPlanMeal, MealFood } from "./nutrition.service";
 
 export interface ClientRoutineView {
   id: string;
@@ -257,6 +258,73 @@ export const clientAppService = {
       .order("date", { ascending: true });
     if (error) throw error;
     return data as BodyMeasurement[];
+  },
+
+  async getMyActiveMealPlan(): Promise<MealPlan | null> {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    // Get client record
+    const { data: client } = await supabase
+      .from("clients")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+    if (!client) return null;
+
+    // Get active meal plan assignment
+    const { data: assignment, error: assignError } = await supabase
+      .from("client_meal_plans")
+      .select("*")
+      .eq("client_id", client.id)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (assignError) throw assignError;
+    if (!assignment) return null;
+
+    // Fetch the meal plan
+    const { data: mealPlan, error: planError } = await supabase
+      .from("meal_plans")
+      .select("*")
+      .eq("id", assignment.meal_plan_id)
+      .single();
+    if (planError) throw planError;
+    if (!mealPlan) return null;
+
+    // Fetch meals
+    const { data: meals, error: mealsError } = await supabase
+      .from("meal_plan_meals")
+      .select("*")
+      .eq("meal_plan_id", mealPlan.id)
+      .order("order_index", { ascending: true });
+    if (mealsError) throw mealsError;
+
+    // Fetch foods for all meals
+    const mealIds = (meals ?? []).map((m) => m.id);
+    let foods: MealFood[] = [];
+
+    if (mealIds.length > 0) {
+      const { data: foodData, error: foodError } = await supabase
+        .from("meal_foods")
+        .select("*")
+        .in("meal_plan_meal_id", mealIds)
+        .order("order_index", { ascending: true });
+      if (foodError) throw foodError;
+      foods = (foodData ?? []) as MealFood[];
+    }
+
+    // Assemble
+    const assembledMeals: MealPlanMeal[] = (meals ?? []).map((meal) => ({
+      ...meal,
+      foods: foods.filter((f) => f.meal_plan_meal_id === meal.id),
+    }));
+
+    return { ...mealPlan, meals: assembledMeals } as MealPlan;
   },
 
   async getProgressData(clientRoutineId: string) {

@@ -84,3 +84,35 @@ export const PUBLIC_ROUTES = [
   "/join",
   "/auth/callback",
 ];
+
+export const MEAL_TYPES = [
+  "breakfast",
+  "morning_snack",
+  "lunch",
+  "afternoon_snack",
+  "dinner",
+  "evening_snack",
+  "pre_workout",
+  "post_workout",
+  "other",
+] as const;
+
+export const FOOD_UNITS = [
+  "g",
+  "ml",
+  "oz",
+  "cup",
+  "tbsp",
+  "tsp",
+  "unit",
+  "slice",
+  "scoop",
+] as const;
+
+export const NUTRITION_GOALS = [
+  "loss",
+  "maintenance",
+  "gain",
+  "performance",
+  "health",
+] as const;

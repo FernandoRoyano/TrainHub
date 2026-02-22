@@ -64,10 +64,12 @@ export async function middleware(request: NextRequest) {
       pathname.includes("/clients") ||
       pathname.includes("/exercises") ||
       pathname.includes("/routines") ||
+      pathname.includes("/nutrition") ||
       pathname.includes("/messages") ||
       pathname.includes("/settings");
     const isClientRoute =
       pathname.includes("/my-routine") ||
+      pathname.includes("/my-nutrition") ||
       pathname.includes("/my-progress") ||
       pathname.includes("/my-messages") ||
       pathname.includes("/my-profile");

@@ -104,3 +104,11 @@ export function useProgressData(clientRoutineId: string) {
     staleTime: 2 * 60 * 1000,
   });
 }
+
+export function useMyMealPlan() {
+  return useQuery({
+    queryKey: ["my-meal-plan"],
+    queryFn: () => clientAppService.getMyActiveMealPlan(),
+    staleTime: 2 * 60 * 1000,
+  });
+}
