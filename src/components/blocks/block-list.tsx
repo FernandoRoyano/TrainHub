@@ -38,6 +38,7 @@ const blockTypeColors: Record<string, string> = {
 export function BlockList() {
   const t = useTranslations("blocks");
   const tc = useTranslations("common");
+  const te = useTranslations("empty");
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -104,8 +105,9 @@ export function BlockList() {
       {blocks.length === 0 ? (
         <EmptyState
           icon={Puzzle}
-          title={t("noBlocks")}
-          description={t("noBlocksDescription")}
+          emoji={"\uD83E\uDDE9"}
+          title={te("blocksTitle")}
+          description={te("blocksDescription")}
           actionLabel={t("addBlock")}
           actionHref="/blocks/new"
         />

@@ -42,6 +42,7 @@ export default function MyRoutinePage() {
     return (
       <EmptyState
         icon={Dumbbell}
+        emoji={"\uD83D\uDCCB"}
         title={t("noRoutineAssigned")}
         description={t("noRoutineDescription")}
       />

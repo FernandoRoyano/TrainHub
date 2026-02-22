@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 
 interface EmptyStateProps {
   icon?: LucideIcon;
+  emoji?: string;
   title: string;
   description?: string;
   actionLabel?: string;
@@ -12,6 +13,7 @@ interface EmptyStateProps {
 
 export function EmptyState({
   icon: Icon,
+  emoji,
   title,
   description,
   actionLabel,
@@ -20,6 +22,11 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
+      {emoji && (
+        <span className="text-5xl mb-2 inline-block transition-transform hover:animate-bounce cursor-default">
+          {emoji}
+        </span>
+      )}
       {Icon && (
         <div className="rounded-full bg-muted p-4 mb-4">
           <Icon className="h-8 w-8 text-muted-foreground" />

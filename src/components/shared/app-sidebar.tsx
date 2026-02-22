@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
+import { useSidebarBadges } from "@/hooks/use-dashboard";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -22,14 +23,14 @@ import {
 import { useUIStore } from "@/stores/ui-store";
 
 const navItems = [
-  { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { key: "clients", href: "/clients", icon: Users },
-  { key: "exercises", href: "/exercises", icon: Dumbbell },
-  { key: "blocks", href: "/blocks", icon: Puzzle },
-  { key: "routines", href: "/routines", icon: ClipboardList },
-  { key: "messages", href: "/messages", icon: MessageSquare },
-  { key: "calendar", href: "/calendar", icon: CalendarDays },
-  { key: "settings", href: "/settings", icon: Settings },
+  { key: "dashboard", href: "/dashboard", icon: LayoutDashboard, badgeKey: null },
+  { key: "clients", href: "/clients", icon: Users, badgeKey: "pendingClients" as const },
+  { key: "exercises", href: "/exercises", icon: Dumbbell, badgeKey: null },
+  { key: "blocks", href: "/blocks", icon: Puzzle, badgeKey: null },
+  { key: "routines", href: "/routines", icon: ClipboardList, badgeKey: null },
+  { key: "messages", href: "/messages", icon: MessageSquare, badgeKey: "unreadMessages" as const },
+  { key: "calendar", href: "/calendar", icon: CalendarDays, badgeKey: null },
+  { key: "settings", href: "/settings", icon: Settings, badgeKey: null },
 ] as const;
 
 export function AppSidebar() {
@@ -37,6 +38,7 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { profile, signOut, isSigningOut, isAdmin } = useAuth();
   const { sidebarOpen, toggleSidebar } = useUIStore();
+  const { data: badges } = useSidebarBadges();
 
   const initials = profile?.full_name
     ? profile.full_name
@@ -83,21 +85,36 @@ export function AppSidebar() {
           const isActive =
             pathname === item.href || pathname.startsWith(item.href + "/");
           const Icon = item.icon;
+          const badgeCount = item.badgeKey && badges ? badges[item.badgeKey] : 0;
 
           return (
             <Link
               key={item.key}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 relative",
                 isActive
                   ? "bg-primary/15 text-primary"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground",
                 !sidebarOpen && "justify-center px-2"
               )}
             >
-              <Icon className={cn("h-[18px] w-[18px] shrink-0", isActive && "text-primary")} />
-              {sidebarOpen && <span>{t(item.key)}</span>}
+              <span className="relative shrink-0">
+                <Icon className={cn("h-[18px] w-[18px]", isActive && "text-primary")} />
+                {badgeCount > 0 && !sidebarOpen && (
+                  <span className="absolute -top-1.5 -right-1.5 h-2 w-2 rounded-full bg-destructive" />
+                )}
+              </span>
+              {sidebarOpen && (
+                <>
+                  <span className="flex-1">{t(item.key)}</span>
+                  {badgeCount > 0 && (
+                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-white">
+                      {badgeCount > 99 ? "99+" : badgeCount}
+                    </span>
+                  )}
+                </>
+              )}
             </Link>
           );
         })}

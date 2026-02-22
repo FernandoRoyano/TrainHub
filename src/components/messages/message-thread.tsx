@@ -66,9 +66,12 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {messages && messages.length === 0 && (
-          <p className="text-center text-sm text-muted-foreground py-8">
-            {t("noMessages")}
-          </p>
+          <div className="text-center py-8">
+            <span className="text-5xl inline-block transition-transform hover:animate-bounce cursor-default">{"\uD83D\uDCAC"}</span>
+            <p className="text-sm text-muted-foreground mt-2">
+              {t("noMessages")}
+            </p>
+          </div>
         )}
         {messages?.map((msg) => {
           const isMe = msg.sender_id === profile?.id;

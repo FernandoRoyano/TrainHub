@@ -39,6 +39,7 @@ const difficultyColors: Record<string, string> = {
 export function RoutineList() {
   const t = useTranslations("routines");
   const tc = useTranslations("common");
+  const te = useTranslations("empty");
   const router = useRouter();
 
   const [search, setSearch] = useState("");
@@ -94,8 +95,9 @@ export function RoutineList() {
       ) : routines.length === 0 ? (
         <EmptyState
           icon={Dumbbell}
-          title={t("noRoutines")}
-          description={t("noRoutinesDescription")}
+          emoji={"\uD83D\uDCCB"}
+          title={te("routinesTitle")}
+          description={te("routinesDescription")}
           actionLabel={t("addRoutine")}
           actionHref="/routines/new"
         />

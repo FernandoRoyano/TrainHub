@@ -87,7 +87,16 @@
     "activity_client_added": "Cliente",
     "activity_routine_created": "Rutina",
     "activity_routine_assigned": "Asignacion",
-    "activity_message_received": "Mensaje"
+    "activity_message_received": "Mensaje",
+    "trackingRate": "Tasa de tracking",
+    "trackingRateDesc": "Clientes activos esta semana",
+    "pendingReviews": "Revisiones pendientes",
+    "pendingReviewsDesc": "Rutinas con mas de 4 semanas",
+    "weekSessions": "Sesiones esta semana",
+    "weekSummary": "Resumen semanal",
+    "workoutsThisWeek": "Entrenamientos",
+    "newClientsThisWeek": "Nuevos clientes",
+    "messagesSentThisWeek": "Mensajes enviados"
   },
   "clients": {
     "title": "Clientes",
@@ -130,7 +139,14 @@
     "copyInviteLink": "Copiar link",
     "inviteLinkCopied": "Link copiado al portapapeles",
     "inviteLinkError": "Error al generar el link",
-    "noNotes": "Sin notas"
+    "noNotes": "Sin notas",
+    "lastActive": "Ultima actividad",
+    "lastActiveToday": "Hoy",
+    "lastActiveDaysAgo": "Hace {days} dias",
+    "lastActiveNever": "Sin actividad",
+    "sendMessage": "Enviar mensaje",
+    "assignRoutine": "Asignar rutina",
+    "viewDetails": "Ver detalle"
   },
   "sessionNotes": {
     "title": "Notas de sesion",
@@ -418,7 +434,17 @@
     "measurementDate": "Fecha de medicion",
     "weight": "Peso",
     "bodyFat": "Grasa corporal",
-    "waist": "Cintura"
+    "waist": "Cintura",
+    "bodyComposition": "Composicion corporal",
+    "fatMass": "Grasa corporal",
+    "leanMass": "Masa magra",
+    "weeklyTracking": "Tracking semanal",
+    "daysCompleted": "{completed} de {total} dias",
+    "timeline": "Historial",
+    "eventRoutineAssigned": "Rutina asignada: {name}",
+    "eventMeasurementTaken": "Medicion registrada",
+    "eventNoteAdded": "Nota de sesion: {title}",
+    "eventClientCreated": "Cliente creado"
   },
   "calendar": {
     "title": "Calendario de sesiones",
@@ -634,5 +660,23 @@
     "saving": "Guardando...",
     "createdBy": "Creado por ti",
     "metadata": "Informacion del bloque"
+  },
+  "empty": {
+    "clientsTitle": "Tu gimnasio esta vacio",
+    "clientsDescription": "Hora de reclutar campeones! Anade tu primer cliente para empezar.",
+    "exercisesTitle": "Sin ejercicios propios",
+    "exercisesDescription": "Construye tu arsenal de entrenamiento! Crea ejercicios personalizados.",
+    "routinesTitle": "Sin rutinas todavia",
+    "routinesDescription": "Tus clientes esperan sus ganancias! Crea tu primera rutina.",
+    "messagesTitle": "Todo tranquilo por aqui",
+    "messagesDescription": "Inicia una conversacion con tus clientes!",
+    "calendarTitle": "Calendario vacio",
+    "calendarDescription": "Listo cuando tu lo estes! Las sesiones apareceran aqui.",
+    "blocksTitle": "Sin bloques aun",
+    "blocksDescription": "Crea piezas reutilizables para tus rutinas!",
+    "sessionNotesTitle": "Sin notas todavia",
+    "sessionNotesDescription": "Registra el progreso de cada sesion!",
+    "measurementsTitle": "Sin medidas registradas",
+    "measurementsDescription": "Empieza a trackear la transformacion!"
   }
 }

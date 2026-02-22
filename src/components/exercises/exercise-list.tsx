@@ -93,6 +93,7 @@ function AnimatedThumbnail({ images, alt }: { images: string[]; alt: string }) {
 export function ExerciseList() {
   const t = useTranslations("exercises");
   const tc = useTranslations("common");
+  const te = useTranslations("empty");
   const locale = useLocale();
   const router = useRouter();
 
@@ -233,8 +234,9 @@ export function ExerciseList() {
       ) : exercises.length === 0 ? (
         <EmptyState
           icon={Dumbbell}
-          title={t("noExercises")}
-          description={t("noExercisesDescription")}
+          emoji={"\uD83D\uDCAA"}
+          title={te("exercisesTitle")}
+          description={te("exercisesDescription")}
           actionLabel={t("addExercise")}
           actionHref="/exercises/new"
         />

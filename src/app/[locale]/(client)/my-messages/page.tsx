@@ -9,6 +9,7 @@ import { MessageCircle } from "lucide-react";
 
 export default function MyMessagesPage() {
   const t = useTranslations("messages");
+  const te = useTranslations("empty");
   const { data: conversation, isLoading } = useClientConversation();
 
   if (isLoading) {
@@ -26,8 +27,9 @@ export default function MyMessagesPage() {
         <h1 className="text-2xl font-bold mb-4">{t("title")}</h1>
         <EmptyState
           icon={MessageCircle}
-          title={t("noMessages")}
-          description={t("noMessagesDescription")}
+          emoji={"\uD83D\uDCAC"}
+          title={te("messagesTitle")}
+          description={te("messagesDescription")}
         />
       </div>
     );

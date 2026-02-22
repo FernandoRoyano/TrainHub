@@ -4,6 +4,14 @@ export interface DashboardStats {
   activeClients: number;
   totalRoutines: number;
   unreadMessages: number;
+  trackingRate: number;
+  pendingReviews: number;
+  weekSessions: number;
+  weekSummary: {
+    workouts: number;
+    newClients: number;
+    messagesSent: number;
+  };
   recentActivity: ActivityItem[];
 }
 
@@ -14,6 +22,20 @@ export interface ActivityItem {
   timestamp: string;
 }
 
+export interface SidebarBadges {
+  unreadMessages: number;
+  pendingClients: number;
+}
+
+function getMonday(): string {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(now.setDate(diff));
+  monday.setHours(0, 0, 0, 0);
+  return monday.toISOString();
+}
+
 export const dashboardService = {
   async getStats(): Promise<DashboardStats> {
     const supabase = createClient();
@@ -22,7 +44,8 @@ export const dashboardService = {
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
-    // Run ALL queries in parallel instead of sequentially
+    const mondayISO = getMonday();
+
     const [
       clientsResult,
       routinesResult,
@@ -30,6 +53,11 @@ export const dashboardService = {
       recentClientsResult,
       recentRoutinesResult,
       recentAssignmentsResult,
+      // New queries
+      pendingClientsResult,
+      weekWorkoutsResult,
+      pendingReviewsResult,
+      newClientsWeekResult,
     ] = await Promise.all([
       // Active clients count
       supabase
@@ -67,26 +95,71 @@ export const dashboardService = {
         .select("id, created_at, client:clients(full_name), routine:routines(name)")
         .order("created_at", { ascending: false })
         .limit(5),
+      // Pending clients count
+      supabase
+        .from("clients")
+        .select("*", { count: "exact", head: true })
+        .eq("trainer_id", user.id)
+        .eq("status", "pending"),
+      // Week workout logs (all clients of this trainer)
+      supabase
+        .from("workout_logs")
+        .select("id, client_id, client_routine:client_routines!inner(trainer_id)")
+        .eq("client_routine.trainer_id" as string, user.id)
+        .gte("date", mondayISO),
+      // Pending reviews: active routines assigned > 28 days ago
+      supabase
+        .from("client_routines")
+        .select("*", { count: "exact", head: true })
+        .eq("trainer_id", user.id)
+        .eq("status", "active")
+        .lt("start_date", new Date(Date.now() - 28 * 86400000).toISOString().split("T")[0]),
+      // New clients this week
+      supabase
+        .from("clients")
+        .select("*", { count: "exact", head: true })
+        .eq("trainer_id", user.id)
+        .gte("created_at", mondayISO),
     ]);
 
     const activeClients = clientsResult.count ?? 0;
     const totalRoutines = routinesResult.count ?? 0;
+    const pendingReviews = pendingReviewsResult.count ?? 0;
+    const newClientsWeek = newClientsWeekResult.count ?? 0;
 
-    // Unread messages — single dependent query only if conversations exist
+    // Unread messages
     let unreadMessages = 0;
+    let messagesSentWeek = 0;
     const conversations = conversationsResult.data;
     if (conversations && conversations.length > 0) {
       const convIds = conversations.map((c) => c.id);
-      const { count } = await supabase
-        .from("messages")
-        .select("*", { count: "exact", head: true })
-        .in("conversation_id", convIds)
-        .eq("read", false)
-        .neq("sender_id", user.id);
-      unreadMessages = count ?? 0;
+      const [unreadResult, sentResult] = await Promise.all([
+        supabase
+          .from("messages")
+          .select("*", { count: "exact", head: true })
+          .in("conversation_id", convIds)
+          .eq("read", false)
+          .neq("sender_id", user.id),
+        supabase
+          .from("messages")
+          .select("*", { count: "exact", head: true })
+          .in("conversation_id", convIds)
+          .eq("sender_id", user.id)
+          .gte("created_at", mondayISO),
+      ]);
+      unreadMessages = unreadResult.count ?? 0;
+      messagesSentWeek = sentResult.count ?? 0;
     }
 
-    // Build activity list from parallel results
+    // Week workouts & tracking rate
+    const weekWorkouts = weekWorkoutsResult.data ?? [];
+    const weekSessions = weekWorkouts.length;
+    const uniqueClientsThisWeek = new Set(weekWorkouts.map((w) => w.client_id)).size;
+    const trackingRate = activeClients > 0
+      ? Math.round((uniqueClientsThisWeek / activeClients) * 100)
+      : 0;
+
+    // Build activity list
     const activity: ActivityItem[] = [];
 
     if (recentClientsResult.data) {
@@ -127,10 +200,56 @@ export const dashboardService = {
     activity.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
     return {
-      activeClients: activeClients ?? 0,
-      totalRoutines: totalRoutines ?? 0,
+      activeClients,
+      totalRoutines,
       unreadMessages,
+      trackingRate,
+      pendingReviews,
+      weekSessions,
+      weekSummary: {
+        workouts: weekSessions,
+        newClients: newClientsWeek,
+        messagesSent: messagesSentWeek,
+      },
       recentActivity: activity.slice(0, 10),
+    };
+  },
+
+  async getSidebarBadges(): Promise<SidebarBadges> {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { unreadMessages: 0, pendingClients: 0 };
+
+    const [conversationsResult, pendingResult] = await Promise.all([
+      supabase
+        .from("conversations")
+        .select("id")
+        .eq("trainer_id", user.id),
+      supabase
+        .from("clients")
+        .select("*", { count: "exact", head: true })
+        .eq("trainer_id", user.id)
+        .eq("status", "pending"),
+    ]);
+
+    let unreadMessages = 0;
+    const conversations = conversationsResult.data;
+    if (conversations && conversations.length > 0) {
+      const convIds = conversations.map((c) => c.id);
+      const { count } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .in("conversation_id", convIds)
+        .eq("read", false)
+        .neq("sender_id", user.id);
+      unreadMessages = count ?? 0;
+    }
+
+    return {
+      unreadMessages,
+      pendingClients: pendingResult.count ?? 0,
     };
   },
 };

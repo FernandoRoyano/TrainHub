@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
+import { useSidebarBadges } from "@/hooks/use-dashboard";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -23,20 +24,21 @@ import {
 import { useState } from "react";
 
 const navItems = [
-  { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { key: "clients", href: "/clients", icon: Users },
-  { key: "exercises", href: "/exercises", icon: Dumbbell },
-  { key: "blocks", href: "/blocks", icon: Puzzle },
-  { key: "routines", href: "/routines", icon: ClipboardList },
-  { key: "messages", href: "/messages", icon: MessageSquare },
-  { key: "calendar", href: "/calendar", icon: CalendarDays },
-  { key: "settings", href: "/settings", icon: Settings },
+  { key: "dashboard", href: "/dashboard", icon: LayoutDashboard, badgeKey: null },
+  { key: "clients", href: "/clients", icon: Users, badgeKey: "pendingClients" as const },
+  { key: "exercises", href: "/exercises", icon: Dumbbell, badgeKey: null },
+  { key: "blocks", href: "/blocks", icon: Puzzle, badgeKey: null },
+  { key: "routines", href: "/routines", icon: ClipboardList, badgeKey: null },
+  { key: "messages", href: "/messages", icon: MessageSquare, badgeKey: "unreadMessages" as const },
+  { key: "calendar", href: "/calendar", icon: CalendarDays, badgeKey: null },
+  { key: "settings", href: "/settings", icon: Settings, badgeKey: null },
 ] as const;
 
 export function MobileSidebar() {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const { profile, signOut, isSigningOut, isAdmin } = useAuth();
+  const { data: badges } = useSidebarBadges();
   const [open, setOpen] = useState(false);
 
   const initials = profile?.full_name
@@ -51,8 +53,11 @@ export function MobileSidebar() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden">
+        <Button variant="ghost" size="icon" className="md:hidden relative">
           <Menu className="h-5 w-5" />
+          {badges && (badges.unreadMessages > 0 || badges.pendingClients > 0) && (
+            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive" />
+          )}
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-72 p-0 border-r border-border/50">
@@ -71,6 +76,7 @@ export function MobileSidebar() {
               const isActive =
                 pathname === item.href || pathname.startsWith(item.href + "/");
               const Icon = item.icon;
+              const badgeCount = item.badgeKey && badges ? badges[item.badgeKey] : 0;
 
               return (
                 <Link
@@ -85,7 +91,12 @@ export function MobileSidebar() {
                   )}
                 >
                   <Icon className={cn("h-[18px] w-[18px]", isActive && "text-primary")} />
-                  <span>{t(item.key)}</span>
+                  <span className="flex-1">{t(item.key)}</span>
+                  {badgeCount > 0 && (
+                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-white">
+                      {badgeCount > 99 ? "99+" : badgeCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}

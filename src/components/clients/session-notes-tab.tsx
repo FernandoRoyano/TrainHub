@@ -24,6 +24,7 @@ interface SessionNotesTabProps {
 export function SessionNotesTab({ clientId }: SessionNotesTabProps) {
   const t = useTranslations("sessionNotes");
   const tc = useTranslations("common");
+  const te = useTranslations("empty");
   const { data: notes, isLoading } = useSessionNotes(clientId);
   const createNote = useCreateSessionNote();
   const deleteNote = useDeleteSessionNote();
@@ -138,8 +139,9 @@ export function SessionNotesTab({ clientId }: SessionNotesTabProps) {
       {!notes || notes.length === 0 ? (
         <EmptyState
           icon={StickyNote}
-          title={t("noNotes")}
-          description={t("noNotesDescription")}
+          emoji={"\uD83D\uDCDD"}
+          title={te("sessionNotesTitle")}
+          description={te("sessionNotesDescription")}
         />
       ) : (
         <div className="space-y-2">

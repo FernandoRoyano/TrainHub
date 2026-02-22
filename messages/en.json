@@ -87,7 +87,16 @@
     "activity_client_added": "Client",
     "activity_routine_created": "Routine",
     "activity_routine_assigned": "Assignment",
-    "activity_message_received": "Message"
+    "activity_message_received": "Message",
+    "trackingRate": "Tracking rate",
+    "trackingRateDesc": "Active clients this week",
+    "pendingReviews": "Pending reviews",
+    "pendingReviewsDesc": "Routines older than 4 weeks",
+    "weekSessions": "Sessions this week",
+    "weekSummary": "Weekly summary",
+    "workoutsThisWeek": "Workouts",
+    "newClientsThisWeek": "New clients",
+    "messagesSentThisWeek": "Messages sent"
   },
   "clients": {
     "title": "Clients",
@@ -130,7 +139,14 @@
     "copyInviteLink": "Copy link",
     "inviteLinkCopied": "Link copied to clipboard",
     "inviteLinkError": "Error generating link",
-    "noNotes": "No notes"
+    "noNotes": "No notes",
+    "lastActive": "Last active",
+    "lastActiveToday": "Today",
+    "lastActiveDaysAgo": "{days} days ago",
+    "lastActiveNever": "No activity",
+    "sendMessage": "Send message",
+    "assignRoutine": "Assign routine",
+    "viewDetails": "View details"
   },
   "sessionNotes": {
     "title": "Session notes",
@@ -418,7 +434,17 @@
     "measurementDate": "Measurement date",
     "weight": "Weight",
     "bodyFat": "Body fat",
-    "waist": "Waist"
+    "waist": "Waist",
+    "bodyComposition": "Body composition",
+    "fatMass": "Body fat",
+    "leanMass": "Lean mass",
+    "weeklyTracking": "Weekly tracking",
+    "daysCompleted": "{completed} of {total} days",
+    "timeline": "Timeline",
+    "eventRoutineAssigned": "Routine assigned: {name}",
+    "eventMeasurementTaken": "Measurement recorded",
+    "eventNoteAdded": "Session note: {title}",
+    "eventClientCreated": "Client created"
   },
   "calendar": {
     "title": "Sessions Calendar",
@@ -634,5 +660,23 @@
     "saving": "Saving...",
     "createdBy": "Created by you",
     "metadata": "Block info"
+  },
+  "empty": {
+    "clientsTitle": "Your gym is empty",
+    "clientsDescription": "Time to recruit some champions! Add your first client to get started.",
+    "exercisesTitle": "No custom exercises",
+    "exercisesDescription": "Build your training arsenal! Create custom exercises.",
+    "routinesTitle": "No routines yet",
+    "routinesDescription": "Your clients are waiting for their gains! Create your first routine.",
+    "messagesTitle": "All quiet here",
+    "messagesDescription": "Start a conversation with your clients!",
+    "calendarTitle": "Empty calendar",
+    "calendarDescription": "Ready when you are! Sessions will appear here.",
+    "blocksTitle": "No blocks yet",
+    "blocksDescription": "Create reusable building blocks for your routines!",
+    "sessionNotesTitle": "No notes yet",
+    "sessionNotesDescription": "Record each session's progress!",
+    "measurementsTitle": "No measurements yet",
+    "measurementsDescription": "Start tracking the transformation!"
   }
 }

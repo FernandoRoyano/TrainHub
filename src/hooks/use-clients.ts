@@ -6,7 +6,12 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { clientsService, type ClientFilters } from "@/services/clients.service";
+import {
+  clientsService,
+  type ClientFilters,
+  type TimelineEvent,
+  type ClientCompliance,
+} from "@/services/clients.service";
 import type { ClientFormData } from "@/lib/validations/client";
 import { toast } from "sonner";
 
@@ -32,6 +37,15 @@ export function useClientStats() {
     queryKey: ["clients", "stats"],
     queryFn: () => clientsService.getClientStats(),
     staleTime: 60 * 1000,
+  });
+}
+
+export function useClientsActivity(clientIds: string[]) {
+  return useQuery({
+    queryKey: ["clients", "activity", clientIds],
+    queryFn: () => clientsService.getClientsActivity(clientIds),
+    staleTime: 2 * 60 * 1000,
+    enabled: clientIds.length > 0,
   });
 }
 
@@ -129,5 +143,23 @@ export function useGenerateInviteLink() {
     onError: () => {
       toast.error(t("inviteLinkError"));
     },
+  });
+}
+
+export function useClientTimeline(clientId: string) {
+  return useQuery<TimelineEvent[]>({
+    queryKey: ["client-timeline", clientId],
+    queryFn: () => clientsService.getClientTimeline(clientId),
+    enabled: !!clientId,
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+export function useClientCompliance(clientId: string) {
+  return useQuery<ClientCompliance>({
+    queryKey: ["client-compliance", clientId],
+    queryFn: () => clientsService.getClientCompliance(clientId),
+    enabled: !!clientId,
+    staleTime: 60 * 1000,
   });
 }

@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 export default function MessagesPage() {
   const t = useTranslations("messages");
+  const te = useTranslations("empty");
   const { data: conversations, isLoading } = useConversations();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -41,8 +42,9 @@ export default function MessagesPage() {
         <h1 className="text-2xl font-bold mb-4">{t("title")}</h1>
         <EmptyState
           icon={MessageCircle}
-          title={t("noMessages")}
-          description={t("noMessagesDescription")}
+          emoji={"\uD83D\uDCAC"}
+          title={te("messagesTitle")}
+          description={te("messagesDescription")}
         />
       </div>
     );

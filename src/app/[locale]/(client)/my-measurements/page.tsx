@@ -20,6 +20,7 @@ import { Ruler, TrendingDown } from "lucide-react";
 export default function MyMeasurementsPage() {
   const t = useTranslations("measurements");
   const tc = useTranslations("clientApp");
+  const te = useTranslations("empty");
   const { data: measurements, isLoading } = useMyMeasurements();
 
   const chartData = (measurements ?? []).map((m) => ({
@@ -104,8 +105,9 @@ export default function MyMeasurementsPage() {
       {!measurements || measurements.length === 0 ? (
         <EmptyState
           icon={Ruler}
-          title={t("noMeasurements")}
-          description={t("noMeasurementsClientDescription")}
+          emoji={"\uD83D\uDCCF"}
+          title={te("measurementsTitle")}
+          description={te("measurementsDescription")}
         />
       ) : (
         <div className="space-y-2">

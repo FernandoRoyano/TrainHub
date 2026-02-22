@@ -116,7 +116,7 @@ export default function MyProgressPage() {
           </CardContent>
         </Card>
       ) : (
-        <EmptyState icon={BarChart3} title={t("noWorkouts")} />
+        <EmptyState icon={BarChart3} emoji={"\uD83D\uDCC5"} title={t("noWorkouts")} />
       )}
 
       {/* Progress Charts */}

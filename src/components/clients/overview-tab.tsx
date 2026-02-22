@@ -1,14 +1,22 @@
 "use client";
 
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { useClientRoutines } from "@/hooks/use-routines";
 import { useSessionNotes } from "@/hooks/use-session-notes";
 import { useMeasurements } from "@/hooks/use-measurements";
+import { useClientTimeline, useClientCompliance } from "@/hooks/use-clients";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+} from "recharts";
 import {
   Dumbbell,
   StickyNote,
@@ -17,6 +25,11 @@ import {
   ArrowRight,
   TrendingUp,
   TrendingDown,
+  ClipboardList,
+  FileText,
+  UserPlus,
+  Check,
+  X,
 } from "lucide-react";
 
 interface OverviewTabProps {
@@ -36,16 +49,111 @@ const difficultyColors: Record<string, string> = {
   advanced: "bg-red-500/10 text-red-400 border-red-500/20",
 };
 
+const WEEKDAY_KEYS = [
+  "weekday_mon",
+  "weekday_tue",
+  "weekday_wed",
+  "weekday_thu",
+  "weekday_fri",
+  "weekday_sat",
+  "weekday_sun",
+] as const;
+
+const timelineConfig: Record<
+  string,
+  { color: string; bgColor: string; icon: React.ElementType }
+> = {
+  routine_assigned: {
+    color: "text-blue-400",
+    bgColor: "bg-blue-500",
+    icon: ClipboardList,
+  },
+  measurement_taken: {
+    color: "text-purple-400",
+    bgColor: "bg-purple-500",
+    icon: Ruler,
+  },
+  note_added: {
+    color: "text-amber-400",
+    bgColor: "bg-amber-500",
+    icon: FileText,
+  },
+  client_created: {
+    color: "text-emerald-400",
+    bgColor: "bg-emerald-500",
+    icon: UserPlus,
+  },
+};
+
+function formatRelativeTime(timestamp: string): string {
+  const now = new Date();
+  const date = new Date(timestamp);
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMin / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMin < 1) return "ahora";
+  if (diffMin < 60) return `${diffMin}m`;
+  if (diffHours < 24) return `${diffHours}h`;
+  if (diffDays < 30) return `${diffDays}d`;
+  const diffMonths = Math.floor(diffDays / 30);
+  return `${diffMonths}mo`;
+}
+
 export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
   const t = useTranslations("overview");
   const tc = useTranslations("common");
+  const tCal = useTranslations("calendar");
   const { data: routines, isLoading: loadingRoutines } =
     useClientRoutines(clientId);
   const { data: notes, isLoading: loadingNotes } = useSessionNotes(clientId);
   const { data: measurements, isLoading: loadingMeasurements } =
     useMeasurements(clientId);
+  const { data: timeline } = useClientTimeline(clientId);
+  const { data: compliance } = useClientCompliance(clientId);
 
   const isLoading = loadingRoutines || loadingNotes || loadingMeasurements;
+
+  // Compute week days info for weekly tracking
+  const weekDays = useMemo(() => {
+    const now = new Date();
+    const currentDay = now.getDay(); // 0=Sun, 1=Mon, ...
+    const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + mondayOffset);
+    monday.setHours(0, 0, 0, 0);
+
+    const days: { date: Date; label: string; isFuture: boolean; hasLog: boolean }[] = [];
+
+    for (let i = 0; i < 7; i++) {
+      const dayDate = new Date(monday);
+      dayDate.setDate(monday.getDate() + i);
+
+      const todayStart = new Date(now);
+      todayStart.setHours(0, 0, 0, 0);
+
+      const isFuture = dayDate.getTime() > todayStart.getTime();
+
+      const hasLog = (compliance?.logs ?? []).some((logDate) => {
+        const ld = new Date(logDate);
+        return (
+          ld.getFullYear() === dayDate.getFullYear() &&
+          ld.getMonth() === dayDate.getMonth() &&
+          ld.getDate() === dayDate.getDate()
+        );
+      });
+
+      days.push({
+        date: dayDate,
+        label: tCal(WEEKDAY_KEYS[i]),
+        isFuture,
+        hasLog,
+      });
+    }
+
+    return days;
+  }, [compliance?.logs, tCal]);
 
   if (isLoading) {
     return (
@@ -90,6 +198,33 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
     );
   }
 
+  // Body composition donut data
+  const showBodyComposition =
+    latest != null && latest.body_fat_pct != null;
+  const donutData = showBodyComposition
+    ? [
+        { name: "fat", value: latest!.body_fat_pct! },
+        { name: "lean", value: 100 - latest!.body_fat_pct! },
+      ]
+    : [];
+  const DONUT_COLORS = ["#f97316", "#22c55e"];
+
+  // Timeline event description
+  function getTimelineDescription(event: { type: string; description: string }) {
+    switch (event.type) {
+      case "routine_assigned":
+        return t("eventRoutineAssigned", { name: event.description });
+      case "measurement_taken":
+        return t("eventMeasurementTaken");
+      case "note_added":
+        return t("eventNoteAdded", { title: event.description });
+      case "client_created":
+        return t("eventClientCreated");
+      default:
+        return event.description;
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Assigned Routines */}
@@ -104,6 +239,7 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
           {!routines || routines.length === 0 ? (
             <EmptyState
               icon={Dumbbell}
+              emoji={"\uD83D\uDCCB"}
               title={t("noRoutines")}
               description={t("noRoutinesDescription")}
             />
@@ -276,6 +412,158 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* Body Composition Donut */}
+      {showBodyComposition && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Ruler className="h-4 w-4" />
+              {t("bodyComposition")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-6">
+              <div className="relative w-[180px] h-[180px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={donutData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {donutData.map((_, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={DONUT_COLORS[index]}
+                        />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                {/* Center text */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-bold">
+                    {latest!.weight ?? "—"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">kg</span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="inline-block h-3 w-3 rounded-full"
+                    style={{ backgroundColor: "#f97316" }}
+                  />
+                  <span className="text-sm">
+                    {t("fatMass")} — {latest!.body_fat_pct}%
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="inline-block h-3 w-3 rounded-full"
+                    style={{ backgroundColor: "#22c55e" }}
+                  />
+                  <span className="text-sm">
+                    {t("leanMass")} — {(100 - latest!.body_fat_pct!).toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Weekly Tracking */}
+      {compliance && compliance.totalDays > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              {t("weeklyTracking")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-between gap-2 mb-4">
+              {weekDays.map((day) => (
+                <div
+                  key={day.label}
+                  className="flex flex-col items-center gap-1.5"
+                >
+                  <span className="text-xs text-muted-foreground">
+                    {day.label}
+                  </span>
+                  {day.hasLog ? (
+                    <div className="flex items-center justify-center h-9 w-9 rounded-full bg-emerald-500/20 text-emerald-400">
+                      <Check className="h-4 w-4" />
+                    </div>
+                  ) : day.isFuture ? (
+                    <div className="flex items-center justify-center h-9 w-9 rounded-full border-2 border-muted" />
+                  ) : (
+                    <div className="flex items-center justify-center h-9 w-9 rounded-full bg-zinc-500/10 text-zinc-500">
+                      <X className="h-4 w-4" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground text-center">
+              {t("daysCompleted", {
+                completed: compliance.completedDays,
+                total: compliance.totalDays,
+              })}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Timeline */}
+      {timeline && timeline.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              {t("timeline")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="relative">
+              {/* Connecting line */}
+              <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-border" />
+
+              <div className="space-y-4">
+                {timeline.map((event) => {
+                  const config = timelineConfig[event.type];
+                  const Icon = config?.icon ?? Calendar;
+                  return (
+                    <div key={`${event.type}-${event.id}`} className="relative flex gap-3">
+                      {/* Dot */}
+                      <div
+                        className={`relative z-10 flex items-center justify-center h-6 w-6 rounded-full ${config?.bgColor ?? "bg-zinc-500"} shrink-0`}
+                      >
+                        <Icon className="h-3 w-3 text-white" />
+                      </div>
+                      {/* Content */}
+                      <div className="flex-1 min-w-0 pt-0.5">
+                        <p className="text-sm leading-tight">
+                          {getTimelineDescription(event)}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {formatRelativeTime(event.timestamp)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -184,9 +184,12 @@ export function SessionsCalendar() {
           </CardHeader>
           <CardContent>
             {selectedEvents.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {t("noSessions")}
-              </p>
+              <div className="text-center py-4">
+                <span className="text-5xl inline-block transition-transform hover:animate-bounce cursor-default">{"\uD83D\uDCC5"}</span>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {t("noSessions")}
+                </p>
+              </div>
             ) : (
               <div className="space-y-2">
                 {selectedEvents.map((ev) => (

@@ -1,6 +1,21 @@
 import { createClient } from "@/lib/supabase/client";
 import type { ClientFormData } from "@/lib/validations/client";
 
+export interface ClientActivity {
+  lastWorkoutDate: string | null;
+  workoutsThisWeek: number;
+  assignedDaysPerWeek: number | null;
+}
+
+function getMonday(): string {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(now.setDate(diff));
+  monday.setHours(0, 0, 0, 0);
+  return monday.toISOString();
+}
+
 export interface Client {
   id: string;
   trainer_id: string;
@@ -21,6 +36,19 @@ export interface ClientFilters {
   status?: string;
   page?: number;
   pageSize?: number;
+}
+
+export interface TimelineEvent {
+  id: string;
+  type: "routine_assigned" | "measurement_taken" | "note_added" | "client_created";
+  description: string;
+  timestamp: string;
+}
+
+export interface ClientCompliance {
+  completedDays: number;
+  totalDays: number;
+  logs: Date[];
 }
 
 export const clientsService = {
@@ -147,5 +175,197 @@ export const clientsService = {
       pending: data.filter((c) => c.status === "pending").length,
     };
     return stats;
+  },
+
+  async getClientsActivity(
+    clientIds: string[]
+  ): Promise<Record<string, ClientActivity>> {
+    if (clientIds.length === 0) return {};
+
+    const supabase = createClient();
+    const monday = getMonday();
+
+    // Query workout_logs joined with client_routines to get last workout date
+    // and workouts this week per client
+    const { data: logs, error: logsError } = await supabase
+      .from("workout_logs")
+      .select("client_routine_id, completed_at, client_routines!inner(client_id)")
+      .in("client_routines.client_id", clientIds)
+      .order("completed_at", { ascending: false });
+
+    if (logsError) throw logsError;
+
+    // Query client_routines to get days_per_week for active routines per client
+    const { data: routines, error: routinesError } = await supabase
+      .from("client_routines")
+      .select("client_id, days_per_week, status")
+      .in("client_id", clientIds)
+      .eq("status", "active");
+
+    if (routinesError) throw routinesError;
+
+    // Build a map of client_id -> days_per_week from active routines
+    const daysPerWeekMap: Record<string, number> = {};
+    for (const routine of routines ?? []) {
+      if (routine.days_per_week != null) {
+        // If a client has multiple active routines, use the highest days_per_week
+        const clientId = routine.client_id as string;
+        daysPerWeekMap[clientId] = Math.max(
+          daysPerWeekMap[clientId] ?? 0,
+          routine.days_per_week
+        );
+      }
+    }
+
+    // Build activity data from logs
+    const activityMap: Record<string, ClientActivity> = {};
+
+    // Initialize all clients
+    for (const id of clientIds) {
+      activityMap[id] = {
+        lastWorkoutDate: null,
+        workoutsThisWeek: 0,
+        assignedDaysPerWeek: daysPerWeekMap[id] ?? null,
+      };
+    }
+
+    // Process logs to extract per-client data
+    for (const log of logs ?? []) {
+      const clientId = (
+        log.client_routines as unknown as { client_id: string }
+      ).client_id;
+
+      if (!activityMap[clientId]) continue;
+
+      // Track last workout date (logs are ordered descending, first one is latest)
+      if (!activityMap[clientId].lastWorkoutDate) {
+        activityMap[clientId].lastWorkoutDate = log.completed_at;
+      }
+
+      // Count workouts this week
+      if (log.completed_at && log.completed_at >= monday) {
+        activityMap[clientId].workoutsThisWeek += 1;
+      }
+    }
+
+    return activityMap;
+  },
+
+  async getClientTimeline(clientId: string): Promise<TimelineEvent[]> {
+    const supabase = createClient();
+
+    const [routinesRes, measurementsRes, notesRes, clientRes] =
+      await Promise.all([
+        supabase
+          .from("client_routines")
+          .select("id, created_at, routine:routines(name)")
+          .eq("client_id", clientId),
+        supabase
+          .from("body_measurements")
+          .select("id, date, created_at")
+          .eq("client_id", clientId),
+        supabase
+          .from("session_notes")
+          .select("id, title, created_at")
+          .eq("client_id", clientId),
+        supabase
+          .from("clients")
+          .select("created_at")
+          .eq("id", clientId)
+          .single(),
+      ]);
+
+    if (routinesRes.error) throw routinesRes.error;
+    if (measurementsRes.error) throw measurementsRes.error;
+    if (notesRes.error) throw notesRes.error;
+    if (clientRes.error) throw clientRes.error;
+
+    const timeline: TimelineEvent[] = [];
+
+    for (const r of routinesRes.data ?? []) {
+      const routineName =
+        (r.routine as unknown as { name: string } | null)?.name ?? "Unknown";
+      timeline.push({
+        id: r.id,
+        type: "routine_assigned",
+        description: routineName,
+        timestamp: r.created_at,
+      });
+    }
+
+    for (const m of measurementsRes.data ?? []) {
+      timeline.push({
+        id: m.id,
+        type: "measurement_taken",
+        description: "Measurement",
+        timestamp: m.created_at ?? m.date,
+      });
+    }
+
+    for (const n of notesRes.data ?? []) {
+      timeline.push({
+        id: n.id,
+        type: "note_added",
+        description: n.title ?? "Note",
+        timestamp: n.created_at,
+      });
+    }
+
+    if (clientRes.data) {
+      timeline.push({
+        id: clientId,
+        type: "client_created",
+        description: "Client created",
+        timestamp: clientRes.data.created_at,
+      });
+    }
+
+    timeline.sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+
+    return timeline.slice(0, 10);
+  },
+
+  async getClientCompliance(clientId: string): Promise<ClientCompliance> {
+    const supabase = createClient();
+
+    // Get active client_routine
+    const { data: clientRoutine, error: crError } = await supabase
+      .from("client_routines")
+      .select("id, routine_id, routines(days_per_week)")
+      .eq("client_id", clientId)
+      .eq("status", "active")
+      .limit(1)
+      .single();
+
+    if (crError || !clientRoutine) {
+      return { completedDays: 0, totalDays: 0, logs: [] };
+    }
+
+    const daysPerWeek =
+      (clientRoutine.routines as unknown as { days_per_week: number } | null)
+        ?.days_per_week ?? 0;
+
+    // Get Monday of this week
+    const monday = getMonday();
+
+    // Get workout_logs for this week
+    const { data: logs, error: logsError } = await supabase
+      .from("workout_logs")
+      .select("completed_at")
+      .eq("client_routine_id", clientRoutine.id)
+      .gte("completed_at", monday);
+
+    if (logsError) throw logsError;
+
+    const logDates = (logs ?? []).map((l) => new Date(l.completed_at));
+
+    return {
+      completedDays: logDates.length,
+      totalDays: daysPerWeek,
+      logs: logDates,
+    };
   },
 };

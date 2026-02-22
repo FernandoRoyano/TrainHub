@@ -19,6 +19,9 @@ import {
   ArrowRight,
   MessageCircle,
   TrendingUp,
+  AlertCircle,
+  CalendarCheck,
+  Dumbbell,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -29,30 +32,27 @@ const activityIcons = {
   message_received: MessageCircle,
 } as const;
 
-const kpiConfig = [
-  { key: "activeClients", icon: Users, color: "text-emerald-400", bg: "bg-emerald-400/15", glow: "shadow-emerald-500/20 hover:shadow-emerald-500/30" },
-  { key: "totalRoutines", icon: ClipboardList, color: "text-blue-400", bg: "bg-blue-400/15", glow: "shadow-blue-500/20 hover:shadow-blue-500/30" },
-  { key: "unreadMessages", icon: MessageSquare, color: "text-amber-400", bg: "bg-amber-400/15", glow: "shadow-amber-500/20 hover:shadow-amber-500/30" },
-  { key: "recentActivity", icon: Activity, color: "text-purple-400", bg: "bg-purple-400/15", glow: "shadow-purple-500/20 hover:shadow-purple-500/30" },
-] as const;
+function timeAgo(timestamp: string): string {
+  const diff = Date.now() - new Date(timestamp).getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return "now";
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `${days}d`;
+}
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
   const { data: stats, isLoading } = useDashboardStats();
 
-  const kpiValues = [
-    stats?.activeClients ?? 0,
-    stats?.totalRoutines ?? 0,
-    stats?.unreadMessages ?? 0,
-    stats?.recentActivity?.length ?? 0,
-  ];
-
   if (isLoading) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-48" />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-28" />
           ))}
         </div>
@@ -61,30 +61,102 @@ export default function DashboardPage() {
     );
   }
 
+  const kpis = [
+    {
+      label: t("activeClients"),
+      value: stats?.activeClients ?? 0,
+      icon: Users,
+      color: "text-emerald-400",
+      bg: "bg-emerald-400/15",
+      glow: "shadow-emerald-500/20 hover:shadow-emerald-500/30",
+    },
+    {
+      label: t("trackingRate"),
+      value: `${stats?.trackingRate ?? 0}%`,
+      subtitle: t("trackingRateDesc"),
+      icon: TrendingUp,
+      color: "text-cyan-400",
+      bg: "bg-cyan-400/15",
+      glow: "shadow-cyan-500/20 hover:shadow-cyan-500/30",
+      progress: stats?.trackingRate ?? 0,
+    },
+    {
+      label: t("totalRoutines"),
+      value: stats?.totalRoutines ?? 0,
+      icon: ClipboardList,
+      color: "text-blue-400",
+      bg: "bg-blue-400/15",
+      glow: "shadow-blue-500/20 hover:shadow-blue-500/30",
+    },
+    {
+      label: t("pendingReviews"),
+      value: stats?.pendingReviews ?? 0,
+      subtitle: t("pendingReviewsDesc"),
+      icon: AlertCircle,
+      color: "text-rose-400",
+      bg: "bg-rose-400/15",
+      glow: "shadow-rose-500/20 hover:shadow-rose-500/30",
+      urgent: (stats?.pendingReviews ?? 0) > 0,
+    },
+    {
+      label: t("weekSessions"),
+      value: stats?.weekSessions ?? 0,
+      icon: CalendarCheck,
+      color: "text-violet-400",
+      bg: "bg-violet-400/15",
+      glow: "shadow-violet-500/20 hover:shadow-violet-500/30",
+    },
+    {
+      label: t("unreadMessages"),
+      value: stats?.unreadMessages ?? 0,
+      icon: MessageSquare,
+      color: "text-amber-400",
+      bg: "bg-amber-400/15",
+      glow: "shadow-amber-500/20 hover:shadow-amber-500/30",
+    },
+  ];
+
+  const summary = stats?.weekSummary;
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">{t("title")}</h1>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {kpiConfig.map((kpi, i) => {
+      {/* KPI Cards - 6 cards in 2x3 grid */}
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
+        {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <Card key={kpi.key} className={`glass-elevated shadow-xl transition-all duration-300 ${kpi.glow}`}>
+            <Card
+              key={kpi.label}
+              className={`glass-elevated shadow-xl transition-all duration-300 ${kpi.glow}`}
+            >
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {t(kpi.key)}
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-muted-foreground truncate">
+                      {kpi.label}
                     </p>
-                    <p className="text-3xl font-bold mt-1">{kpiValues[i]}</p>
+                    <p className={`text-3xl font-bold mt-1 ${kpi.urgent ? "text-rose-400" : ""}`}>
+                      {kpi.value}
+                    </p>
                   </div>
-                  <div className={`h-12 w-12 rounded-xl ${kpi.bg} flex items-center justify-center`}>
+                  <div
+                    className={`h-12 w-12 rounded-xl ${kpi.bg} flex items-center justify-center shrink-0`}
+                  >
                     <Icon className={`h-6 w-6 ${kpi.color}`} />
                   </div>
                 </div>
+                {kpi.progress !== undefined && (
+                  <div className="mt-3 h-1.5 w-full rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-cyan-400 transition-all duration-500"
+                      style={{ width: `${Math.min(kpi.progress, 100)}%` }}
+                    />
+                  </div>
+                )}
               </CardContent>
             </Card>
           );
@@ -92,29 +164,43 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Quick Actions */}
+        {/* Week Summary */}
         <Card className="border-border/50">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-primary" />
-              {t("quickActions")}
+              <Dumbbell className="h-4 w-4 text-primary" />
+              {t("weekSummary")}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center p-3 rounded-lg bg-muted/50">
+                <p className="text-2xl font-bold">{summary?.workouts ?? 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t("workoutsThisWeek")}</p>
+              </div>
+              <div className="text-center p-3 rounded-lg bg-muted/50">
+                <p className="text-2xl font-bold">{summary?.newClients ?? 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t("newClientsThisWeek")}</p>
+              </div>
+              <div className="text-center p-3 rounded-lg bg-muted/50">
+                <p className="text-2xl font-bold">{summary?.messagesSent ?? 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t("messagesSentThisWeek")}</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-3 mt-4">
+              <Button asChild size="sm">
                 <Link href="/clients/new">
                   <UserPlus className="mr-2 h-4 w-4" />
                   {t("addClient")}
                 </Link>
               </Button>
-              <Button variant="outline" asChild>
+              <Button variant="outline" size="sm" asChild>
                 <Link href="/routines/new">
                   <Plus className="mr-2 h-4 w-4" />
                   {t("createRoutine")}
                 </Link>
               </Button>
-              <Button variant="outline" asChild>
+              <Button variant="outline" size="sm" asChild>
                 <Link href="/messages">
                   <Mail className="mr-2 h-4 w-4" />
                   {t("viewMessages")}
@@ -152,10 +238,10 @@ export default function DashboardPage() {
                           </Badge>
                           {item.description}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {new Date(item.timestamp).toLocaleDateString()}
-                        </p>
                       </div>
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        {timeAgo(item.timestamp)}
+                      </span>
                     </div>
                   );
                 })}

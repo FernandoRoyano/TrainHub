@@ -25,6 +25,70 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Ruler, Plus, Trash2, TrendingDown } from "lucide-react";
 
+interface BodySilhouetteProps {
+  chest_cm: number | null;
+  waist_cm: number | null;
+  hips_cm: number | null;
+  bicep_cm: number | null;
+  thigh_cm: number | null;
+  calf_cm: number | null;
+}
+
+function BodySilhouette({ chest_cm, waist_cm, hips_cm, bicep_cm, thigh_cm, calf_cm }: BodySilhouetteProps) {
+  const t = useTranslations("measurements");
+
+  const labels: { key: keyof BodySilhouetteProps; value: number | null; top: string; left: string }[] = [
+    { key: "chest_cm", value: chest_cm, top: "23%", left: "105%" },
+    { key: "waist_cm", value: waist_cm, top: "36%", left: "105%" },
+    { key: "hips_cm", value: hips_cm, top: "46%", left: "105%" },
+    { key: "bicep_cm", value: bicep_cm, top: "28%", left: "-70%" },
+    { key: "thigh_cm", value: thigh_cm, top: "62%", left: "-70%" },
+    { key: "calf_cm", value: calf_cm, top: "82%", left: "-70%" },
+  ];
+
+  const hasAnyValue = labels.some((l) => l.value != null);
+  if (!hasAnyValue) return null;
+
+  return (
+    <Card>
+      <CardContent className="pt-4">
+        <div className="relative w-full max-w-[200px] mx-auto">
+          <svg viewBox="0 0 200 400" className="w-full max-w-[200px] mx-auto">
+            {/* Head */}
+            <circle cx="100" cy="30" r="20" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3" />
+            {/* Neck */}
+            <line x1="100" y1="50" x2="100" y2="65" stroke="currentColor" strokeWidth="1.5" opacity="0.3" />
+            {/* Torso */}
+            <path d="M70 65 L60 180 L80 190 L100 195 L120 190 L140 180 L130 65 Z" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3" />
+            {/* Left arm */}
+            <path d="M70 65 L45 130 L40 170" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3" />
+            {/* Right arm */}
+            <path d="M130 65 L155 130 L160 170" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3" />
+            {/* Left leg */}
+            <path d="M80 190 L75 280 L70 370" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3" />
+            {/* Right leg */}
+            <path d="M120 190 L125 280 L130 370" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3" />
+          </svg>
+          {labels.map(
+            (label) =>
+              label.value != null && (
+                <div
+                  key={label.key}
+                  className="absolute text-[10px] leading-tight whitespace-nowrap text-muted-foreground"
+                  style={{ top: label.top, left: label.left }}
+                >
+                  <span className="font-medium text-foreground">{t(label.key)}</span>
+                  <br />
+                  <span className="font-semibold text-primary">{label.value} cm</span>
+                </div>
+              )
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 interface MeasurementsTabProps {
   clientId: string;
 }
@@ -43,6 +107,7 @@ const METRIC_FIELDS = [
 export function MeasurementsTab({ clientId }: MeasurementsTabProps) {
   const t = useTranslations("measurements");
   const tc = useTranslations("common");
+  const te = useTranslations("empty");
   const { data: measurements, isLoading } = useMeasurements(clientId);
   const createMeasurement = useCreateMeasurement();
   const deleteMeasurement = useDeleteMeasurement();
@@ -98,6 +163,21 @@ export function MeasurementsTab({ clientId }: MeasurementsTabProps) {
           {t("addMeasurement")}
         </Button>
       </div>
+
+      {/* Body Silhouette - latest measurement */}
+      {measurements && measurements.length > 0 && (() => {
+        const latest = measurements[measurements.length - 1];
+        return (
+          <BodySilhouette
+            chest_cm={latest.chest_cm}
+            waist_cm={latest.waist_cm}
+            hips_cm={latest.hips_cm}
+            bicep_cm={latest.bicep_cm}
+            thigh_cm={latest.thigh_cm}
+            calf_cm={latest.calf_cm}
+          />
+        );
+      })()}
 
       {showForm && (
         <Card>
@@ -203,8 +283,9 @@ export function MeasurementsTab({ clientId }: MeasurementsTabProps) {
       {!measurements || measurements.length === 0 ? (
         <EmptyState
           icon={Ruler}
-          title={t("noMeasurements")}
-          description={t("noMeasurementsDescription")}
+          emoji={"\uD83D\uDCCF"}
+          title={te("measurementsTitle")}
+          description={te("measurementsDescription")}
         />
       ) : (
         <div className="space-y-2">

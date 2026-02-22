@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useClients, useDeleteClient } from "@/hooks/use-clients";
+import { useClients, useDeleteClient, useClientsActivity } from "@/hooks/use-clients";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +26,9 @@ import {
   Pencil,
   Trash2,
   Users,
+  MessageCircle,
+  ClipboardList,
+  Eye,
 } from "lucide-react";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -37,9 +40,39 @@ const statusColors: Record<string, string> = {
   pending: "bg-blue-500/10 text-blue-400 border-blue-500/20",
 };
 
+function getComplianceDotClass(
+  workoutsThisWeek: number,
+  assignedDaysPerWeek: number | null
+): string {
+  if (assignedDaysPerWeek == null || assignedDaysPerWeek === 0) {
+    return "bg-muted-foreground/30";
+  }
+  const ratio = workoutsThisWeek / assignedDaysPerWeek;
+  if (ratio >= 0.8) return "bg-emerald-400";
+  if (ratio >= 0.4) return "bg-amber-400";
+  return "bg-rose-400";
+}
+
+function getLastActiveText(
+  lastWorkoutDate: string | null,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: (key: string, values?: any) => string
+): string {
+  if (!lastWorkoutDate) return t("lastActiveNever");
+
+  const now = new Date();
+  const last = new Date(lastWorkoutDate);
+  const diffMs = now.getTime() - last.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return t("lastActiveToday");
+  return t("lastActiveDaysAgo", { days: diffDays });
+}
+
 export function ClientList() {
   const t = useTranslations("clients");
   const tc = useTranslations("common");
+  const te = useTranslations("empty");
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
@@ -53,6 +86,13 @@ export function ClientList() {
   const deleteClient = useDeleteClient();
 
   const clients = data?.data ?? [];
+
+  const clientIds = useMemo(
+    () => clients.map((c) => c.id),
+    [clients]
+  );
+
+  const { data: activityMap } = useClientsActivity(clientIds);
 
   return (
     <div className="space-y-4">
@@ -108,8 +148,9 @@ export function ClientList() {
       ) : clients.length === 0 ? (
         <EmptyState
           icon={Users}
-          title={t("noClients")}
-          description={t("noClientsDescription")}
+          emoji={"\uD83C\uDFCB\uFE0F"}
+          title={te("clientsTitle")}
+          description={te("clientsDescription")}
           actionLabel={t("addClient")}
           actionHref="/clients/new"
         />
@@ -122,6 +163,16 @@ export function ClientList() {
               .join("")
               .toUpperCase()
               .slice(0, 2);
+
+            const activity = activityMap?.[client.id];
+            const complianceDotClass = getComplianceDotClass(
+              activity?.workoutsThisWeek ?? 0,
+              activity?.assignedDaysPerWeek ?? null
+            );
+            const lastActiveText = getLastActiveText(
+              activity?.lastWorkoutDate ?? null,
+              t
+            );
 
             return (
               <Card
@@ -137,9 +188,19 @@ export function ClientList() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{client.full_name}</p>
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`inline-block h-2 w-2 rounded-full shrink-0 ${complianceDotClass}`}
+                        />
+                        <p className="font-medium truncate">
+                          {client.full_name}
+                        </p>
+                      </div>
                       <p className="text-xs text-muted-foreground truncate">
                         {client.email || client.phone || "--"}
+                      </p>
+                      <p className="text-xs text-muted-foreground/70 mt-0.5">
+                        {lastActiveText}
                       </p>
                     </div>
                     <Badge
@@ -191,6 +252,45 @@ export function ClientList() {
                       ))}
                     </div>
                   )}
+                  {/* Quick action buttons */}
+                  <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/50">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      title={t("sendMessage")}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push("/messages");
+                      }}
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      title={t("assignRoutine")}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push("/routines");
+                      }}
+                    >
+                      <ClipboardList className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      title={t("viewDetails")}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/clients/${client.id}`);
+                      }}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             );
