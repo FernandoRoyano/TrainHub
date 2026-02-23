@@ -420,7 +420,17 @@
     "category_supplement": "Supplements",
     "category_snack": "Snacks",
     "category_condiment": "Condiments",
-    "category_other": "Other"
+    "category_other": "Other",
+    "mealPlanCreated": "Meal plan created",
+    "mealPlanCreateError": "Error creating meal plan",
+    "mealPlanUpdated": "Meal plan updated",
+    "mealPlanUpdateError": "Error updating meal plan",
+    "mealPlanDeleted": "Meal plan deleted",
+    "mealPlanDeleteError": "Error deleting meal plan",
+    "mealPlanDuplicated": "Meal plan duplicated",
+    "mealPlanDuplicateError": "Error duplicating meal plan",
+    "mealPlanAssigned": "Meal plan assigned",
+    "mealPlanAssignError": "Error assigning meal plan"
   },
   "messages": {
     "title": "Messages",

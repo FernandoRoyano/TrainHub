@@ -420,7 +420,17 @@
     "category_supplement": "Suplementos",
     "category_snack": "Snacks",
     "category_condiment": "Condimentos",
-    "category_other": "Otros"
+    "category_other": "Otros",
+    "mealPlanCreated": "Plan de nutrición creado",
+    "mealPlanCreateError": "Error al crear el plan",
+    "mealPlanUpdated": "Plan de nutrición actualizado",
+    "mealPlanUpdateError": "Error al actualizar el plan",
+    "mealPlanDeleted": "Plan de nutrición eliminado",
+    "mealPlanDeleteError": "Error al eliminar el plan",
+    "mealPlanDuplicated": "Plan de nutrición duplicado",
+    "mealPlanDuplicateError": "Error al duplicar el plan",
+    "mealPlanAssigned": "Plan de nutrición asignado",
+    "mealPlanAssignError": "Error al asignar el plan"
   },
   "messages": {
     "title": "Mensajes",
