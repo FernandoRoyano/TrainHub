@@ -116,3 +116,19 @@ export const NUTRITION_GOALS = [
   "performance",
   "health",
 ] as const;
+
+export const FOOD_CATEGORIES = [
+  "protein",
+  "dairy",
+  "grain",
+  "vegetable",
+  "fruit",
+  "legume",
+  "nut_seed",
+  "oil_fat",
+  "beverage",
+  "supplement",
+  "snack",
+  "condiment",
+  "other",
+] as const;

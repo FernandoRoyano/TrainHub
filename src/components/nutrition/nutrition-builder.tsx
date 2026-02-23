@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   createMealPlanSchema,
   type MealPlanFormData,
@@ -17,6 +17,7 @@ import {
 import type { MealPlan } from "@/services/nutrition.service";
 import { MEAL_TYPES, FOOD_UNITS, NUTRITION_GOALS } from "@/lib/constants";
 import { MacroSummary } from "./macro-summary";
+import { FoodPicker } from "./food-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -37,7 +38,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, ArrowLeft, Plus, Trash2, X } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Trash2, X, Search } from "lucide-react";
 import Link from "next/link";
 
 interface NutritionBuilderProps {
@@ -49,9 +50,11 @@ export function NutritionBuilder({ mode, mealPlan }: NutritionBuilderProps) {
   const t = useTranslations("nutrition");
   const tc = useTranslations("common");
   const tv = useTranslations("validation");
+  const locale = useLocale();
   const router = useRouter();
   const createMealPlan = useCreateMealPlan();
   const updateMealPlan = useUpdateMealPlan();
+  const [foodPickerOpen, setFoodPickerOpen] = useState(false);
 
   const {
     meals,
@@ -469,16 +472,47 @@ export function NutritionBuilder({ mode, mealPlan }: NutritionBuilderProps) {
                     </div>
                   )}
 
-                  {/* Add food button */}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => addFood(activeMealIndex)}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    {t("addFood")}
-                  </Button>
+                  {/* Add food buttons */}
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setFoodPickerOpen(true)}
+                    >
+                      <Search className="mr-2 h-4 w-4" />
+                      {t("searchFood")}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="shrink-0"
+                      onClick={() => addFood(activeMealIndex)}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      {t("customFood")}
+                    </Button>
+                  </div>
+
+                  <FoodPicker
+                    open={foodPickerOpen}
+                    onOpenChange={setFoodPickerOpen}
+                    onSelect={(food) => {
+                      const displayName =
+                        locale === "es" && food.name_es
+                          ? food.name_es
+                          : food.name;
+                      addFood(activeMealIndex, {
+                        name: displayName,
+                        quantity: 100,
+                        unit: "g",
+                        calories: food.calories_per_100g,
+                        protein: food.protein_per_100g,
+                        carbs: food.carbs_per_100g,
+                        fat: food.fat_per_100g,
+                      });
+                    }}
+                  />
                 </div>
               )}
 
