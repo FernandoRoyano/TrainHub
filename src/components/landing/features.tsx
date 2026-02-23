@@ -7,6 +7,7 @@ import {
   Smartphone,
   CreditCard,
   BarChart3,
+  UtensilsCrossed,
   Check,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -33,6 +34,19 @@ const featureConfigs: FeatureConfig[] = [
     ],
     color: "text-emerald-400",
     bg: "bg-emerald-400/10",
+  },
+  {
+    icon: UtensilsCrossed,
+    titleKey: "featureNutritionTitle",
+    subtitleKey: "featureNutritionSubtitle",
+    bulletKeys: [
+      "featureNutritionBullet1",
+      "featureNutritionBullet2",
+      "featureNutritionBullet3",
+      "featureNutritionBullet4",
+    ],
+    color: "text-orange-400",
+    bg: "bg-orange-400/10",
   },
   {
     icon: Smartphone,
@@ -112,23 +126,16 @@ export function Features() {
               >
                 {/* Visual */}
                 <div className="flex-1 w-full">
-                  <div className="rounded-xl border border-border/50 bg-card/50 p-8 md:p-12">
-                    <div className={`h-16 w-16 rounded-xl ${feature.bg} flex items-center justify-center mb-6`}>
-                      <Icon className={`h-8 w-8 ${feature.color}`} />
+                  <div className="rounded-xl border border-border/50 bg-card/50 p-8 md:p-12 flex flex-col items-center justify-center min-h-[240px]">
+                    <div className={`h-20 w-20 rounded-2xl ${feature.bg} flex items-center justify-center mb-4`}>
+                      <Icon className={`h-10 w-10 ${feature.color}`} />
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {bullets.map((bullet) => (
-                        <div
-                          key={bullet}
-                          className="flex items-start gap-2 p-3 rounded-lg bg-background/50 border border-border/30"
-                        >
-                          <Check className={`h-4 w-4 ${feature.color} shrink-0 mt-0.5`} />
-                          <span className="text-xs text-muted-foreground">
-                            {bullet}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                    <h4 className="text-lg font-semibold text-center">
+                      {t(feature.titleKey)}
+                    </h4>
+                    <p className="text-sm text-muted-foreground text-center mt-2 max-w-sm">
+                      {t(feature.subtitleKey)}
+                    </p>
                   </div>
                 </div>
 
