@@ -54,7 +54,7 @@ export const dashboardService = {
       recentRoutinesResult,
       recentAssignmentsResult,
       // New queries
-      pendingClientsResult,
+      _pendingClientsResult,
       weekWorkoutsResult,
       pendingReviewsResult,
       newClientsWeekResult,
