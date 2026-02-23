@@ -1,14 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useMyRoutine, useWorkoutLogs, useProgressData } from "@/hooks/use-client-app";
+import type { WorkoutLog, WorkoutWithExercises } from "@/services/client-app.service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ProgressCharts } from "@/components/progress/progress-charts";
-import { BarChart3, Calendar, Check } from "lucide-react";
+import { BarChart3, Calendar, Check, ChevronDown, ChevronUp } from "lucide-react";
 
 export default function MyProgressPage() {
   const t = useTranslations("clientApp");
@@ -152,32 +153,90 @@ export default function MyProgressPage() {
       </Card>
 
       {logs && logs.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">{t("history")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {logs.slice(0, 10).map((log) => (
-              <div
-                key={log.id}
-                className="flex items-center justify-between py-2 border-b last:border-0"
-              >
-                <span className="text-sm">{log.date}</span>
-                <Badge variant={log.completed ? "default" : "secondary"}>
-                  {log.completed ? (
-                    <>
-                      <Check className="mr-1 h-3 w-3" />
-                      {t("workoutCompleted")}
-                    </>
-                  ) : (
-                    t("workoutInProgress")
-                  )}
-                </Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <WorkoutHistory logs={logs} progressWorkouts={progressWorkouts ?? []} t={t} />
       )}
     </div>
+  );
+}
+
+function WorkoutHistory({
+  logs,
+  progressWorkouts,
+  t,
+}: {
+  logs: WorkoutLog[];
+  progressWorkouts: WorkoutWithExercises[];
+  t: ReturnType<typeof useTranslations<"clientApp">>;
+}) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const workoutMap = useMemo(() => {
+    const map = new Map<string, WorkoutWithExercises>();
+    for (const w of progressWorkouts) map.set(w.id, w);
+    return map;
+  }, [progressWorkouts]);
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">{t("history")}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-1">
+        {logs.slice(0, 15).map((log) => {
+          const workout = workoutMap.get(log.id);
+          const isExpanded = expandedId === log.id;
+          const hasExercises = workout && workout.exercise_logs.length > 0;
+
+          return (
+            <div key={log.id} className="border-b last:border-0">
+              <button
+                className="flex items-center justify-between w-full py-2 text-left"
+                onClick={() => setExpandedId(isExpanded ? null : log.id)}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">{log.date}</span>
+                  {log.notes && (
+                    <span className="text-xs text-muted-foreground truncate max-w-[120px]">
+                      - {log.notes}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant={log.completed ? "default" : "secondary"} className="text-xs">
+                    {log.completed ? (
+                      <>
+                        <Check className="mr-1 h-3 w-3" />
+                        {t("workoutCompleted")}
+                      </>
+                    ) : (
+                      t("workoutInProgress")
+                    )}
+                  </Badge>
+                  {hasExercises && (
+                    isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
+                  )}
+                </div>
+              </button>
+              {isExpanded && hasExercises && (
+                <div className="pb-3 pl-2 space-y-1">
+                  {workout.exercise_logs.map((el) => (
+                    <div key={el.id} className="flex items-center justify-between text-xs text-muted-foreground py-0.5">
+                      <span className="font-medium text-foreground">
+                        {el.routine_exercise?.exercise?.name ?? t("exerciseDetails")}
+                      </span>
+                      <span>
+                        {el.sets_completed}s
+                        {el.reps_completed ? ` x ${el.reps_completed}` : ""}
+                        {el.weight_used ? ` @ ${el.weight_used}kg` : ""}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
   );
 }

@@ -1,5 +1,25 @@
 import { createClient } from "@/lib/supabase/client";
 
+export interface DailyActivity {
+  day: string;
+  workouts: number;
+}
+
+export interface ClientComplianceRow {
+  clientId: string;
+  name: string;
+  workoutsThisWeek: number;
+  assignedDays: number;
+  compliancePercent: number;
+  lastWorkoutDate: string | null;
+}
+
+export interface AtRiskClient {
+  clientId: string;
+  name: string;
+  daysSinceLastWorkout: number;
+}
+
 export interface DashboardStats {
   activeClients: number;
   totalRoutines: number;
@@ -13,6 +33,9 @@ export interface DashboardStats {
     messagesSent: number;
   };
   recentActivity: ActivityItem[];
+  weeklyActivity: DailyActivity[];
+  clientCompliance: ClientComplianceRow[];
+  clientsAtRisk: AtRiskClient[];
 }
 
 export interface ActivityItem {
@@ -53,11 +76,14 @@ export const dashboardService = {
       recentClientsResult,
       recentRoutinesResult,
       recentAssignmentsResult,
-      // New queries
       _pendingClientsResult,
       weekWorkoutsResult,
       pendingReviewsResult,
       newClientsWeekResult,
+      // Analytics queries
+      activeClientsListResult,
+      activeClientRoutinesResult,
+      allRecentLogsResult,
     ] = await Promise.all([
       // Active clients count
       supabase
@@ -101,10 +127,10 @@ export const dashboardService = {
         .select("*", { count: "exact", head: true })
         .eq("trainer_id", user.id)
         .eq("status", "pending"),
-      // Week workout logs (all clients of this trainer)
+      // Week workout logs (all clients of this trainer) - include date for chart
       supabase
         .from("workout_logs")
-        .select("id, client_id, client_routine:client_routines!inner(trainer_id)")
+        .select("id, client_id, date, client_routine:client_routines!inner(trainer_id)")
         .eq("client_routine.trainer_id" as string, user.id)
         .gte("date", mondayISO),
       // Pending reviews: active routines assigned > 28 days ago
@@ -120,6 +146,25 @@ export const dashboardService = {
         .select("*", { count: "exact", head: true })
         .eq("trainer_id", user.id)
         .gte("created_at", mondayISO),
+      // Active clients with names (for compliance table)
+      supabase
+        .from("clients")
+        .select("id, full_name")
+        .eq("trainer_id", user.id)
+        .eq("status", "active"),
+      // Active client_routines with days_per_week
+      supabase
+        .from("client_routines")
+        .select("client_id, routine:routines(days_per_week)")
+        .eq("trainer_id", user.id)
+        .eq("status", "active"),
+      // All recent workout logs (last 90 days) for last workout dates
+      supabase
+        .from("workout_logs")
+        .select("client_id, date, client_routine:client_routines!inner(trainer_id)")
+        .eq("client_routine.trainer_id" as string, user.id)
+        .gte("date", new Date(Date.now() - 90 * 86400000).toISOString().split("T")[0])
+        .order("date", { ascending: false }),
     ]);
 
     const activeClients = clientsResult.count ?? 0;
@@ -199,6 +244,80 @@ export const dashboardService = {
 
     activity.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
+    // --- Analytics: Weekly Activity Chart ---
+    const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const dayCounts: Record<string, number> = {};
+    for (const name of dayNames) dayCounts[name] = 0;
+
+    for (const log of weekWorkouts) {
+      const d = new Date(log.date);
+      const jsDay = d.getDay(); // 0=Sun
+      const idx = jsDay === 0 ? 6 : jsDay - 1; // Convert to 0=Mon
+      dayCounts[dayNames[idx]]++;
+    }
+
+    const weeklyActivity: DailyActivity[] = dayNames.map((day) => ({
+      day,
+      workouts: dayCounts[day],
+    }));
+
+    // --- Analytics: Client Compliance ---
+    const activeClientsList = activeClientsListResult.data ?? [];
+
+    // Map client_id -> assigned days per week
+    const daysPerWeekMap: Record<string, number> = {};
+    for (const cr of activeClientRoutinesResult.data ?? []) {
+      const dpw = (cr.routine as unknown as { days_per_week: number } | null)?.days_per_week ?? 0;
+      const cid = cr.client_id as string;
+      daysPerWeekMap[cid] = Math.max(daysPerWeekMap[cid] ?? 0, dpw);
+    }
+
+    // Map client_id -> workouts this week (from weekWorkouts already loaded)
+    const weekWorkoutsPerClient: Record<string, number> = {};
+    for (const log of weekWorkouts) {
+      const cid = log.client_id as string;
+      weekWorkoutsPerClient[cid] = (weekWorkoutsPerClient[cid] ?? 0) + 1;
+    }
+
+    // Map client_id -> last workout date (from allRecentLogs)
+    const lastWorkoutMap: Record<string, string> = {};
+    for (const log of allRecentLogsResult.data ?? []) {
+      const cid = log.client_id as string;
+      if (!lastWorkoutMap[cid]) lastWorkoutMap[cid] = log.date;
+    }
+
+    const clientCompliance: ClientComplianceRow[] = activeClientsList
+      .map((client) => {
+        const assigned = daysPerWeekMap[client.id] ?? 0;
+        const done = weekWorkoutsPerClient[client.id] ?? 0;
+        const pct = assigned > 0 ? Math.round((done / assigned) * 100) : done > 0 ? 100 : 0;
+        return {
+          clientId: client.id,
+          name: client.full_name,
+          workoutsThisWeek: done,
+          assignedDays: assigned,
+          compliancePercent: pct,
+          lastWorkoutDate: lastWorkoutMap[client.id] ?? null,
+        };
+      })
+      .sort((a, b) => b.compliancePercent - a.compliancePercent);
+
+    // --- Analytics: Clients at Risk (7+ days without workout) ---
+    const now = Date.now();
+    const clientsAtRisk: AtRiskClient[] = activeClientsList
+      .map((client) => {
+        const lastDate = lastWorkoutMap[client.id];
+        if (!lastDate) return { clientId: client.id, name: client.full_name, daysSinceLastWorkout: -1 };
+        const days = Math.floor((now - new Date(lastDate).getTime()) / 86400000);
+        return { clientId: client.id, name: client.full_name, daysSinceLastWorkout: days };
+      })
+      .filter((c) => c.daysSinceLastWorkout === -1 || c.daysSinceLastWorkout >= 7)
+      .sort((a, b) => {
+        if (a.daysSinceLastWorkout === -1) return -1;
+        if (b.daysSinceLastWorkout === -1) return 1;
+        return b.daysSinceLastWorkout - a.daysSinceLastWorkout;
+      });
+
     return {
       activeClients,
       totalRoutines,
@@ -212,6 +331,9 @@ export const dashboardService = {
         messagesSent: messagesSentWeek,
       },
       recentActivity: activity.slice(0, 10),
+      weeklyActivity,
+      clientCompliance,
+      clientsAtRisk,
     };
   },
 

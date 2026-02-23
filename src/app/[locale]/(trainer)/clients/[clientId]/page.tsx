@@ -13,6 +13,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { OverviewTab } from "@/components/clients/overview-tab";
 import { SessionNotesTab } from "@/components/clients/session-notes-tab";
 import { MeasurementsTab } from "@/components/clients/measurements-tab";
+import { WorkoutsTab } from "@/components/clients/workouts-tab";
 import { ArrowLeft, Pencil, Trash2, Mail, Phone, Send, Link2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -161,6 +162,7 @@ export default function ClientDetailPage() {
           <TabsTrigger value="overview">{t("overview")}</TabsTrigger>
           <TabsTrigger value="physical">{t("physicalData")}</TabsTrigger>
           <TabsTrigger value="notes">{t("notes")}</TabsTrigger>
+          <TabsTrigger value="workouts">{t("workoutsTab")}</TabsTrigger>
           <TabsTrigger value="session-notes">{t("sessionNotes")}</TabsTrigger>
           <TabsTrigger value="measurements">{t("measurements")}</TabsTrigger>
         </TabsList>
@@ -216,6 +218,10 @@ export default function ClientDetailPage() {
               </p>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="workouts">
+          <WorkoutsTab clientId={client.id} />
         </TabsContent>
 
         <TabsContent value="session-notes">

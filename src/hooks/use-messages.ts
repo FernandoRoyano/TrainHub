@@ -65,7 +65,7 @@ export function useSendMessage() {
       conversationId: string;
       content: string;
     }) => messagesService.sendMessage(conversationId, content),
-    onSuccess: (msg) => {
+    onSuccess: (msg, variables) => {
       queryClient.setQueryData(
         ["messages", msg.conversation_id],
         (old: Message[] | undefined) => {
@@ -75,6 +75,16 @@ export function useSendMessage() {
         }
       );
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
+
+      // Fire-and-forget email notification
+      fetch("/api/notifications/unread-message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversationId: msg.conversation_id,
+          messageContent: variables.content,
+        }),
+      }).catch(() => {});
     },
     onError: () => {
       toast.error(t("sendError"));

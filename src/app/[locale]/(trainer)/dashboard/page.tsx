@@ -22,7 +22,18 @@ import {
   AlertCircle,
   CalendarCheck,
   Dumbbell,
+  AlertTriangle,
+  BarChart3,
+  CheckCircle2,
 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import Link from "next/link";
 
 const activityIcons = {
@@ -45,6 +56,7 @@ function timeAgo(timestamp: string): string {
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
+  const tCal = useTranslations("calendar");
   const { data: stats, isLoading } = useDashboardStats();
 
   if (isLoading) {
@@ -57,9 +69,27 @@ export default function DashboardPage() {
           ))}
         </div>
         <Skeleton className="h-64" />
+        <Skeleton className="h-52" />
+        <Skeleton className="h-48" />
       </div>
     );
   }
+
+  // Map day codes to translated labels for the chart
+  const dayLabelMap: Record<string, string> = {
+    Mon: tCal("weekday_mon"),
+    Tue: tCal("weekday_tue"),
+    Wed: tCal("weekday_wed"),
+    Thu: tCal("weekday_thu"),
+    Fri: tCal("weekday_fri"),
+    Sat: tCal("weekday_sat"),
+    Sun: tCal("weekday_sun"),
+  };
+
+  const chartData = (stats?.weeklyActivity ?? []).map((d) => ({
+    day: dayLabelMap[d.day] ?? d.day,
+    workouts: d.workouts,
+  }));
 
   const kpis = [
     {
@@ -248,6 +278,136 @@ export default function DashboardPage() {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">{t("noActivity")}</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Weekly Activity Chart */}
+      <Card className="border-border/50">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 text-primary" />
+            {t("weeklyActivity")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} barSize={32}>
+                <XAxis
+                  dataKey="day"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                  width={24}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: 8,
+                    fontSize: 13,
+                  }}
+                  labelStyle={{ color: "hsl(var(--foreground))" }}
+                  formatter={(value) => [value, t("workoutsLabel")]}
+                />
+                <Bar dataKey="workouts" fill="#6dbd57" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Client Compliance + Clients at Risk */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Client Compliance */}
+        {(stats?.clientCompliance?.length ?? 0) > 0 && (
+          <Card className="border-border/50">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  {t("clientCompliance")}
+                </CardTitle>
+                <Button variant="ghost" size="sm" className="text-xs" asChild>
+                  <Link href="/clients">
+                    {t("viewAllClients")} <ArrowRight className="ml-1 h-3 w-3" />
+                  </Link>
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {stats!.clientCompliance.slice(0, 8).map((client) => {
+                  const color =
+                    client.compliancePercent >= 75
+                      ? "bg-emerald-400"
+                      : client.compliancePercent >= 50
+                        ? "bg-amber-400"
+                        : "bg-rose-400";
+                  return (
+                    <div key={client.clientId} className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium truncate mr-2">{client.name}</span>
+                        <span className="text-xs text-muted-foreground shrink-0">
+                          {t("complianceRate", {
+                            done: client.workoutsThisWeek,
+                            total: client.assignedDays || "–",
+                          })}
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full rounded-full bg-muted">
+                        <div
+                          className={`h-full rounded-full ${color} transition-all duration-500`}
+                          style={{ width: `${Math.min(client.compliancePercent, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Clients at Risk */}
+        <Card className="border-border/50">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-400" />
+              {t("clientsAtRisk")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(stats?.clientsAtRisk?.length ?? 0) > 0 ? (
+              <div className="space-y-3">
+                {stats!.clientsAtRisk.slice(0, 8).map((client) => (
+                  <Link
+                    key={client.clientId}
+                    href={`/clients/${client.clientId}`}
+                    className="flex items-center justify-between gap-2 text-sm rounded-lg border p-3 hover:bg-accent/50 transition-colors"
+                  >
+                    <span className="font-medium truncate">{client.name}</span>
+                    <Badge variant="outline" className="text-rose-400 border-rose-500/20 shrink-0">
+                      {client.daysSinceLastWorkout === -1
+                        ? t("neverTrained")
+                        : t("daysSinceWorkout", { days: client.daysSinceLastWorkout })}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <CheckCircle2 className="h-8 w-8 text-emerald-400 mb-2" />
+                <p className="text-sm text-muted-foreground">{t("allClientsOnTrack")}</p>
+              </div>
             )}
           </CardContent>
         </Card>

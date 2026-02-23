@@ -98,7 +98,16 @@
     "weekSummary": "Resumen semanal",
     "workoutsThisWeek": "Entrenamientos",
     "newClientsThisWeek": "Nuevos clientes",
-    "messagesSentThisWeek": "Mensajes enviados"
+    "messagesSentThisWeek": "Mensajes enviados",
+    "weeklyActivity": "Actividad semanal",
+    "workoutsLabel": "Entrenamientos",
+    "clientCompliance": "Cumplimiento de clientes",
+    "complianceRate": "{done}/{total} dias",
+    "viewAllClients": "Ver todos",
+    "clientsAtRisk": "Clientes que necesitan atencion",
+    "daysSinceWorkout": "{days}d sin entrenar",
+    "neverTrained": "Nunca entreno",
+    "allClientsOnTrack": "Todos los clientes van al dia esta semana!"
   },
   "clients": {
     "title": "Clientes",
@@ -126,6 +135,7 @@
     "accountLinked": "Cuenta vinculada",
     "inviteSent": "Invitacion enviada",
     "inviteDescription": "Se enviara un email de invitacion al cliente para que cree su cuenta",
+    "workoutsTab": "Entrenamientos",
     "sessionNotes": "Notas de sesion",
     "measurements": "Mediciones",
     "namePlaceholder": "Juan Garcia",
@@ -492,7 +502,27 @@
     "workoutCompleteError": "Error al completar entrenamiento",
     "myNutrition": "Mi Nutricion",
     "noMealPlanAssigned": "No tienes un plan nutricional asignado",
-    "noMealPlanDescription": "Tu entrenador te asignara un plan de nutricion pronto"
+    "noMealPlanDescription": "Tu entrenador te asignara un plan de nutricion pronto",
+    "restTimer": "Temporizador de descanso",
+    "startRestTimer": "Iniciar temporizador",
+    "timerFinished": "Se acabo el tiempo!",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "reset": "Reiniciar",
+    "dismiss": "Cerrar",
+    "stopwatch": "Cronometro",
+    "repsCompleted": "Reps",
+    "workoutNotes": "Notas (opcional)",
+    "workoutNotesPlaceholder": "Como fue la sesion?",
+    "exerciseDetails": "Detalle del ejercicio",
+    "exerciseSaved": "Guardado"
+  },
+  "workouts": {
+    "noWorkoutsYet": "Sin entrenamientos registrados",
+    "exercisesLogged": "ejercicios",
+    "setsLabel": "series",
+    "repsLabel": "reps",
+    "weightLabel": "kg"
   },
   "onboarding": {
     "title": "Bienvenido a TrainHub",
@@ -541,7 +571,8 @@
     "measurementUpdated": "Medicion actualizada",
     "measurementUpdateError": "Error al actualizar medicion",
     "measurementDeleted": "Medicion eliminada",
-    "measurementDeleteError": "Error al eliminar medicion"
+    "measurementDeleteError": "Error al eliminar medicion",
+    "deleteConfirm": "Seguro que quieres eliminar esta medicion?"
   },
   "overview": {
     "assignedRoutines": "Rutinas asignadas",
@@ -825,5 +856,30 @@
     "measurementsDescription": "Empieza a trackear la transformacion!",
     "nutritionTitle": "Sin planes nutricionales",
     "nutritionDescription": "Crea planes de alimentacion para tus clientes!"
+  },
+  "emails": {
+    "welcomeSubject": "Bienvenido a TrainHub!",
+    "welcomeTitle": "Bienvenido, {name}!",
+    "welcomeBody": "Tu entrenador {trainer} te ha invitado a TrainHub. Ahora puedes ver tus rutinas, seguir tu progreso y chatear con tu entrenador.",
+    "welcomeCta": "Ver mi rutina",
+    "routineAssignedSubject": "Nueva rutina asignada",
+    "routineAssignedTitle": "Tienes una nueva rutina!",
+    "routineAssignedBody": "Hola {name}, tu entrenador te ha asignado la rutina \"{routine}\" a partir del {date}.",
+    "routineAssignedCta": "Ver rutina",
+    "mealPlanAssignedSubject": "Nuevo plan nutricional asignado",
+    "mealPlanAssignedTitle": "Tienes un nuevo plan nutricional!",
+    "mealPlanAssignedBody": "Hola {name}, tu entrenador te ha asignado el plan \"{plan}\" a partir del {date}.",
+    "mealPlanAssignedCta": "Ver plan",
+    "unreadMessageSubject": "Nuevo mensaje de tu entrenador",
+    "unreadMessageTitle": "Tienes un nuevo mensaje",
+    "unreadMessageBody": "Tu entrenador {trainer} te ha enviado un mensaje:",
+    "unreadMessageCta": "Responder ahora",
+    "weeklySummarySubject": "Tu resumen semanal de entrenamiento",
+    "weeklySummaryTitle": "Resumen semanal",
+    "weeklySummaryGreeting": "Hola {name}, aqui tienes tu semana:",
+    "weeklySummaryWorkouts": "entrenamientos completados",
+    "weeklySummaryPositive": "Gran trabajo esta semana! Sigue asi.",
+    "weeklySummaryEncourage": "Nueva semana, nueva oportunidad! Tu rutina te espera.",
+    "weeklySummaryCta": "Empezar a entrenar"
   }
 }

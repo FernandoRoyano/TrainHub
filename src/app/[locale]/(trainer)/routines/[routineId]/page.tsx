@@ -95,6 +95,7 @@ export default function RoutineDetailPage() {
           <Button
             variant="outline"
             onClick={() => duplicateRoutine.mutate(routine.id)}
+            disabled={duplicateRoutine.isPending}
           >
             <Copy className="mr-2 h-4 w-4" />
             {t("duplicate")}

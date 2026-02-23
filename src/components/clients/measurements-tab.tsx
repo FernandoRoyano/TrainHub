@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Ruler, Plus, Trash2, TrendingDown } from "lucide-react";
 
 interface BodySilhouetteProps {
@@ -113,6 +114,7 @@ export function MeasurementsTab({ clientId }: MeasurementsTabProps) {
   const deleteMeasurement = useDeleteMeasurement();
 
   const [showForm, setShowForm] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<Record<string, string>>({
     date: new Date().toISOString().split("T")[0],
   });
@@ -327,9 +329,7 @@ export function MeasurementsTab({ clientId }: MeasurementsTabProps) {
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
-                    onClick={() =>
-                      deleteMeasurement.mutate({ id: m.id, clientId })
-                    }
+                    onClick={() => setDeleteId(m.id)}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
@@ -339,6 +339,23 @@ export function MeasurementsTab({ clientId }: MeasurementsTabProps) {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => { if (!open) setDeleteId(null); }}
+        title={tc("delete")}
+        description={t("deleteConfirm")}
+        confirmLabel={tc("delete")}
+        cancelLabel={tc("cancel")}
+        isLoading={deleteMeasurement.isPending}
+        onConfirm={() => {
+          if (deleteId) {
+            deleteMeasurement.mutate({ id: deleteId, clientId }, {
+              onSuccess: () => setDeleteId(null),
+            });
+          }
+        }}
+      />
     </div>
   );
 }

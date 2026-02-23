@@ -20,6 +20,7 @@ export interface WorkoutLog {
   routine_day_id: string;
   date: string;
   completed: boolean;
+  completed_at: string | null;
   notes: string | null;
   created_at: string;
 }
@@ -182,11 +183,16 @@ export const clientAppService = {
     return data as WorkoutLog;
   },
 
-  async completeWorkout(workoutLogId: string) {
+  async completeWorkout(workoutLogId: string, notes?: string) {
     const { supabase, clientId } = await getAuthenticatedClient();
+    const updateData: Record<string, unknown> = {
+      completed: true,
+      completed_at: new Date().toISOString(),
+    };
+    if (notes !== undefined) updateData.notes = notes || null;
     const { error } = await supabase
       .from("workout_logs")
-      .update({ completed: true })
+      .update(updateData)
       .eq("id", workoutLogId)
       .eq("client_id", clientId);
     if (error) throw error;

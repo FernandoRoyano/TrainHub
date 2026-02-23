@@ -99,10 +99,21 @@ export function useAssignMealPlan() {
   return useMutation({
     mutationFn: (data: AssignMealPlanData) =>
       nutritionService.assignToClient(data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["client-meal-plans"] });
       queryClient.invalidateQueries({ queryKey: ["meal-plans"] });
       toast.success(t("mealPlanAssigned"));
+
+      // Fire-and-forget email notification
+      fetch("/api/notifications/meal-plan-assigned", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId: variables.client_id,
+          mealPlanId: variables.meal_plan_id,
+          startDate: variables.start_date,
+        }),
+      }).catch(() => {});
     },
     onError: () => {
       toast.error(t("mealPlanAssignError"));

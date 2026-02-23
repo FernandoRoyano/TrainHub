@@ -102,6 +102,7 @@ export default function MealPlanDetailPage() {
           <Button
             variant="outline"
             onClick={() => duplicateMealPlan.mutate(mealPlan.id)}
+            disabled={duplicateMealPlan.isPending}
           >
             <Copy className="mr-2 h-4 w-4" />
             {t("duplicate")}

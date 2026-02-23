@@ -45,6 +45,27 @@ export interface TimelineEvent {
   timestamp: string;
 }
 
+export interface ClientWorkoutHistoryItem {
+  id: string;
+  date: string;
+  completed: boolean;
+  completed_at: string | null;
+  notes: string | null;
+  routine_day_id: string;
+  exercise_logs: {
+    id: string;
+    sets_completed: number;
+    weight_used: number | null;
+    reps_completed: string | null;
+    routine_exercise: {
+      id: string;
+      sets: number;
+      reps: string | null;
+      exercise: { name: string } | null;
+    } | null;
+  }[];
+}
+
 export interface ClientCompliance {
   completedDays: number;
   totalDays: number;
@@ -326,6 +347,35 @@ export const clientsService = {
     );
 
     return timeline.slice(0, 10);
+  },
+
+  async getClientWorkoutHistory(clientId: string) {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    // Verify trainer owns this client
+    const { data: client } = await supabase
+      .from("clients")
+      .select("id")
+      .eq("id", clientId)
+      .eq("trainer_id", user.id)
+      .single();
+    if (!client) throw new Error("Not authorized");
+
+    const { data, error } = await supabase
+      .from("workout_logs")
+      .select(
+        "id, date, completed, completed_at, notes, routine_day_id, exercise_logs:exercise_logs(id, sets_completed, weight_used, reps_completed, routine_exercise:routine_exercises(id, sets, reps, exercise:exercises(name)))"
+      )
+      .eq("client_id", clientId)
+      .order("date", { ascending: false })
+      .limit(30);
+
+    if (error) throw error;
+    return data as unknown as ClientWorkoutHistoryItem[];
   },
 
   async getClientCompliance(clientId: string): Promise<ClientCompliance> {

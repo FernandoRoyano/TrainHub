@@ -57,8 +57,8 @@ export function useCompleteWorkout() {
   const queryClient = useQueryClient();
   const t = useTranslations("clientApp");
   return useMutation({
-    mutationFn: (workoutLogId: string) =>
-      clientAppService.completeWorkout(workoutLogId),
+    mutationFn: ({ id, notes }: { id: string; notes?: string }) =>
+      clientAppService.completeWorkout(id, notes),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["workout-logs"] });
       toast.success(t("workoutCompletedToast"));
@@ -71,6 +71,7 @@ export function useCompleteWorkout() {
 
 export function useLogExercise() {
   const queryClient = useQueryClient();
+  const t = useTranslations("clientApp");
   return useMutation({
     mutationFn: ({
       workoutLogId,
@@ -84,6 +85,7 @@ export function useLogExercise() {
       clientAppService.logExercise(workoutLogId, routineExerciseId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["exercise-logs"] });
+      toast.success(t("exerciseSaved"));
     },
   });
 }

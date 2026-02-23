@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
-import { Dumbbell, Check, Play } from "lucide-react";
+import { Dumbbell, Check, Play, Timer, Loader2 } from "lucide-react";
+import { RestTimer } from "@/components/workout/rest-timer";
+import { useRestTimerStore } from "@/stores/rest-timer-store";
 
 export default function MyRoutinePage() {
   const t = useTranslations("clientApp");
@@ -22,11 +25,14 @@ export default function MyRoutinePage() {
   const completeWorkout = useCompleteWorkout();
   const logExercise = useLogExercise();
 
+  const startCountdown = useRestTimerStore((s) => s.startCountdown);
+
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [activeWorkoutId, setActiveWorkoutId] = useState<string | null>(null);
   const [exerciseData, setExerciseData] = useState<
-    Record<string, { sets: number; weight: string }>
+    Record<string, { sets: number; weight: string; reps: string }>
   >({});
+  const [workoutNotes, setWorkoutNotes] = useState("");
 
   if (isLoading) {
     return (
@@ -71,18 +77,32 @@ export default function MyRoutinePage() {
     );
   };
 
-  const handleLogExercise = (routineExerciseId: string) => {
+  const handleLogExercise = (
+    routineExerciseId: string,
+    restSeconds?: number,
+    exerciseName?: string
+  ) => {
     const workoutId = activeWorkoutId ?? todayLog?.id;
     if (!workoutId) return;
     const data = exerciseData[routineExerciseId];
-    logExercise.mutate({
-      workoutLogId: workoutId,
-      routineExerciseId,
-      data: {
-        sets_completed: data?.sets ?? 0,
-        weight_used: data?.weight ? parseFloat(data.weight) : undefined,
+    logExercise.mutate(
+      {
+        workoutLogId: workoutId,
+        routineExerciseId,
+        data: {
+          sets_completed: data?.sets ?? 0,
+          weight_used: data?.weight ? parseFloat(data.weight) : undefined,
+          reps_completed: data?.reps || undefined,
+        },
       },
-    });
+      {
+        onSuccess: () => {
+          if (restSeconds && restSeconds > 0) {
+            startCountdown(restSeconds, exerciseName);
+          }
+        },
+      }
+    );
   };
 
   return (
@@ -111,8 +131,8 @@ export default function MyRoutinePage() {
       {activeDay && (
         <div className="space-y-3">
           {!todayLog && !activeWorkoutId ? (
-            <Button onClick={handleStartWorkout} className="w-full">
-              <Play className="mr-2 h-4 w-4" />
+            <Button onClick={handleStartWorkout} className="w-full" disabled={startWorkout.isPending}>
+              {startWorkout.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
               {t("startWorkout")}
             </Button>
           ) : todayLog?.completed ? (
@@ -123,22 +143,32 @@ export default function MyRoutinePage() {
               </Badge>
             </div>
           ) : (
-            <Button
-              variant="secondary"
-              className="w-full"
-              onClick={() => {
-                const id = activeWorkoutId ?? todayLog?.id;
-                if (id) completeWorkout.mutate(id);
-              }}
-            >
-              <Check className="mr-2 h-4 w-4" />
-              {t("completeWorkout")}
-            </Button>
+            <div className="space-y-2">
+              <Textarea
+                placeholder={t("workoutNotesPlaceholder")}
+                value={workoutNotes}
+                onChange={(e) => setWorkoutNotes(e.target.value)}
+                className="text-sm resize-none"
+                rows={2}
+              />
+              <Button
+                variant="secondary"
+                className="w-full"
+                disabled={completeWorkout.isPending}
+                onClick={() => {
+                  const id = activeWorkoutId ?? todayLog?.id;
+                  if (id) completeWorkout.mutate({ id, notes: workoutNotes || undefined });
+                }}
+              >
+                {completeWorkout.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                {t("completeWorkout")}
+              </Button>
+            </div>
           )}
 
           <div className="space-y-2">
             {activeDay.exercises.map((ex) => {
-              const exData = exerciseData[ex.id] ?? { sets: ex.sets, weight: "" };
+              const exData = exerciseData[ex.id] ?? { sets: ex.sets, weight: "", reps: ex.reps ?? "" };
               const inSuperset = ex.superset_group !== null;
 
               return (
@@ -160,9 +190,20 @@ export default function MyRoutinePage() {
                             </Badge>
                           ))}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {ex.sets}x{ex.reps} - {ex.rest_seconds}s
-                        </p>
+                        <div className="flex items-center gap-1 mt-1">
+                          <p className="text-xs text-muted-foreground">
+                            {ex.sets}x{ex.reps} - {ex.rest_seconds}s
+                          </p>
+                          {(activeWorkoutId || (todayLog && !todayLog.completed)) && ex.rest_seconds > 0 && (
+                            <button
+                              onClick={() => startCountdown(ex.rest_seconds, ex.exercise?.name)}
+                              className="text-muted-foreground hover:text-primary transition-colors"
+                              title={t("startRestTimer")}
+                            >
+                              <Timer className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </div>
 
                       {(activeWorkoutId || (todayLog && !todayLog.completed)) && (
@@ -187,6 +228,23 @@ export default function MyRoutinePage() {
                           </div>
                           <div className="text-center">
                             <label className="text-[10px] text-muted-foreground block">
+                              {t("repsCompleted")}
+                            </label>
+                            <Input
+                              type="text"
+                              value={exData.reps}
+                              onChange={(e) =>
+                                setExerciseData((prev) => ({
+                                  ...prev,
+                                  [ex.id]: { ...exData, reps: e.target.value },
+                                }))
+                              }
+                              className="h-7 w-14 text-xs text-center"
+                              placeholder={ex.reps ?? ""}
+                            />
+                          </div>
+                          <div className="text-center">
+                            <label className="text-[10px] text-muted-foreground block">
                               {t("weightUsed")}
                             </label>
                             <Input
@@ -207,9 +265,10 @@ export default function MyRoutinePage() {
                             size="sm"
                             variant="ghost"
                             className="h-7 px-2"
-                            onClick={() => handleLogExercise(ex.id)}
+                            disabled={logExercise.isPending}
+                            onClick={() => handleLogExercise(ex.id, ex.rest_seconds, ex.exercise?.name)}
                           >
-                            <Check className="h-3 w-3" />
+                            {logExercise.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
                           </Button>
                         </div>
                       )}
@@ -221,6 +280,8 @@ export default function MyRoutinePage() {
           </div>
         </div>
       )}
+
+      <RestTimer />
     </div>
   );
 }

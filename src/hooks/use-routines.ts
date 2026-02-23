@@ -99,10 +99,20 @@ export function useAssignRoutine() {
   return useMutation({
     mutationFn: (data: AssignRoutineData) =>
       routinesService.assignToClient(data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["client-routines"] });
       queryClient.invalidateQueries({ queryKey: ["routines"] });
       toast.success(t("routineAssigned"));
+
+      fetch("/api/notifications/routine-assigned", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId: variables.client_id,
+          routineId: variables.routine_id,
+          startDate: variables.start_date,
+        }),
+      }).catch(() => {});
     },
     onError: () => {
       toast.error(t("routineAssignError"));

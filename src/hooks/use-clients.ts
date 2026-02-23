@@ -11,6 +11,7 @@ import {
   type ClientFilters,
   type TimelineEvent,
   type ClientCompliance,
+  type ClientWorkoutHistoryItem,
 } from "@/services/clients.service";
 import type { ClientFormData } from "@/lib/validations/client";
 import { toast } from "sonner";
@@ -152,6 +153,15 @@ export function useClientTimeline(clientId: string) {
     queryFn: () => clientsService.getClientTimeline(clientId),
     enabled: !!clientId,
     staleTime: 2 * 60 * 1000,
+  });
+}
+
+export function useClientWorkoutHistory(clientId: string) {
+  return useQuery<ClientWorkoutHistoryItem[]>({
+    queryKey: ["client-workout-history", clientId],
+    queryFn: () => clientsService.getClientWorkoutHistory(clientId),
+    enabled: !!clientId,
+    staleTime: 60 * 1000,
   });
 }
 

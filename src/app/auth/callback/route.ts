@@ -1,5 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
+import { sendEmail } from "@/lib/email/send-email";
+import { WelcomeEmail } from "@/lib/email/templates/welcome";
+import { getEmailTranslations, getLocaleForEmail } from "@/lib/email/translations";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -20,7 +24,7 @@ export async function GET(request: Request) {
         // Try linking by email match
         const { data: client } = await supabase
           .from("clients")
-          .select("id, user_id")
+          .select("id, user_id, trainer_id, full_name")
           .eq("email", user.email)
           .is("user_id", null)
           .maybeSingle();
@@ -36,6 +40,9 @@ export async function GET(request: Request) {
             .update({ role: "client" })
             .eq("id", user.id);
 
+          // Send welcome email (non-blocking)
+          sendWelcomeEmail(user.email, client.full_name, client.trainer_id, origin).catch(() => {});
+
           return NextResponse.redirect(`${origin}/my-routine`);
         }
 
@@ -44,7 +51,7 @@ export async function GET(request: Request) {
         if (inviteToken) {
           const { data: tokenClient } = await supabase
             .from("clients")
-            .select("id")
+            .select("id, trainer_id, full_name")
             .eq("invite_token", inviteToken)
             .is("user_id", null)
             .maybeSingle();
@@ -65,6 +72,9 @@ export async function GET(request: Request) {
               .update({ role: "client" })
               .eq("id", user.id);
 
+            // Send welcome email (non-blocking)
+            sendWelcomeEmail(user.email!, tokenClient.full_name, tokenClient.trainer_id, origin).catch(() => {});
+
             return NextResponse.redirect(`${origin}/my-routine`);
           }
         }
@@ -75,4 +85,33 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.redirect(`${origin}/login`);
+}
+
+async function sendWelcomeEmail(
+  clientEmail: string,
+  clientName: string,
+  trainerId: string,
+  appOrigin: string
+) {
+  const admin = createAdminClient();
+
+  const { data: trainer } = await admin
+    .from("users")
+    .select("full_name")
+    .eq("id", trainerId)
+    .single();
+
+  const locale = getLocaleForEmail();
+  const t = getEmailTranslations(locale);
+
+  await sendEmail({
+    to: clientEmail,
+    subject: t.welcomeSubject,
+    react: WelcomeEmail({
+      clientName,
+      trainerName: trainer?.full_name || "Your trainer",
+      appUrl: `${appOrigin}/${locale}`,
+      t,
+    }),
+  });
 }

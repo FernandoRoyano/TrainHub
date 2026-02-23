@@ -2,6 +2,7 @@ import { AppSidebar } from "@/components/shared/app-sidebar";
 import { TopBar } from "@/components/shared/top-bar";
 import { OnboardingDialog } from "@/components/shared/onboarding-dialog";
 import { SectionBackground } from "@/components/shared/section-background";
+import { NavigationProgress } from "@/components/shared/navigation-progress";
 
 export default function TrainerLayout({
   children,
@@ -10,6 +11,7 @@ export default function TrainerLayout({
 }) {
   return (
     <div className="flex min-h-screen">
+      <NavigationProgress />
       <AppSidebar />
       <SectionBackground>
         <TopBar />
