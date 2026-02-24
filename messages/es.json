@@ -515,7 +515,12 @@
     "workoutNotes": "Notas (opcional)",
     "workoutNotesPlaceholder": "Como fue la sesion?",
     "exerciseDetails": "Detalle del ejercicio",
-    "exerciseSaved": "Guardado"
+    "exerciseSaved": "Guardado",
+    "editProfile": "Editar perfil",
+    "profileUpdated": "Perfil actualizado",
+    "profileUpdateError": "Error al actualizar perfil",
+    "fullName": "Nombre completo",
+    "save": "Guardar"
   },
   "workouts": {
     "noWorkoutsYet": "Sin entrenamientos registrados",

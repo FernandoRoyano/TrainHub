@@ -515,7 +515,12 @@
     "workoutNotes": "Notes (optional)",
     "workoutNotesPlaceholder": "How did it go?",
     "exerciseDetails": "Exercise details",
-    "exerciseSaved": "Saved"
+    "exerciseSaved": "Saved",
+    "editProfile": "Edit profile",
+    "profileUpdated": "Profile updated",
+    "profileUpdateError": "Error updating profile",
+    "fullName": "Full name",
+    "save": "Save"
   },
   "workouts": {
     "noWorkoutsYet": "No workouts logged yet",

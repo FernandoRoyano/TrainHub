@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 
 interface AssignRoutineDialogProps {
@@ -36,7 +37,7 @@ export function AssignRoutineDialog({
 }: AssignRoutineDialogProps) {
   const t = useTranslations("routines");
   const tc = useTranslations("common");
-  const { data: clientsData } = useClients({ status: "active" });
+  const { data: clientsData } = useClients();
   const assignRoutine = useAssignRoutine();
 
   const [clientId, setClientId] = useState("");
@@ -80,7 +81,14 @@ export function AssignRoutineDialog({
               <SelectContent>
                 {clients.map((client) => (
                   <SelectItem key={client.id} value={client.id}>
-                    {client.full_name}
+                    <span className="flex items-center gap-2">
+                      {client.full_name}
+                      {client.status !== "active" && (
+                        <Badge variant="outline" className="text-[10px] px-1 py-0">
+                          {client.status}
+                        </Badge>
+                      )}
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>

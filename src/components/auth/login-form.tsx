@@ -37,8 +37,9 @@ export function LoginForm() {
   async function onSubmit(data: LoginFormData) {
     setIsLoading(true);
     try {
-      await authService.signIn(data.email, data.password);
-      router.push("/dashboard");
+      const { user } = await authService.signIn(data.email, data.password);
+      const role = user?.user_metadata?.role;
+      router.push(role === "client" ? "/my-routine" : "/dashboard");
       router.refresh();
     } catch {
       toast.error(t("loginError"));
