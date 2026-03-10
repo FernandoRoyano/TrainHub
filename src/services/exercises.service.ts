@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { BODY_REGION_MUSCLES, MOVEMENT_PATTERN_MUSCLES } from "@/lib/constants";
 import type { ExerciseFormData } from "@/lib/validations/exercise";
 
 export interface Exercise {
@@ -37,6 +38,10 @@ export interface ExerciseFilters {
   difficulty?: string;
   category?: string;
   source?: "all" | "platform" | "mine";
+  body_region?: string;
+  movement_pattern?: string;
+  primary_muscle?: string;
+  secondary_muscle?: string;
   page?: number;
   pageSize?: number;
 }
@@ -73,6 +78,34 @@ export const exercisesService = {
       query = query.or(
         `muscle_groups.cs.{${filters.muscle_group}},primary_muscles.cs.{${filters.muscle_group}}`
       );
+    }
+
+    if (filters?.primary_muscle) {
+      query = query.contains("primary_muscles", [filters.primary_muscle]);
+    }
+
+    if (filters?.secondary_muscle) {
+      query = query.contains("secondary_muscles", [filters.secondary_muscle]);
+    }
+
+    if (filters?.body_region) {
+      const muscles = BODY_REGION_MUSCLES[filters.body_region];
+      if (muscles) {
+        const orClauses = muscles
+          .map((m) => `muscle_groups.cs.{${m}},primary_muscles.cs.{${m}}`)
+          .join(",");
+        query = query.or(orClauses);
+      }
+    }
+
+    if (filters?.movement_pattern) {
+      const muscles = MOVEMENT_PATTERN_MUSCLES[filters.movement_pattern];
+      if (muscles) {
+        const orClauses = muscles
+          .map((m) => `muscle_groups.cs.{${m}},primary_muscles.cs.{${m}}`)
+          .join(",");
+        query = query.or(orClauses);
+      }
     }
 
     if (filters?.equipment) {

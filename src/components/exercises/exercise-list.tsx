@@ -5,7 +5,14 @@ import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { useExercises, useDeleteExercise } from "@/hooks/use-exercises";
 import { useDebounce } from "@/hooks/use-debounce";
-import { MUSCLE_GROUPS, EQUIPMENT, DIFFICULTY_LEVELS, EXERCISE_CATEGORIES } from "@/lib/constants";
+import {
+  MUSCLE_GROUPS,
+  EQUIPMENT,
+  DIFFICULTY_LEVELS,
+  EXERCISE_CATEGORIES,
+  BODY_REGIONS,
+  MOVEMENT_PATTERNS,
+} from "@/lib/constants";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -103,6 +110,10 @@ export function ExerciseList() {
   const [equipment, setEquipment] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [category, setCategory] = useState("");
+  const [bodyRegion, setBodyRegion] = useState("");
+  const [movementPattern, setMovementPattern] = useState("");
+  const [primaryMuscle, setPrimaryMuscle] = useState("");
+  const [secondaryMuscle, setSecondaryMuscle] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const debouncedSearch = useDebounce(search, 300);
@@ -114,6 +125,10 @@ export function ExerciseList() {
     equipment: equipment || undefined,
     difficulty: difficulty || undefined,
     category: category || undefined,
+    body_region: bodyRegion || undefined,
+    movement_pattern: movementPattern || undefined,
+    primary_muscle: primaryMuscle || undefined,
+    secondary_muscle: secondaryMuscle || undefined,
   });
   const deleteExercise = useDeleteExercise();
 
@@ -155,6 +170,78 @@ export function ExerciseList() {
       </div>
 
       <div className="flex flex-wrap gap-2">
+        <Select value={bodyRegion} onValueChange={setBodyRegion}>
+          <SelectTrigger className="w-full sm:w-[160px]">
+            <SelectValue placeholder={t("bodyRegion")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{tc("all")}</SelectItem>
+            {BODY_REGIONS.map((br) => (
+              <SelectItem key={br} value={br}>
+                {t(`region_${br}` as Parameters<typeof t>[0])}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={movementPattern} onValueChange={setMovementPattern}>
+          <SelectTrigger className="w-full sm:w-[160px]">
+            <SelectValue placeholder={t("movementPattern")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{tc("all")}</SelectItem>
+            {MOVEMENT_PATTERNS.map((mp) => (
+              <SelectItem key={mp} value={mp}>
+                {t(`pattern_${mp}` as Parameters<typeof t>[0])}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={difficulty} onValueChange={setDifficulty}>
+          <SelectTrigger className="w-full sm:w-[160px]">
+            <SelectValue placeholder={t("difficulty")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{tc("all")}</SelectItem>
+            {DIFFICULTY_LEVELS.map((d) => (
+              <SelectItem key={d} value={d}>
+                {t(d as Parameters<typeof t>[0])}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={primaryMuscle} onValueChange={setPrimaryMuscle}>
+          <SelectTrigger className="w-full sm:w-[160px]">
+            <SelectValue placeholder={t("primaryMuscles")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{tc("all")}</SelectItem>
+            {MUSCLE_GROUPS.map((mg) => (
+              <SelectItem key={mg} value={mg}>
+                {t(`muscle_${mg}` as Parameters<typeof t>[0])}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={secondaryMuscle} onValueChange={setSecondaryMuscle}>
+          <SelectTrigger className="w-full sm:w-[160px]">
+            <SelectValue placeholder={t("secondaryMuscles")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{tc("all")}</SelectItem>
+            {MUSCLE_GROUPS.map((mg) => (
+              <SelectItem key={mg} value={mg}>
+                {t(`muscle_${mg}` as Parameters<typeof t>[0])}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
         <Select value={muscleGroup} onValueChange={setMuscleGroup}>
           <SelectTrigger className="w-full sm:w-[160px]">
             <SelectValue placeholder={t("muscleGroups")} />
@@ -178,20 +265,6 @@ export function ExerciseList() {
             {EQUIPMENT.map((eq) => (
               <SelectItem key={eq} value={eq}>
                 {t(`equip_${eq}` as Parameters<typeof t>[0])}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={difficulty} onValueChange={setDifficulty}>
-          <SelectTrigger className="w-full sm:w-[160px]">
-            <SelectValue placeholder={t("difficulty")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{tc("all")}</SelectItem>
-            {DIFFICULTY_LEVELS.map((d) => (
-              <SelectItem key={d} value={d}>
-                {t(d as Parameters<typeof t>[0])}
               </SelectItem>
             ))}
           </SelectContent>

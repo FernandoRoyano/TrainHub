@@ -269,7 +269,17 @@
     "force_pull": "Tiron",
     "force_static": "Estatico",
     "images": "Imagenes",
-    "noImages": "Sin imagenes"
+    "noImages": "Sin imagenes",
+    "bodyRegion": "Region corporal",
+    "movementPattern": "Patron de movimiento",
+    "region_upper_body": "Tren superior",
+    "region_lower_body": "Tren inferior",
+    "region_core": "Core",
+    "pattern_push": "Empuje",
+    "pattern_pull": "Traccion",
+    "pattern_hip_dominant": "Dominante de cadera",
+    "pattern_knee_dominant": "Dominante de rodilla",
+    "pattern_core": "Core"
   },
   "routines": {
     "title": "Rutinas",

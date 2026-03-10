@@ -269,7 +269,17 @@
     "force_pull": "Pull",
     "force_static": "Static",
     "images": "Images",
-    "noImages": "No images"
+    "noImages": "No images",
+    "bodyRegion": "Body region",
+    "movementPattern": "Movement pattern",
+    "region_upper_body": "Upper body",
+    "region_lower_body": "Lower body",
+    "region_core": "Core",
+    "pattern_push": "Push",
+    "pattern_pull": "Pull",
+    "pattern_hip_dominant": "Hip dominant",
+    "pattern_knee_dominant": "Knee dominant",
+    "pattern_core": "Core"
   },
   "routines": {
     "title": "Routines",
