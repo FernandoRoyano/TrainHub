@@ -158,7 +158,9 @@
     "lastActiveNever": "Sin actividad",
     "sendMessage": "Enviar mensaje",
     "assignRoutine": "Asignar rutina",
-    "viewDetails": "Ver detalle"
+    "viewDetails": "Ver detalle",
+    "clientLimit": "{count}/{max} clientes usados",
+    "upgradeNeeded": "Mejora tu plan"
   },
   "sessionNotes": {
     "title": "Notas de sesion",
@@ -472,7 +474,27 @@
     "passwordMismatch": "Las contrasenas no coinciden",
     "passwordTooShort": "La contrasena debe tener al menos 6 caracteres",
     "specialty": "Especialidad",
-    "specialtyPlaceholder": "Ej: Fuerza, CrossFit, Yoga..."
+    "specialtyPlaceholder": "Ej: Fuerza, CrossFit, Yoga...",
+    "subscription": "Suscripcion",
+    "currentPlan": "Plan actual",
+    "freePlan": "Gratis",
+    "proPlan": "Pro",
+    "elitePlan": "Elite",
+    "upgradePlan": "Mejorar plan",
+    "manageBilling": "Gestionar facturacion",
+    "subscriptionActive": "Activa",
+    "subscriptionCanceled": "Cancelada",
+    "subscriptionPastDue": "Pago pendiente",
+    "subscriptionTrialing": "Prueba",
+    "renewsOn": "Se renueva el {date}",
+    "cancelsOn": "Se cancela el {date}",
+    "clientLimit": "{count}/{max} clientes",
+    "clientLimitFree": "Hasta 3 clientes",
+    "clientLimitPro": "Hasta 25 clientes",
+    "clientLimitElite": "Clientes ilimitados",
+    "upgradeNeeded": "Mejora tu plan para agregar mas clientes",
+    "subscriptionSuccess": "Suscripcion activada correctamente!",
+    "subscriptionCancelled": "Se cancelo el proceso de suscripcion"
   },
   "clientApp": {
     "myRoutine": "Mi Rutina",

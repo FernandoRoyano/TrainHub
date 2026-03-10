@@ -158,7 +158,9 @@
     "lastActiveNever": "No activity",
     "sendMessage": "Send message",
     "assignRoutine": "Assign routine",
-    "viewDetails": "View details"
+    "viewDetails": "View details",
+    "clientLimit": "{count}/{max} clients used",
+    "upgradeNeeded": "Upgrade your plan"
   },
   "sessionNotes": {
     "title": "Session notes",
@@ -472,7 +474,27 @@
     "passwordMismatch": "Passwords do not match",
     "passwordTooShort": "Password must be at least 6 characters",
     "specialty": "Specialty",
-    "specialtyPlaceholder": "E.g., Strength, CrossFit, Yoga..."
+    "specialtyPlaceholder": "E.g., Strength, CrossFit, Yoga...",
+    "subscription": "Subscription",
+    "currentPlan": "Current plan",
+    "freePlan": "Free",
+    "proPlan": "Pro",
+    "elitePlan": "Elite",
+    "upgradePlan": "Upgrade plan",
+    "manageBilling": "Manage billing",
+    "subscriptionActive": "Active",
+    "subscriptionCanceled": "Canceled",
+    "subscriptionPastDue": "Past due",
+    "subscriptionTrialing": "Trial",
+    "renewsOn": "Renews on {date}",
+    "cancelsOn": "Cancels on {date}",
+    "clientLimit": "{count}/{max} clients",
+    "clientLimitFree": "Up to 3 clients",
+    "clientLimitPro": "Up to 25 clients",
+    "clientLimitElite": "Unlimited clients",
+    "upgradeNeeded": "Upgrade to add more clients",
+    "subscriptionSuccess": "Subscription activated successfully!",
+    "subscriptionCancelled": "Subscription checkout was cancelled"
   },
   "clientApp": {
     "myRoutine": "My Routine",

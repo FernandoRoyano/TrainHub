@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useClients, useDeleteClient, useClientsActivity } from "@/hooks/use-clients";
+import { useSubscription } from "@/hooks/use-subscription";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +30,7 @@ import {
   MessageCircle,
   ClipboardList,
   Eye,
+  AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -84,6 +86,7 @@ export function ClientList() {
     status,
   });
   const deleteClient = useDeleteClient();
+  const { data: sub } = useSubscription();
 
   const clients = data?.data ?? [];
 
@@ -99,13 +102,36 @@ export function ClientList() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <Button asChild>
-          <Link href="/clients/new">
-            <UserPlus className="mr-2 h-4 w-4" />
-            {t("addClient")}
-          </Link>
-        </Button>
+        {sub?.canAddClient !== false ? (
+          <Button asChild>
+            <Link href="/clients/new">
+              <UserPlus className="mr-2 h-4 w-4" />
+              {t("addClient")}
+            </Link>
+          </Button>
+        ) : (
+          <Button asChild variant="outline">
+            <Link href="/settings">
+              <UserPlus className="mr-2 h-4 w-4" />
+              {t("addClient")}
+            </Link>
+          </Button>
+        )}
       </div>
+
+      {/* Subscription limit warning */}
+      {sub && !sub.canAddClient && (
+        <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm">
+          <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+          <span className="text-muted-foreground">
+            {t("clientLimit", { count: sub.activeClientCount, max: sub.clientLimit })}
+            {" — "}
+            <Link href="/settings" className="text-primary underline">
+              {t("upgradeNeeded")}
+            </Link>
+          </span>
+        </div>
+      )}
 
       {/* Search + Filters */}
       <div className="flex flex-col sm:flex-row gap-3">

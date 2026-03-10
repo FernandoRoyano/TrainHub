@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { toast } from "sonner";
 import { User, Languages, Lock } from "lucide-react";
+import { SubscriptionCard } from "@/components/settings/subscription-card";
 
 export default function SettingsPage() {
   const t = useTranslations("settings");
@@ -106,6 +107,9 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 max-w-2xl">
       <h1 className="text-2xl font-bold">{t("title")}</h1>
+
+      {/* Subscription */}
+      <SubscriptionCard />
 
       {/* Profile */}
       <Card>
