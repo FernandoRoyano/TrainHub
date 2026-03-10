@@ -72,7 +72,8 @@
     "logout": "Cerrar sesion",
     "trainer": "Entrenador",
     "nutrition": "Nutricion",
-    "myNutrition": "Mi Nutricion"
+    "myNutrition": "Mi Nutricion",
+    "analytics": "Analiticas"
   },
   "dashboard": {
     "title": "Panel de control",
@@ -934,5 +935,24 @@
     "weeklySummaryPositive": "Gran trabajo esta semana! Sigue asi.",
     "weeklySummaryEncourage": "Nueva semana, nueva oportunidad! Tu rutina te espera.",
     "weeklySummaryCta": "Empezar a entrenar"
+  },
+  "analytics": {
+    "title": "Analiticas",
+    "last30days": "Ultimos 30 dias",
+    "last90days": "Ultimos 90 dias",
+    "last6months": "Ultimos 6 meses",
+    "lastYear": "Ultimo ano",
+    "weekOverWeek": "Semana a semana",
+    "sessions": "Sesiones",
+    "activeClients": "Clientes activos",
+    "volumeKg": "Volumen (kg)",
+    "clientGrowth": "Crecimiento de clientes",
+    "totalClients": "Total de clientes",
+    "retentionRate": "Tasa de retencion",
+    "sessionsTrend": "Tendencia de sesiones",
+    "clientDistribution": "Distribucion de clientes",
+    "topExercises": "Ejercicios populares",
+    "needMoreData": "Aun no hay suficientes datos. Las analiticas apareceran cuando tus clientes entrenen.",
+    "reps": "reps"
   }
 }

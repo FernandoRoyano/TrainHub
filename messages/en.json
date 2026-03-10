@@ -72,7 +72,8 @@
     "logout": "Log out",
     "trainer": "Trainer",
     "nutrition": "Nutrition",
-    "myNutrition": "My Nutrition"
+    "myNutrition": "My Nutrition",
+    "analytics": "Analytics"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -934,5 +935,24 @@
     "weeklySummaryPositive": "Great work this week! Keep the momentum going.",
     "weeklySummaryEncourage": "New week, new opportunity! Your routine is waiting for you.",
     "weeklySummaryCta": "Start training"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "last30days": "Last 30 days",
+    "last90days": "Last 90 days",
+    "last6months": "Last 6 months",
+    "lastYear": "Last year",
+    "weekOverWeek": "Week over week",
+    "sessions": "Sessions",
+    "activeClients": "Active clients",
+    "volumeKg": "Volume (kg)",
+    "clientGrowth": "Client growth",
+    "totalClients": "Total clients",
+    "retentionRate": "Retention rate",
+    "sessionsTrend": "Sessions trend",
+    "clientDistribution": "Client distribution",
+    "topExercises": "Top exercises",
+    "needMoreData": "Not enough data yet. Analytics will appear as your clients train.",
+    "reps": "reps"
   }
 }

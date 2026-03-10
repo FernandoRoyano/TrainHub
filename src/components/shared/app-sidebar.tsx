@@ -16,6 +16,7 @@ import {
   UtensilsCrossed,
   MessageSquare,
   CalendarDays,
+  BarChart3,
   Settings,
   LogOut,
   ChevronLeft,
@@ -32,6 +33,7 @@ const navItems = [
   { key: "nutrition", href: "/nutrition", icon: UtensilsCrossed, badgeKey: null },
   { key: "messages", href: "/messages", icon: MessageSquare, badgeKey: "unreadMessages" as const },
   { key: "calendar", href: "/calendar", icon: CalendarDays, badgeKey: null },
+  { key: "analytics", href: "/analytics", icon: BarChart3, badgeKey: null },
   { key: "settings", href: "/settings", icon: Settings, badgeKey: null },
 ] as const;
 
