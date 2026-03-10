@@ -977,5 +977,32 @@
     "emptyDescription": "Create reusable templates to speed up routine creation for your clients.",
     "templateUsed": "Routine created from template",
     "templateUseError": "Error creating routine from template"
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "nav": {
+      "dashboard": "Dashboard",
+      "users": "Users"
+    },
+    "backToApp": "Back to TrainHub",
+    "totalUsers": "Total users",
+    "totalTrainers": "Trainers",
+    "totalClients": "Clients",
+    "totalRoutines": "Routines",
+    "totalExercises": "Exercises",
+    "paidSubscriptions": "Paid subscriptions",
+    "recentUsers": "Recent users",
+    "usersTitle": "User Management",
+    "allRoles": "All roles",
+    "user": "User",
+    "role": "Role",
+    "tier": "Tier",
+    "joined": "Joined",
+    "changeRole": "Change role",
+    "changeRoleTo": "Change to {role}",
+    "changeRoleConfirm": "Are you sure you want to change {name}'s role to {role}?",
+    "roleUpdated": "Role updated successfully",
+    "roleUpdateError": "Error updating role",
+    "showingUsers": "Showing {from}-{to} of {total} users"
   }
 }

@@ -977,5 +977,32 @@
     "emptyDescription": "Crea plantillas reutilizables para agilizar la creacion de rutinas para tus clientes.",
     "templateUsed": "Rutina creada desde plantilla",
     "templateUseError": "Error al crear rutina desde plantilla"
+  },
+  "admin": {
+    "title": "Panel de Administracion",
+    "nav": {
+      "dashboard": "Dashboard",
+      "users": "Usuarios"
+    },
+    "backToApp": "Volver a TrainHub",
+    "totalUsers": "Usuarios totales",
+    "totalTrainers": "Entrenadores",
+    "totalClients": "Clientes",
+    "totalRoutines": "Rutinas",
+    "totalExercises": "Ejercicios",
+    "paidSubscriptions": "Suscripciones activas",
+    "recentUsers": "Usuarios recientes",
+    "usersTitle": "Gestion de Usuarios",
+    "allRoles": "Todos los roles",
+    "user": "Usuario",
+    "role": "Rol",
+    "tier": "Plan",
+    "joined": "Registro",
+    "changeRole": "Cambiar rol",
+    "changeRoleTo": "Cambiar a {role}",
+    "changeRoleConfirm": "Estas seguro de cambiar el rol de {name} a {role}?",
+    "roleUpdated": "Rol actualizado correctamente",
+    "roleUpdateError": "Error al actualizar el rol",
+    "showingUsers": "Mostrando {from}-{to} de {total} usuarios"
   }
 }

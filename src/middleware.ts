@@ -58,7 +58,10 @@ export async function middleware(request: NextRequest) {
 
   // 4. Role-based route protection
   if (user) {
-    const isClient = user.user_metadata?.role === "client";
+    const role = user.user_metadata?.role;
+    const isClient = role === "client";
+    const isAdmin = role === "admin";
+    const isAdminRoute = pathname.includes("/admin");
     const isTrainerRoute =
       pathname.includes("/dashboard") ||
       pathname.includes("/clients") ||
@@ -66,13 +69,27 @@ export async function middleware(request: NextRequest) {
       pathname.includes("/routines") ||
       pathname.includes("/nutrition") ||
       pathname.includes("/messages") ||
-      pathname.includes("/settings");
+      pathname.includes("/settings") ||
+      pathname.includes("/templates") ||
+      pathname.includes("/analytics") ||
+      pathname.includes("/blocks") ||
+      pathname.includes("/calendar");
     const isClientRoute =
       pathname.includes("/my-routine") ||
       pathname.includes("/my-nutrition") ||
       pathname.includes("/my-progress") ||
       pathname.includes("/my-messages") ||
-      pathname.includes("/my-profile");
+      pathname.includes("/my-profile") ||
+      pathname.includes("/my-measurements");
+
+    // Admin routes: only admins (admins can also access trainer routes)
+    if (isAdminRoute && !isAdmin) {
+      const locale = routing.locales.find((l) => pathname.startsWith(`/${l}`));
+      const redirect = isClient ? "my-routine" : "dashboard";
+      return NextResponse.redirect(
+        new URL(locale ? `/${locale}/${redirect}` : `/${redirect}`, request.url)
+      );
+    }
 
     if (isClient && isTrainerRoute) {
       const locale = routing.locales.find((l) => pathname.startsWith(`/${l}`));

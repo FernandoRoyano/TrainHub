@@ -22,6 +22,7 @@ import {
   LogOut,
   ChevronLeft,
   Puzzle,
+  Shield,
 } from "lucide-react";
 import { useUIStore } from "@/stores/ui-store";
 
@@ -87,6 +88,19 @@ export function AppSidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1">
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 mb-2 border border-primary/20 bg-primary/5",
+              "text-primary hover:bg-primary/10",
+              !sidebarOpen && "justify-center px-2"
+            )}
+          >
+            <Shield className={cn("h-[18px] w-[18px] shrink-0")} />
+            {sidebarOpen && <span className="flex-1">Admin Panel</span>}
+          </Link>
+        )}
         {navItems.map((item) => {
           const isActive =
             pathname === item.href || pathname.startsWith(item.href + "/");
