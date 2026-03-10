@@ -73,7 +73,8 @@
     "trainer": "Trainer",
     "nutrition": "Nutrition",
     "myNutrition": "My Nutrition",
-    "analytics": "Analytics"
+    "analytics": "Analytics",
+    "templates": "Templates"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -960,5 +961,21 @@
     "installDescription": "Add TrainHub to your home screen for a faster, app-like experience.",
     "installButton": "Install app",
     "iosInstructions": "Tap the share button and select \"Add to Home Screen\" to install."
+  },
+  "templates": {
+    "title": "Program Templates",
+    "subtitle": "Reusable routine templates you can apply to any client.",
+    "createTemplate": "New template",
+    "useTemplate": "Use template",
+    "useTemplateDescription": "This will create a new routine based on this template. You can customize it before assigning to a client.",
+    "routineName": "Routine name",
+    "createRoutine": "Create routine",
+    "cancel": "Cancel",
+    "viewDetails": "View details",
+    "deleteConfirm": "Are you sure you want to delete this template? This action cannot be undone.",
+    "emptyTitle": "No templates yet",
+    "emptyDescription": "Create reusable templates to speed up routine creation for your clients.",
+    "templateUsed": "Routine created from template",
+    "templateUseError": "Error creating routine from template"
   }
 }

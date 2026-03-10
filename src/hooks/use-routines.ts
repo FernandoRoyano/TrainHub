@@ -93,6 +93,22 @@ export function useDuplicateRoutine() {
   });
 }
 
+export function useUseTemplate() {
+  const queryClient = useQueryClient();
+  const t = useTranslations("templates");
+  return useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      routinesService.useTemplate(id, name),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["routines"] });
+      toast.success(t("templateUsed"));
+    },
+    onError: () => {
+      toast.error(t("templateUseError"));
+    },
+  });
+}
+
 export function useAssignRoutine() {
   const queryClient = useQueryClient();
   const t = useTranslations("routines");

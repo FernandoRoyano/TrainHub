@@ -55,6 +55,7 @@ export interface ClientRoutine {
 export interface RoutineFilters {
   search?: string;
   difficulty?: string;
+  is_template?: boolean;
   page?: number;
   pageSize?: number;
 }
@@ -85,6 +86,10 @@ export const routinesService = {
 
     if (filters?.search) {
       query = query.ilike("name", `%${filters.search}%`);
+    }
+
+    if (filters?.is_template !== undefined) {
+      query = query.eq("is_template", filters.is_template);
     }
 
     const { data, count, error } = await query;
@@ -327,6 +332,34 @@ export const routinesService = {
       difficulty: routine.difficulty as RoutineFormData["difficulty"],
       target_gender: routine.target_gender as RoutineFormData["target_gender"],
       is_template: routine.is_template,
+      days: (routine.days ?? []).map((day) => ({
+        day_number: day.day_number,
+        name: day.name ?? "",
+        notes: day.notes ?? "",
+        exercises: day.exercises.map((ex) => ({
+          exercise_id: ex.exercise_id,
+          order_index: ex.order_index,
+          sets: ex.sets,
+          reps: ex.reps,
+          rest_seconds: ex.rest_seconds,
+          notes: ex.notes ?? "",
+          superset_group: ex.superset_group,
+        })),
+      })),
+    };
+    return this.createRoutine(formData);
+  },
+
+  async useTemplate(id: string, newName: string) {
+    const routine = await this.getRoutineById(id);
+    const formData: RoutineFormData = {
+      name: newName,
+      description: routine.description ?? "",
+      duration_weeks: routine.duration_weeks,
+      days_per_week: routine.days_per_week,
+      difficulty: routine.difficulty as RoutineFormData["difficulty"],
+      target_gender: routine.target_gender as RoutineFormData["target_gender"],
+      is_template: false,
       days: (routine.days ?? []).map((day) => ({
         day_number: day.day_number,
         name: day.name ?? "",

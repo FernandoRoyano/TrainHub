@@ -73,7 +73,8 @@
     "trainer": "Entrenador",
     "nutrition": "Nutricion",
     "myNutrition": "Mi Nutricion",
-    "analytics": "Analiticas"
+    "analytics": "Analiticas",
+    "templates": "Plantillas"
   },
   "dashboard": {
     "title": "Panel de control",
@@ -960,5 +961,21 @@
     "installDescription": "Agrega TrainHub a tu pantalla de inicio para una experiencia mas rapida.",
     "installButton": "Instalar app",
     "iosInstructions": "Toca el boton compartir y selecciona \"Agregar a pantalla de inicio\" para instalar."
+  },
+  "templates": {
+    "title": "Plantillas de Programas",
+    "subtitle": "Plantillas de rutinas reutilizables que puedes aplicar a cualquier cliente.",
+    "createTemplate": "Nueva plantilla",
+    "useTemplate": "Usar plantilla",
+    "useTemplateDescription": "Esto creara una nueva rutina basada en esta plantilla. Puedes personalizarla antes de asignarla a un cliente.",
+    "routineName": "Nombre de la rutina",
+    "createRoutine": "Crear rutina",
+    "cancel": "Cancelar",
+    "viewDetails": "Ver detalles",
+    "deleteConfirm": "Estas seguro de que quieres eliminar esta plantilla? Esta accion no se puede deshacer.",
+    "emptyTitle": "Sin plantillas aun",
+    "emptyDescription": "Crea plantillas reutilizables para agilizar la creacion de rutinas para tus clientes.",
+    "templateUsed": "Rutina creada desde plantilla",
+    "templateUseError": "Error al crear rutina desde plantilla"
   }
 }

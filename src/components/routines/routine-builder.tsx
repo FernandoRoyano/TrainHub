@@ -68,6 +68,7 @@ import type { Exercise } from "@/services/exercises.service";
 interface RoutineBuilderProps {
   mode: "create" | "edit";
   routine?: Routine;
+  defaultTemplate?: boolean;
 }
 
 /* ── Sortable exercise row ────────────────────────────────── */
@@ -264,7 +265,7 @@ function SortableExerciseItem({
 }
 
 /* ── Main builder ─────────────────────────────────────────── */
-export function RoutineBuilder({ mode, routine }: RoutineBuilderProps) {
+export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilderProps) {
   const t = useTranslations("routines");
   const te = useTranslations("exercises");
   const tc = useTranslations("common");
@@ -312,7 +313,7 @@ export function RoutineBuilder({ mode, routine }: RoutineBuilderProps) {
       difficulty: (routine?.difficulty as RoutineFormData["difficulty"]) ?? "beginner",
       target_gender:
         (routine?.target_gender as RoutineFormData["target_gender"]) ?? "unisex",
-      is_template: routine?.is_template ?? false,
+      is_template: routine?.is_template ?? defaultTemplate ?? false,
       days: [],
     },
   });
