@@ -31,5 +31,25 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "maskable",
       },
     ],
+    shortcuts: [
+      {
+        name: "Dashboard",
+        short_name: "Dashboard",
+        url: "/dashboard",
+        icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
+      },
+      {
+        name: "Clientes",
+        short_name: "Clientes",
+        url: "/clients",
+        icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
+      },
+      {
+        name: "Mensajes",
+        short_name: "Mensajes",
+        url: "/messages",
+        icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
+      },
+    ],
   };
 }

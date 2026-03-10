@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import { QueryProvider } from "@/components/shared/query-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -35,6 +36,7 @@ export default async function LocaleLayout({
           <QueryProvider>
             {children}
             <Toaster />
+            <InstallPrompt />
           </QueryProvider>
         </NextIntlClientProvider>
       </body>

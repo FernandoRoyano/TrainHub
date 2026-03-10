@@ -954,5 +954,11 @@
     "topExercises": "Top exercises",
     "needMoreData": "Not enough data yet. Analytics will appear as your clients train.",
     "reps": "reps"
+  },
+  "pwa": {
+    "installTitle": "Install TrainHub",
+    "installDescription": "Add TrainHub to your home screen for a faster, app-like experience.",
+    "installButton": "Install app",
+    "iosInstructions": "Tap the share button and select \"Add to Home Screen\" to install."
   }
 }

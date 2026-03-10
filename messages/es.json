@@ -954,5 +954,11 @@
     "topExercises": "Ejercicios populares",
     "needMoreData": "Aun no hay suficientes datos. Las analiticas apareceran cuando tus clientes entrenen.",
     "reps": "reps"
+  },
+  "pwa": {
+    "installTitle": "Instalar TrainHub",
+    "installDescription": "Agrega TrainHub a tu pantalla de inicio para una experiencia mas rapida.",
+    "installButton": "Instalar app",
+    "iosInstructions": "Toca el boton compartir y selecciona \"Agregar a pantalla de inicio\" para instalar."
   }
 }
