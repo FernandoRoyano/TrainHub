@@ -105,7 +105,6 @@ export function BlockList() {
       {blocks.length === 0 ? (
         <EmptyState
           icon={Puzzle}
-          emoji={"\uD83E\uDDE9"}
           title={te("blocksTitle")}
           description={te("blocksDescription")}
           actionLabel={t("addBlock")}

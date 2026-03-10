@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight, Check, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, Clock, CalendarDays } from "lucide-react";
 import type { CalendarEvent } from "@/services/calendar.service";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -185,7 +185,9 @@ export function SessionsCalendar() {
           <CardContent>
             {selectedEvents.length === 0 ? (
               <div className="text-center py-4">
-                <span className="text-5xl inline-block transition-transform hover:animate-bounce cursor-default">{"\uD83D\uDCC5"}</span>
+                <div className="rounded-full bg-muted p-4 inline-flex">
+                  <CalendarDays className="h-8 w-8 text-muted-foreground" />
+                </div>
                 <p className="text-sm text-muted-foreground mt-2">
                   {t("noSessions")}
                 </p>

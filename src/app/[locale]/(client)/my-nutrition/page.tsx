@@ -30,7 +30,6 @@ export default function MyNutritionPage() {
         <h1 className="text-2xl font-bold">{t("myMealPlan")}</h1>
         <EmptyState
           icon={UtensilsCrossed}
-          emoji={"\uD83E\uDD57"}
           title={tc("noMealPlanAssigned")}
           description={tc("noMealPlanDescription")}
         />

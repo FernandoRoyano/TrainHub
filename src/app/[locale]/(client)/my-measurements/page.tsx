@@ -105,7 +105,6 @@ export default function MyMeasurementsPage() {
       {!measurements || measurements.length === 0 ? (
         <EmptyState
           icon={Ruler}
-          emoji={"\uD83D\uDCCF"}
           title={te("measurementsTitle")}
           description={te("measurementsDescription")}
         />

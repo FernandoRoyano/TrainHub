@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Send } from "lucide-react";
+import { Send, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MessageThreadProps {
@@ -67,7 +67,9 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {messages && messages.length === 0 && (
           <div className="text-center py-8">
-            <span className="text-5xl inline-block transition-transform hover:animate-bounce cursor-default">{"\uD83D\uDCAC"}</span>
+            <div className="rounded-full bg-muted p-4 inline-flex">
+              <MessageCircle className="h-8 w-8 text-muted-foreground" />
+            </div>
             <p className="text-sm text-muted-foreground mt-2">
               {t("noMessages")}
             </p>

@@ -234,7 +234,6 @@ export function ExerciseList() {
       ) : exercises.length === 0 ? (
         <EmptyState
           icon={Dumbbell}
-          emoji={"\uD83D\uDCAA"}
           title={te("exercisesTitle")}
           description={te("exercisesDescription")}
           actionLabel={t("addExercise")}

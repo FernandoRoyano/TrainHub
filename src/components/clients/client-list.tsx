@@ -174,7 +174,6 @@ export function ClientList() {
       ) : clients.length === 0 ? (
         <EmptyState
           icon={Users}
-          emoji={"\uD83C\uDFCB\uFE0F"}
           title={te("clientsTitle")}
           description={te("clientsDescription")}
           actionLabel={t("addClient")}

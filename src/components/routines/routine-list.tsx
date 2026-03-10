@@ -95,7 +95,6 @@ export function RoutineList() {
       ) : routines.length === 0 ? (
         <EmptyState
           icon={Dumbbell}
-          emoji={"\uD83D\uDCCB"}
           title={te("routinesTitle")}
           description={te("routinesDescription")}
           actionLabel={t("addRoutine")}

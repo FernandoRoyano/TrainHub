@@ -33,7 +33,6 @@ export function WorkoutsTab({ clientId }: WorkoutsTabProps) {
     return (
       <EmptyState
         icon={Dumbbell}
-        emoji={"\uD83C\uDFCB\uFE0F"}
         title={t("noWorkoutsYet")}
       />
     );

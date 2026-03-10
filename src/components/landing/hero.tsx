@@ -133,7 +133,7 @@ export function Hero() {
                   <div className="flex items-center justify-between mb-5">
                     <div>
                       <h3 className="text-sm sm:text-base font-semibold text-foreground/90 text-left">
-                        {t("previewWelcome")} 👋
+                        {t("previewWelcome")}
                       </h3>
                       <p className="text-xs text-muted-foreground/70 text-left">
                         {t("previewTodaySummary")}

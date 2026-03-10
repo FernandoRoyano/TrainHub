@@ -27,7 +27,6 @@ export default function MyMessagesPage() {
         <h1 className="text-2xl font-bold mb-4">{t("title")}</h1>
         <EmptyState
           icon={MessageCircle}
-          emoji={"\uD83D\uDCAC"}
           title={te("messagesTitle")}
           description={te("messagesDescription")}
         />

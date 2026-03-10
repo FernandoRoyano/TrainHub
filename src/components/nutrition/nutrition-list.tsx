@@ -98,7 +98,6 @@ export function NutritionList() {
       ) : mealPlans.length === 0 ? (
         <EmptyState
           icon={UtensilsCrossed}
-          emoji={"\uD83E\uDD57"}
           title={te("nutritionTitle")}
           description={te("nutritionDescription")}
           actionLabel={t("addPlan")}

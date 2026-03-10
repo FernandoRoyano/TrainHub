@@ -239,7 +239,6 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
           {!routines || routines.length === 0 ? (
             <EmptyState
               icon={Dumbbell}
-              emoji={"\uD83D\uDCCB"}
               title={t("noRoutines")}
               description={t("noRoutinesDescription")}
             />

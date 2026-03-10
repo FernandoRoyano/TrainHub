@@ -139,7 +139,6 @@ export function SessionNotesTab({ clientId }: SessionNotesTabProps) {
       {!notes || notes.length === 0 ? (
         <EmptyState
           icon={StickyNote}
-          emoji={"\uD83D\uDCDD"}
           title={te("sessionNotesTitle")}
           description={te("sessionNotesDescription")}
         />
