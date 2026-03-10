@@ -2,13 +2,18 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useMyRoutine, useWorkoutLogs, useProgressData } from "@/hooks/use-client-app";
+import { useMyRoutine, useWorkoutLogs, useProgressData, useMyMeasurements } from "@/hooks/use-client-app";
 import type { WorkoutLog, WorkoutWithExercises } from "@/services/client-app.service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ProgressCharts } from "@/components/progress/progress-charts";
+import { BodyStatsChart } from "@/components/progress/body-stats-chart";
+import { PersonalRecords } from "@/components/progress/personal-records";
+import { StreakStats } from "@/components/progress/streak-stats";
+import { WeekComparison } from "@/components/progress/week-comparison";
+import { MuscleGroupChart } from "@/components/progress/muscle-group-chart";
 import { BarChart3, Calendar, Check, ChevronDown, ChevronUp } from "lucide-react";
 
 export default function MyProgressPage() {
@@ -16,6 +21,7 @@ export default function MyProgressPage() {
   const { data: routine, isLoading: routineLoading } = useMyRoutine();
   const { data: logs, isLoading: logsLoading } = useWorkoutLogs(routine?.id ?? "");
   const { data: progressWorkouts } = useProgressData(routine?.id ?? "");
+  const { data: measurements } = useMyMeasurements();
 
   const isLoading = routineLoading || logsLoading;
 
@@ -67,6 +73,11 @@ export default function MyProgressPage() {
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-48" />
+        <div className="grid grid-cols-3 gap-3">
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+        </div>
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-48 w-full" />
       </div>
@@ -77,6 +88,15 @@ export default function MyProgressPage() {
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">{t("myProgress")}</h1>
 
+      {/* Streak & consistency stats */}
+      {logs && logs.length > 0 && <StreakStats logs={logs} />}
+
+      {/* Week vs week comparison */}
+      {progressWorkouts && progressWorkouts.length > 0 && (
+        <WeekComparison workouts={progressWorkouts} />
+      )}
+
+      {/* Weekly ring */}
       {weeklyStats ? (
         <Card>
           <CardHeader className="pb-2">
@@ -120,11 +140,27 @@ export default function MyProgressPage() {
         <EmptyState icon={BarChart3} emoji={"\uD83D\uDCC5"} title={t("noWorkouts")} />
       )}
 
-      {/* Progress Charts */}
+      {/* Personal Records */}
+      {progressWorkouts && progressWorkouts.length > 0 && (
+        <PersonalRecords workouts={progressWorkouts} />
+      )}
+
+      {/* Body stats (weight/fat) */}
+      {measurements && measurements.length > 0 && (
+        <BodyStatsChart measurements={measurements} />
+      )}
+
+      {/* Muscle group distribution */}
+      {progressWorkouts && progressWorkouts.length > 0 && (
+        <MuscleGroupChart workouts={progressWorkouts} />
+      )}
+
+      {/* Progress Charts (volume, weight progression, frequency) */}
       {progressWorkouts && progressWorkouts.length > 0 && (
         <ProgressCharts workouts={progressWorkouts} />
       )}
 
+      {/* Calendar heatmap */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
@@ -152,6 +188,7 @@ export default function MyProgressPage() {
         </CardContent>
       </Card>
 
+      {/* Workout history */}
       {logs && logs.length > 0 && (
         <WorkoutHistory logs={logs} progressWorkouts={progressWorkouts ?? []} t={t} />
       )}
