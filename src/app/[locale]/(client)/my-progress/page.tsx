@@ -14,6 +14,7 @@ import { PersonalRecords } from "@/components/progress/personal-records";
 import { StreakStats } from "@/components/progress/streak-stats";
 import { WeekComparison } from "@/components/progress/week-comparison";
 import { MuscleGroupChart } from "@/components/progress/muscle-group-chart";
+import { ExerciseHistory } from "@/components/progress/exercise-history";
 import { BarChart3, Calendar, Check, ChevronDown, ChevronUp } from "lucide-react";
 
 export default function MyProgressPage() {
@@ -153,6 +154,11 @@ export default function MyProgressPage() {
       {/* Muscle group distribution */}
       {progressWorkouts && progressWorkouts.length > 0 && (
         <MuscleGroupChart workouts={progressWorkouts} />
+      )}
+
+      {/* Exercise weight history */}
+      {progressWorkouts && progressWorkouts.length > 0 && (
+        <ExerciseHistory workouts={progressWorkouts} />
       )}
 
       {/* Progress Charts (volume, weight progression, frequency) */}

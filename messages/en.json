@@ -590,6 +590,8 @@
     "selectExercise": "Select an exercise to see its progression",
     "personalRecords": "Personal Records",
     "bestWeight": "Best",
+    "lastWeight": "Last",
+    "exerciseHistory": "Exercise history",
     "noRecords": "Complete workouts to see your records",
     "streak": "Current streak",
     "bestStreak": "Best streak",
