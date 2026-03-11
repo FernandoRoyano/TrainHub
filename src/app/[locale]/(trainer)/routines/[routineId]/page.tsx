@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { AssignRoutineDialog } from "@/components/routines/assign-routine-dialog";
 import { RoutinePrintView } from "@/components/routines/routine-print-view";
+import { RoutinePdfButton } from "@/components/routines/routine-pdf-button";
 import {
   ArrowLeft,
   Pencil,
@@ -100,6 +101,7 @@ export default function RoutineDetailPage() {
             <Copy className="mr-2 h-4 w-4" />
             {t("duplicate")}
           </Button>
+          <RoutinePdfButton routine={routine} />
           <RoutinePrintView routine={routine} />
           <Button variant="outline" asChild>
             <Link href={`/routines/${routine.id}/edit`}>
