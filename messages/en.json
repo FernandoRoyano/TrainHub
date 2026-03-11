@@ -162,7 +162,8 @@
     "assignRoutine": "Assign routine",
     "viewDetails": "View details",
     "clientLimit": "{count}/{max} clients used",
-    "upgradeNeeded": "Upgrade your plan"
+    "upgradeNeeded": "Upgrade your plan",
+    "checkins": "Check-ins"
   },
   "sessionNotes": {
     "title": "Session notes",
@@ -702,7 +703,6 @@
     "navFaq": "FAQ",
     "login": "Log in",
     "startFree": "Start free",
-
     "heroBadge": "Platform for personal trainers",
     "heroTitle": "Manage your clients, routines and payments",
     "heroTitleHighlight": "from one place",
@@ -730,7 +730,6 @@
     "previewActivity2": "New payment received",
     "previewActivity3": "Nutrition plan assigned",
     "previewWeeklyProgress": "Weekly progress",
-
     "featuresLabel": "Features",
     "featuresTitle": "Everything you need for your fitness business",
     "featureRoutinesTitle": "Create professional routines in minutes, not hours",
@@ -763,7 +762,6 @@
     "featureTrackingBullet2": "Real-time chat",
     "featureTrackingBullet3": "Body measurements with history",
     "featureTrackingBullet4": "Sessions calendar",
-
     "howItWorksLabel": "How it works",
     "howItWorksTitle": "Start your business in 4 steps",
     "step1Title": "Sign up for free",
@@ -774,7 +772,6 @@
     "step3Desc": "Send them the link. They access the app and that's it.",
     "step4Title": "Train and get paid",
     "step4Desc": "Create routines, track progress and get paid automatically.",
-
     "pricingLabel": "Pricing",
     "pricingTitle": "A plan for every stage",
     "pricingSubtitle": "Start free and scale when you need to. No surprises.",
@@ -807,7 +804,6 @@
     "planBusinessFeature4": "API access",
     "planBusinessFeature5": "Advanced exports",
     "planBusinessFeature6": "Dedicated support",
-
     "faqTitle": "Frequently asked questions",
     "faqSubtitle": "Everything you need to know before getting started.",
     "faq1Question": "Can I start for free?",
@@ -822,12 +818,10 @@
     "faq5Answer": "On the Business plan you get full white label: your logo, your colors, your domain. On the Pro plan you can customize your profile and your clients' experience.",
     "faq6Question": "What if I need help?",
     "faq6Answer": "All plans include access to our documentation and community. Pro and Business plans have priority chat support. The Business plan includes dedicated support with guaranteed response time.",
-
     "metricTrainers": "Active trainers",
     "metricRoutines": "Routines created",
     "metricWorkouts": "Workouts completed",
     "metricRating": "Average rating",
-
     "problemSolutionTitle": "Tired of managing your business",
     "problemSolutionTitleHighlight": "with Excel and WhatsApp?",
     "problemLabel": "The problem",
@@ -840,14 +834,12 @@
     "solution2": "Automatic billing without chasing anyone",
     "solution3": "Real-time tracking of every workout",
     "solution4": "Professional app with your personal brand",
-
     "ctaTitle": "Start transforming your business",
     "ctaTitleHighlight": "today",
     "ctaSubtitle": "Join hundreds of trainers who already manage their clients, routines and payments from a single platform. Free to start.",
     "ctaPrimary": "Create free account",
     "ctaSecondary": "See plans",
     "ctaTrust": "No credit card · 2 free clients · Set up in 5 minutes",
-
     "footerDescription": "The all-in-one platform for personal trainers who want to grow.",
     "footerProduct": "Product",
     "footerCompany": "Company",
@@ -1016,5 +1008,22 @@
     "roleUpdated": "Role updated successfully",
     "roleUpdateError": "Error updating role",
     "showingUsers": "Showing {from}-{to} of {total} users"
+  },
+  "checkins": {
+    "title": "Weekly check-in",
+    "subtitle": "How was your week?",
+    "energy": "Energy",
+    "sleep_quality": "Sleep quality",
+    "adherence": "Adherence",
+    "stress": "Stress",
+    "notes": "Notes (optional)",
+    "notesPlaceholder": "How have you been feeling this week?",
+    "submit": "Submit check-in",
+    "submitted": "Check-in submitted",
+    "submitError": "Error submitting",
+    "alreadySubmitted": "You already submitted this week's check-in",
+    "noCheckins": "No check-ins yet",
+    "noCheckinsDesc": "This client has not submitted any weekly check-ins yet",
+    "weekOf": "Week of"
   }
 }

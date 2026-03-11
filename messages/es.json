@@ -162,7 +162,8 @@
     "assignRoutine": "Asignar rutina",
     "viewDetails": "Ver detalle",
     "clientLimit": "{count}/{max} clientes usados",
-    "upgradeNeeded": "Mejora tu plan"
+    "upgradeNeeded": "Mejora tu plan",
+    "checkins": "Check-ins"
   },
   "sessionNotes": {
     "title": "Notas de sesion",
@@ -702,7 +703,6 @@
     "navFaq": "FAQ",
     "login": "Iniciar sesion",
     "startFree": "Empezar gratis",
-
     "heroBadge": "Plataforma para entrenadores personales",
     "heroTitle": "Gestiona tus clientes, rutinas y cobros",
     "heroTitleHighlight": "desde un solo lugar",
@@ -730,7 +730,6 @@
     "previewActivity2": "Nuevo pago recibido",
     "previewActivity3": "Plan nutricional asignado",
     "previewWeeklyProgress": "Progreso semanal",
-
     "featuresLabel": "Funcionalidades",
     "featuresTitle": "Todo lo que necesitas para tu negocio fitness",
     "featureRoutinesTitle": "Crea rutinas profesionales en minutos, no en horas",
@@ -763,7 +762,6 @@
     "featureTrackingBullet2": "Chat en tiempo real",
     "featureTrackingBullet3": "Mediciones corporales con historico",
     "featureTrackingBullet4": "Calendario de sesiones",
-
     "howItWorksLabel": "Como funciona",
     "howItWorksTitle": "En 4 pasos empieza tu negocio",
     "step1Title": "Registrate gratis",
@@ -774,7 +772,6 @@
     "step3Desc": "Enviales el link. Ellos acceden a la app y listo.",
     "step4Title": "Entrena y cobra",
     "step4Desc": "Crea rutinas, haz seguimiento y cobra automaticamente.",
-
     "pricingLabel": "Precios",
     "pricingTitle": "Un plan para cada etapa",
     "pricingSubtitle": "Empieza gratis y escala cuando lo necesites. Sin sorpresas.",
@@ -807,7 +804,6 @@
     "planBusinessFeature4": "Acceso API",
     "planBusinessFeature5": "Exportacion avanzada",
     "planBusinessFeature6": "Soporte dedicado",
-
     "faqTitle": "Preguntas frecuentes",
     "faqSubtitle": "Todo lo que necesitas saber antes de empezar.",
     "faq1Question": "Puedo empezar gratis?",
@@ -822,12 +818,10 @@
     "faq5Answer": "En el plan Business tienes marca blanca completa: tu logo, tus colores, tu dominio. En el plan Pro puedes personalizar tu perfil y la experiencia de tus clientes.",
     "faq6Question": "Que pasa si necesito ayuda?",
     "faq6Answer": "Todos los planes incluyen acceso a nuestra documentacion y comunidad. Los planes Pro y Business tienen soporte prioritario por chat. El plan Business incluye soporte dedicado con tiempo de respuesta garantizado.",
-
     "metricTrainers": "Entrenadores activos",
     "metricRoutines": "Rutinas creadas",
     "metricWorkouts": "Entrenamientos completados",
     "metricRating": "Valoracion media",
-
     "problemSolutionTitle": "Cansado de gestionar tu negocio",
     "problemSolutionTitleHighlight": "con Excel y WhatsApp?",
     "problemLabel": "El problema",
@@ -840,14 +834,12 @@
     "solution2": "Cobros automaticos sin perseguir a nadie",
     "solution3": "Tracking en tiempo real de cada entrenamiento",
     "solution4": "App profesional con tu marca personal",
-
     "ctaTitle": "Empieza a transformar tu negocio",
     "ctaTitleHighlight": "hoy mismo",
     "ctaSubtitle": "Unete a cientos de entrenadores que ya gestionan sus clientes, rutinas y cobros desde una sola plataforma. Gratis para empezar.",
     "ctaPrimary": "Crear cuenta gratis",
     "ctaSecondary": "Ver planes",
     "ctaTrust": "Sin tarjeta de credito · 2 clientes gratis · Configura en 5 minutos",
-
     "footerDescription": "La plataforma todo-en-uno para entrenadores personales que quieren crecer.",
     "footerProduct": "Producto",
     "footerCompany": "Empresa",
@@ -1016,5 +1008,22 @@
     "roleUpdated": "Rol actualizado correctamente",
     "roleUpdateError": "Error al actualizar el rol",
     "showingUsers": "Mostrando {from}-{to} de {total} usuarios"
+  },
+  "checkins": {
+    "title": "Check-in semanal",
+    "subtitle": "Como fue tu semana?",
+    "energy": "Energia",
+    "sleep_quality": "Calidad de sueno",
+    "adherence": "Adherencia",
+    "stress": "Estres",
+    "notes": "Notas (opcional)",
+    "notesPlaceholder": "Como te has sentido esta semana?",
+    "submit": "Enviar check-in",
+    "submitted": "Check-in enviado",
+    "submitError": "Error al enviar",
+    "alreadySubmitted": "Ya enviaste el check-in de esta semana",
+    "noCheckins": "Sin check-ins",
+    "noCheckinsDesc": "Este cliente aun no ha enviado ningun check-in semanal",
+    "weekOf": "Semana del"
   }
 }
