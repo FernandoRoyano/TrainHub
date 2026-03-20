@@ -31,7 +31,8 @@
     "intermediate": "Intermedio",
     "advanced": "Avanzado",
     "completed": "Completado",
-    "cancelled": "Cancelado"
+    "cancelled": "Cancelado",
+    "clearFilters": "Limpiar filtros"
   },
   "auth": {
     "login": "Iniciar sesion",
@@ -240,6 +241,9 @@
     "equip_bench": "Banco",
     "equip_pull_up_bar": "Barra de dominadas",
     "equip_trx": "TRX",
+    "allMuscles": "Músculo",
+    "allEquipment": "Equipo",
+    "allCategories": "Categoría",
     "exerciseCreated": "Ejercicio creado",
     "exerciseCreateError": "Error al crear ejercicio",
     "exerciseUpdated": "Ejercicio actualizado",

@@ -31,7 +31,8 @@
     "intermediate": "Intermediate",
     "advanced": "Advanced",
     "completed": "Completed",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "clearFilters": "Clear filters"
   },
   "auth": {
     "login": "Log in",
@@ -240,6 +241,9 @@
     "equip_bench": "Bench",
     "equip_pull_up_bar": "Pull-up bar",
     "equip_trx": "TRX",
+    "allMuscles": "Muscle",
+    "allEquipment": "Equipment",
+    "allCategories": "Category",
     "exerciseCreated": "Exercise created",
     "exerciseCreateError": "Error creating exercise",
     "exerciseUpdated": "Exercise updated",
