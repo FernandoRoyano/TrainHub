@@ -52,6 +52,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const { origin } = new URL(request.url);
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || origin;
   return NextResponse.json({ link: `${appUrl}/join/${token}` });
 }

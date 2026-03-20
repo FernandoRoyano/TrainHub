@@ -21,8 +21,11 @@ export async function GET(request: Request) {
       } = await supabase.auth.getUser();
 
       if (user?.email) {
+        // Use admin client to bypass RLS (client record has no user_id yet)
+        const admin = createAdminClient();
+
         // Try linking by email match
-        const { data: client } = await supabase
+        const { data: client } = await admin
           .from("clients")
           .select("id, user_id, trainer_id, full_name")
           .eq("email", user.email)
@@ -30,12 +33,12 @@ export async function GET(request: Request) {
           .maybeSingle();
 
         if (client) {
-          await supabase
+          await admin
             .from("clients")
             .update({ user_id: user.id, status: "active", invite_token: null })
             .eq("id", client.id);
 
-          await supabase
+          await admin
             .from("users")
             .update({ role: "client" })
             .eq("id", user.id);
@@ -49,7 +52,7 @@ export async function GET(request: Request) {
         // Try linking by invite_token (shareable link flow)
         const inviteToken = user.user_metadata?.invite_token;
         if (inviteToken) {
-          const { data: tokenClient } = await supabase
+          const { data: tokenClient } = await admin
             .from("clients")
             .select("id, trainer_id, full_name")
             .eq("invite_token", inviteToken)
@@ -57,7 +60,7 @@ export async function GET(request: Request) {
             .maybeSingle();
 
           if (tokenClient) {
-            await supabase
+            await admin
               .from("clients")
               .update({
                 user_id: user.id,
@@ -67,7 +70,7 @@ export async function GET(request: Request) {
               })
               .eq("id", tokenClient.id);
 
-            await supabase
+            await admin
               .from("users")
               .update({ role: "client" })
               .eq("id", user.id);

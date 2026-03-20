@@ -42,7 +42,8 @@ export async function POST(request: Request) {
 
   // Invite via Supabase Admin
   const admin = createAdminClient();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const { origin } = new URL(request.url);
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || origin;
 
   const { error: inviteError } = await admin.auth.admin.inviteUserByEmail(
     client.email,
