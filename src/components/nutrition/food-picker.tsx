@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { useQuery } from "@tanstack/react-query";
 import { useFoods } from "@/hooks/use-foods";
 import { useDebounce } from "@/hooks/use-debounce";
 import type { Food } from "@/services/foods.service";
@@ -16,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search } from "lucide-react";
+import { Search, Database, Globe, Loader2 } from "lucide-react";
 
 interface FoodPickerProps {
   open: boolean;
@@ -24,10 +25,58 @@ interface FoodPickerProps {
   onSelect: (food: Food) => void;
 }
 
+interface UsdaFood {
+  fdcId: number;
+  name: string;
+  brandName: string | null;
+  category: string;
+  calories_per_100g: number;
+  protein_per_100g: number;
+  carbs_per_100g: number;
+  fat_per_100g: number;
+}
+
 function getFoodDisplayName(food: Food, locale: string): string {
   if (locale === "es" && food.name_es) return food.name_es;
   return food.name;
 }
+
+function useUsdaSearch(query: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["usda-search", query],
+    queryFn: async (): Promise<UsdaFood[]> => {
+      if (!query || query.length < 2) return [];
+      const res = await fetch(`/api/usda/search?q=${encodeURIComponent(query)}`);
+      if (!res.ok) throw new Error("USDA search failed");
+      const data = await res.json();
+      return data.foods ?? [];
+    },
+    enabled: enabled && query.length >= 2,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+function usdaToFood(usda: UsdaFood): Food {
+  return {
+    id: `usda-${usda.fdcId}`,
+    name: usda.name,
+    name_es: null,
+    slug: null,
+    category: usda.category,
+    calories_per_100g: usda.calories_per_100g,
+    protein_per_100g: usda.protein_per_100g,
+    carbs_per_100g: usda.carbs_per_100g,
+    fat_per_100g: usda.fat_per_100g,
+    source: "usda",
+    source_id: String(usda.fdcId),
+    is_public: true,
+    trainer_id: null,
+    created_at: "",
+    updated_at: "",
+  };
+}
+
+type Tab = "local" | "usda";
 
 export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
   const t = useTranslations("nutrition");
@@ -35,15 +84,31 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
   const locale = useLocale();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string | undefined>(undefined);
+  const [tab, setTab] = useState<Tab>("local");
   const debouncedSearch = useDebounce(search, 300);
 
-  const { data, isLoading } = useFoods({
+  const { data, isLoading: isLoadingLocal } = useFoods({
     search: debouncedSearch,
     category,
     pageSize: 100,
   });
 
-  const foods = data?.data ?? [];
+  const { data: usdaFoods, isLoading: isLoadingUsda } = useUsdaSearch(
+    debouncedSearch,
+    tab === "usda"
+  );
+
+  const localFoods = data?.data ?? [];
+  const isLoading = tab === "local" ? isLoadingLocal : isLoadingUsda;
+  const foods: Food[] =
+    tab === "local" ? localFoods : (usdaFoods ?? []).map(usdaToFood);
+
+  function handleSelect(food: Food) {
+    onSelect(food);
+    onOpenChange(false);
+    setSearch("");
+    setCategory(undefined);
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -52,10 +117,36 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
           <DialogTitle>{t("pickFood")}</DialogTitle>
         </DialogHeader>
 
+        {/* Tabs: Local / USDA */}
+        <div className="flex gap-1 p-1 bg-muted rounded-lg">
+          <Button
+            variant={tab === "local" ? "default" : "ghost"}
+            size="sm"
+            className="flex-1 h-8 text-xs gap-1.5"
+            onClick={() => setTab("local")}
+          >
+            <Database className="h-3.5 w-3.5" />
+            {t("localFoods")}
+          </Button>
+          <Button
+            variant={tab === "usda" ? "default" : "ghost"}
+            size="sm"
+            className="flex-1 h-8 text-xs gap-1.5"
+            onClick={() => setTab("usda")}
+          >
+            <Globe className="h-3.5 w-3.5" />
+            USDA
+          </Button>
+        </div>
+
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder={tc("search") + "..."}
+            placeholder={
+              tab === "usda"
+                ? t("usdaSearchPlaceholder")
+                : tc("search") + "..."
+            }
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
@@ -63,31 +154,49 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
           />
         </div>
 
-        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          <Button
-            variant={category === undefined ? "default" : "outline"}
-            size="sm"
-            className="shrink-0 h-7 text-xs px-2.5"
-            onClick={() => setCategory(undefined)}
-          >
-            {tc("all")}
-          </Button>
-          {FOOD_CATEGORIES.map((cat) => (
+        {/* Category filter - only for local */}
+        {tab === "local" && (
+          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
             <Button
-              key={cat}
-              variant={category === cat ? "default" : "outline"}
+              variant={category === undefined ? "default" : "outline"}
               size="sm"
               className="shrink-0 h-7 text-xs px-2.5"
-              onClick={() => setCategory(cat === category ? undefined : cat)}
+              onClick={() => setCategory(undefined)}
             >
-              {t(`category_${cat}` as Parameters<typeof t>[0])}
+              {tc("all")}
             </Button>
-          ))}
-        </div>
+            {FOOD_CATEGORIES.map((cat) => (
+              <Button
+                key={cat}
+                variant={category === cat ? "default" : "outline"}
+                size="sm"
+                className="shrink-0 h-7 text-xs px-2.5"
+                onClick={() =>
+                  setCategory(cat === category ? undefined : cat)
+                }
+              >
+                {t(`category_${cat}` as Parameters<typeof t>[0])}
+              </Button>
+            ))}
+          </div>
+        )}
+
+        {/* USDA hint */}
+        {tab === "usda" && debouncedSearch.length < 2 && (
+          <p className="text-xs text-muted-foreground text-center py-2">
+            {t("usdaHint")}
+          </p>
+        )}
 
         <div className="flex-1 overflow-y-auto space-y-1 min-h-0 max-h-[400px]">
           {isLoading ? (
             <div className="space-y-2">
+              {tab === "usda" && (
+                <div className="flex items-center justify-center gap-2 py-2 text-xs text-muted-foreground">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  {t("searchingUsda")}
+                </div>
+              )}
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3 p-2">
                   <div className="flex-1 space-y-1">
@@ -99,37 +208,46 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
             </div>
           ) : foods.length === 0 ? (
             <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
-              {tc("noResults")}
+              {tab === "usda" && debouncedSearch.length >= 2
+                ? t("noUsdaResults")
+                : tc("noResults")}
             </div>
           ) : (
             foods.map((food) => {
               const displayName = getFoodDisplayName(food, locale);
+              const isUsda = food.source === "usda";
 
               return (
                 <button
                   key={food.id}
                   type="button"
                   className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors text-left"
-                  onClick={() => {
-                    onSelect(food);
-                    onOpenChange(false);
-                    setSearch("");
-                    setCategory(undefined);
-                  }}
+                  onClick={() => handleSelect(food)}
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium truncate">
                       {displayName}
                     </p>
                     <div className="flex flex-wrap gap-1 mt-0.5">
-                      <Badge
-                        variant="outline"
-                        className="text-[10px] px-1 py-0"
-                      >
-                        {t(
-                          `category_${food.category}` as Parameters<typeof t>[0]
-                        )}
-                      </Badge>
+                      {isUsda ? (
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] px-1 py-0 bg-green-500/10 text-green-400 border-green-500/20"
+                        >
+                          USDA
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] px-1 py-0"
+                        >
+                          {t(
+                            `category_${food.category}` as Parameters<
+                              typeof t
+                            >[0]
+                          )}
+                        </Badge>
+                      )}
                       <Badge
                         variant="outline"
                         className="text-[10px] px-1 py-0 bg-amber-500/10 text-amber-400 border-amber-500/20"

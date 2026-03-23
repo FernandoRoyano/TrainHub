@@ -50,6 +50,7 @@
     "resetSent": "Te hemos enviado un enlace para restablecer tu contrasena",
     "loginError": "Correo o contrasena incorrectos",
     "registerSuccess": "Cuenta creada. Revisa tu correo para confirmar",
+    "confirmEmailSent": "Te enviamos un email de confirmacion. Revisa tu bandeja de entrada y haz click en el enlace para activar tu cuenta.",
     "registerError": "Error al registrarse",
     "resetEmailError": "Error al enviar el correo",
     "emailPlaceholder": "tu@email.com",
@@ -459,7 +460,12 @@
     "mealPlanDuplicated": "Plan de nutrición duplicado",
     "mealPlanDuplicateError": "Error al duplicar el plan",
     "mealPlanAssigned": "Plan de nutrición asignado",
-    "mealPlanAssignError": "Error al asignar el plan"
+    "mealPlanAssignError": "Error al asignar el plan",
+    "localFoods": "Mis alimentos",
+    "usdaSearchPlaceholder": "Buscar en USDA (en inglés)...",
+    "usdaHint": "Escribe al menos 2 caracteres para buscar en la base de datos USDA (300,000+ alimentos)",
+    "searchingUsda": "Buscando en USDA...",
+    "noUsdaResults": "No se encontraron resultados en USDA"
   },
   "messages": {
     "title": "Mensajes",

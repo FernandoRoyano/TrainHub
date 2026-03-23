@@ -50,6 +50,7 @@
     "resetSent": "We've sent you a link to reset your password",
     "loginError": "Invalid email or password",
     "registerSuccess": "Account created. Check your email to confirm",
+    "confirmEmailSent": "We sent you a confirmation email. Check your inbox and click the link to activate your account.",
     "registerError": "Error signing up",
     "resetEmailError": "Error sending email",
     "emailPlaceholder": "you@email.com",
@@ -459,7 +460,12 @@
     "mealPlanDuplicated": "Meal plan duplicated",
     "mealPlanDuplicateError": "Error duplicating meal plan",
     "mealPlanAssigned": "Meal plan assigned",
-    "mealPlanAssignError": "Error assigning meal plan"
+    "mealPlanAssignError": "Error assigning meal plan",
+    "localFoods": "My foods",
+    "usdaSearchPlaceholder": "Search USDA database...",
+    "usdaHint": "Type at least 2 characters to search the USDA database (300,000+ foods)",
+    "searchingUsda": "Searching USDA...",
+    "noUsdaResults": "No results found in USDA"
   },
   "messages": {
     "title": "Messages",

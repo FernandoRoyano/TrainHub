@@ -54,7 +54,7 @@ export function RegisterForm() {
     return (
       <div className="text-center space-y-2 py-4">
         <h3 className="text-lg font-semibold">{t("checkEmail")}</h3>
-        <p className="text-sm text-muted-foreground">{t("resetSent")}</p>
+        <p className="text-sm text-muted-foreground">{t("confirmEmailSent")}</p>
       </div>
     );
   }
