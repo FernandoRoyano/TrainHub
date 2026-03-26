@@ -15,7 +15,8 @@ import { SessionNotesTab } from "@/components/clients/session-notes-tab";
 import { MeasurementsTab } from "@/components/clients/measurements-tab";
 import { CheckinsTab } from "@/components/clients/checkins-tab";
 import { WorkoutsTab } from "@/components/clients/workouts-tab";
-import { ArrowLeft, Pencil, Trash2, Mail, Phone, Send, Link2 } from "lucide-react";
+import { ResetPasswordDialog } from "@/components/clients/reset-password-dialog";
+import { ArrowLeft, Pencil, Trash2, Mail, Phone, Send, Link2, KeyRound } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -36,6 +37,7 @@ export default function ClientDetailPage() {
   const inviteClient = useInviteClient();
   const generateLink = useGenerateInviteLink();
   const [showDelete, setShowDelete] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 
   if (isLoading) {
@@ -133,9 +135,19 @@ export default function ClientDetailPage() {
                 </Button>
               )}
               {client.user_id && (
-                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 h-8 px-3 flex items-center">
-                  {t("accountLinked")}
-                </Badge>
+                <>
+                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 h-8 px-3 flex items-center">
+                    {t("accountLinked")}
+                  </Badge>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowResetPassword(true)}
+                  >
+                    <KeyRound className="mr-1 h-3.5 w-3.5" />
+                    {t("resetPassword")}
+                  </Button>
+                </>
               )}
               <Button variant="outline" size="sm" asChild>
                 <Link href={`/clients/${client.id}/edit`}>
@@ -253,6 +265,15 @@ export default function ClientDetailPage() {
           });
         }}
       />
+
+      {client.user_id && (
+        <ResetPasswordDialog
+          open={showResetPassword}
+          onOpenChange={setShowResetPassword}
+          clientId={client.id}
+          clientName={client.full_name}
+        />
+      )}
     </div>
   );
 }
