@@ -40,8 +40,10 @@ export function ForgotPasswordForm() {
     try {
       await authService.resetPassword(data.email);
       setSuccess(true);
-    } catch {
-      toast.error(t("resetEmailError"));
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : t("resetEmailError");
+      console.error("[ForgotPassword]", message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
