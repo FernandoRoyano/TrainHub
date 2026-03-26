@@ -927,6 +927,11 @@
     "nutritionDescription": "Crea planes de alimentacion para tus clientes!"
   },
   "emails": {
+    "inviteSubject": "{trainer} te invita a TrainHub",
+    "inviteTitle": "Hola {name}!",
+    "inviteBody": "Tu entrenador {trainer} te ha invitado a unirte a TrainHub para gestionar tus rutinas, nutricion y progreso. Crea tu cuenta en menos de 1 minuto.",
+    "inviteCta": "Crear mi cuenta",
+    "inviteFooter": "Si no esperabas este email, puedes ignorarlo. Este enlace es personal y solo funciona una vez.",
     "welcomeSubject": "Bienvenido a TrainHub!",
     "welcomeTitle": "Bienvenido, {name}!",
     "welcomeBody": "Tu entrenador {trainer} te ha invitado a TrainHub. Ahora puedes ver tus rutinas, seguir tu progreso y chatear con tu entrenador.",
