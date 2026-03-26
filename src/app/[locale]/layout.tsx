@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Inter } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import { QueryProvider } from "@/components/shared/query-provider";
+import { ThemeProvider } from "@/components/shared/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
 
@@ -30,15 +31,17 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`${inter.variable} font-sans antialiased dark`}
+        className={`${inter.variable} font-sans antialiased`}
       >
-        <NextIntlClientProvider messages={messages}>
-          <QueryProvider>
-            {children}
-            <Toaster />
-            <InstallPrompt />
-          </QueryProvider>
-        </NextIntlClientProvider>
+        <ThemeProvider>
+          <NextIntlClientProvider messages={messages}>
+            <QueryProvider>
+              {children}
+              <Toaster />
+              <InstallPrompt />
+            </QueryProvider>
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
