@@ -108,6 +108,7 @@ export const PUBLIC_ROUTES = [
   "/register",
   "/forgot-password",
   "/join",
+  "/reset-password",
   "/auth/callback",
 ];
 

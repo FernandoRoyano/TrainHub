@@ -8,11 +8,17 @@ import { getEmailTranslations, getLocaleForEmail } from "@/lib/email/translation
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const type = searchParams.get("type");
   const next = searchParams.get("next") ?? "/dashboard";
 
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    // If this is a password recovery flow, redirect to reset page
+    if (!error && type === "recovery") {
+      return NextResponse.redirect(`${origin}/reset-password`);
+    }
 
     if (!error) {
       // Check if this user is a client (link user_id if needed)

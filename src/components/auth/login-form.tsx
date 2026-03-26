@@ -10,6 +10,7 @@ import { createLoginSchema, type LoginFormData } from "@/lib/validations/auth";
 import { authService } from "@/services/auth.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   Form,
   FormControl,
@@ -77,8 +78,7 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>{t("password")}</FormLabel>
               <FormControl>
-                <Input
-                  type="password"
+                <PasswordInput
                   placeholder="******"
                   autoComplete="current-password"
                   {...field}

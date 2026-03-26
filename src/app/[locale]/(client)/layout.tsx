@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Dumbbell, UtensilsCrossed, BarChart3, Ruler, MessageCircle, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NavigationProgress } from "@/components/shared/navigation-progress";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 const navItems = [
   { href: "/my-routine", icon: Dumbbell, labelKey: "myRoutine" as const },
@@ -27,6 +28,9 @@ export default function ClientLayout({
   return (
     <div className="flex flex-col min-h-screen">
       <NavigationProgress />
+      <header className="sticky top-0 z-40 flex items-center justify-end h-12 px-4">
+        <ThemeToggle />
+      </header>
       <main className="flex-1 p-4 pb-24">{children}</main>
       <nav className="fixed bottom-0 left-0 right-0 border-t border-border/50 bg-card/80 backdrop-blur-xl z-50 safe-area-bottom">
         <div className="flex justify-around py-2 px-2">
