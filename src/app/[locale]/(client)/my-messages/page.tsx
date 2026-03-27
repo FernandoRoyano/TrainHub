@@ -28,7 +28,7 @@ export default function MyMessagesPage() {
         <EmptyState
           icon={MessageCircle}
           title={te("messagesTitle")}
-          description={te("messagesDescription")}
+          description={te("clientMessagesDescription")}
         />
       </div>
     );

@@ -98,6 +98,21 @@ export function useMyMeasurements() {
   });
 }
 
+export function useAddMyMeasurement() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: Parameters<typeof clientAppService.addMyMeasurement>[0]) =>
+      clientAppService.addMyMeasurement(input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-measurements"] });
+      toast.success("Medicion guardada");
+    },
+    onError: () => {
+      toast.error("Error al guardar medicion");
+    },
+  });
+}
+
 export function useProgressData(clientRoutineId: string) {
   return useQuery({
     queryKey: ["progress-data", clientRoutineId],

@@ -266,6 +266,29 @@ export const clientAppService = {
     return data as BodyMeasurement[];
   },
 
+  async addMyMeasurement(input: Omit<BodyMeasurement, "id" | "created_at" | "client_id">) {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    const { data: client } = await supabase
+      .from("clients")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+    if (!client) throw new Error("Client not found");
+
+    const { data, error } = await supabase
+      .from("body_measurements")
+      .insert({ ...input, client_id: client.id })
+      .select()
+      .single();
+    if (error) throw error;
+    return data as BodyMeasurement;
+  },
+
   async getMyActiveMealPlan(): Promise<MealPlan | null> {
     const supabase = createClient();
     const {
