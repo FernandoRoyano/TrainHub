@@ -49,6 +49,8 @@
     "passwordUpdated": "Password updated successfully",
     "redirectingLogin": "Redirecting to login...",
     "resetError": "Error updating password",
+    "invalidOrExpiredLink": "This link has expired or is invalid. Please request a new one.",
+    "requestNewLink": "Request new link",
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
     "checkEmail": "Check your email",

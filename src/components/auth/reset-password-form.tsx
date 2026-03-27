@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -18,7 +18,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import Link from "next/link";
 
 function createResetSchema(t: (key: string) => string) {
   return z
@@ -38,7 +39,10 @@ export function ResetPasswordForm() {
   const t = useTranslations("auth");
   const tv = useTranslations("validation");
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
+  const [verified, setVerified] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const form = useForm<ResetFormData>({
@@ -48,6 +52,33 @@ export function ResetPasswordForm() {
       confirmPassword: "",
     },
   });
+
+  useEffect(() => {
+    async function verifyToken() {
+      const tokenHash = searchParams.get("token_hash");
+      const type = searchParams.get("type");
+
+      if (tokenHash && type === "recovery") {
+        const supabase = createClient();
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: "recovery",
+        });
+        if (!error) {
+          setVerified(true);
+        }
+      } else {
+        // No token in URL — check if user already has an active recovery session
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setVerified(true);
+        }
+      }
+      setIsVerifying(false);
+    }
+    verifyToken();
+  }, [searchParams]);
 
   async function onSubmit(data: ResetFormData) {
     setIsLoading(true);
@@ -65,6 +96,26 @@ export function ResetPasswordForm() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  if (isVerifying) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!verified) {
+    return (
+      <div className="text-center space-y-4 py-4">
+        <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
+        <p className="text-sm text-muted-foreground">{t("invalidOrExpiredLink")}</p>
+        <Button asChild variant="outline">
+          <Link href="/forgot-password">{t("requestNewLink")}</Link>
+        </Button>
+      </div>
+    );
   }
 
   if (success) {

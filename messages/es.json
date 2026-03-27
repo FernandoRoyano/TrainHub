@@ -49,6 +49,8 @@
     "passwordUpdated": "Contrasena actualizada correctamente",
     "redirectingLogin": "Redirigiendo al inicio de sesion...",
     "resetError": "Error al actualizar la contrasena",
+    "invalidOrExpiredLink": "Este enlace ha caducado o no es valido. Solicita uno nuevo.",
+    "requestNewLink": "Solicitar nuevo enlace",
     "noAccount": "No tienes cuenta?",
     "hasAccount": "Ya tienes cuenta?",
     "checkEmail": "Revisa tu correo electronico",
