@@ -338,7 +338,7 @@ export const clientAppService = {
 
     const { data: workouts, error } = await supabase
       .from("workout_logs")
-      .select("*, exercise_logs:exercise_logs(*, routine_exercise:routine_exercises(*, exercise:exercises(name)))")
+      .select("*, exercise_logs:exercise_logs(*, routine_exercise:routine_exercises(*, exercise:exercises(name, name_es)))")
       .eq("client_routine_id", clientRoutineId)
       .eq("client_id", clientId)
       .eq("completed", true)
@@ -353,7 +353,7 @@ export interface WorkoutWithExercises extends WorkoutLog {
   exercise_logs: (ExerciseLog & {
     routine_exercise: {
       id: string;
-      exercise: { name: string } | null;
+      exercise: { name: string; name_es: string | null } | null;
     } | null;
   })[];
 }

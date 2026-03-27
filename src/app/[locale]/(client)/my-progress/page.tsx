@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useMyRoutine, useWorkoutLogs, useProgressData, useMyMeasurements } from "@/hooks/use-client-app";
 import type { WorkoutLog, WorkoutWithExercises } from "@/services/client-app.service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,7 @@ import { BarChart3, Calendar, Check, ChevronDown, ChevronUp } from "lucide-react
 
 export default function MyProgressPage() {
   const t = useTranslations("clientApp");
+  const locale = useLocale();
   const { data: routine, isLoading: routineLoading } = useMyRoutine();
   const { data: logs, isLoading: logsLoading } = useWorkoutLogs(routine?.id ?? "");
   const { data: progressWorkouts } = useProgressData(routine?.id ?? "");
@@ -200,7 +201,7 @@ export default function MyProgressPage() {
 
       {/* Workout history */}
       {logs && logs.length > 0 && (
-        <WorkoutHistory logs={logs} progressWorkouts={progressWorkouts ?? []} t={t} />
+        <WorkoutHistory logs={logs} progressWorkouts={progressWorkouts ?? []} t={t} locale={locale} />
       )}
     </div>
   );
@@ -210,10 +211,12 @@ function WorkoutHistory({
   logs,
   progressWorkouts,
   t,
+  locale,
 }: {
   logs: WorkoutLog[];
   progressWorkouts: WorkoutWithExercises[];
   t: ReturnType<typeof useTranslations<"clientApp">>;
+  locale: string;
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -269,7 +272,7 @@ function WorkoutHistory({
                   {workout.exercise_logs.map((el) => (
                     <div key={el.id} className="flex items-center justify-between text-xs text-muted-foreground py-0.5">
                       <span className="font-medium text-foreground">
-                        {el.routine_exercise?.exercise?.name ?? t("exerciseDetails")}
+                        {(locale === "es" ? el.routine_exercise?.exercise?.name_es : null) ?? el.routine_exercise?.exercise?.name ?? t("exerciseDetails")}
                       </span>
                       <span>
                         {el.sets_completed}s

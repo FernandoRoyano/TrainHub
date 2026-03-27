@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useMyRoutine, useMyClient, useWorkoutLogs, useStartWorkout, useCompleteWorkout, useLogExercise } from "@/hooks/use-client-app";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ export default function MyRoutinePage() {
   const t = useTranslations("clientApp");
   const te = useTranslations("exercises");
   const tr = useTranslations("routines");
+  const locale = useLocale();
   const { data: routine, isLoading } = useMyRoutine();
   const { data: client } = useMyClient();
   const { data: logs } = useWorkoutLogs(routine?.id ?? "");
@@ -176,7 +177,7 @@ export default function MyRoutinePage() {
                     <div className="flex items-start gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm">
-                          {ex.exercise?.name ?? "Exercise"}
+                          {(locale === "es" ? ex.exercise?.name_es : null) ?? ex.exercise?.name ?? "Exercise"}
                         </p>
                         <div className="flex gap-1 mt-1">
                           {ex.exercise?.muscle_groups?.slice(0, 2).map((mg) => (
