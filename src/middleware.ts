@@ -42,7 +42,9 @@ export async function middleware(request: NextRequest) {
     pathname === "/" ||
     routing.locales.some((locale) => pathname === `/${locale}`);
 
-  if (user && isPublicRoute(pathname) && !isLandingPage) {
+  const isResetPassword = pathname.includes("/reset-password");
+
+  if (user && isPublicRoute(pathname) && !isLandingPage && !isResetPassword) {
     const locale = routing.locales.find((l) => pathname.startsWith(`/${l}`));
     const isClient = user.user_metadata?.role === "client";
     const homeUrl = new URL(
