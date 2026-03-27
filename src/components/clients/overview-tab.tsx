@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useClientRoutines, useCancelClientRoutine, useDeleteClientRoutine } from "@/hooks/use-routines";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import Link from "next/link";
 import { useSessionNotes } from "@/hooks/use-session-notes";
 import { useMeasurements } from "@/hooks/use-measurements";
 import { useClientTimeline, useClientCompliance } from "@/hooks/use-clients";
@@ -255,8 +256,8 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
                   key={cr.id}
                   className="flex items-center justify-between gap-2 rounded-lg border p-3"
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">
+                  <Link href={`/routines/${cr.routine_id}`} className="flex-1 min-w-0 hover:opacity-80 transition-opacity">
+                    <p className="font-medium text-sm truncate text-primary underline-offset-2 hover:underline">
                       {cr.routine?.name ?? t("unknownRoutine")}
                     </p>
                     <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
@@ -268,7 +269,7 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
                         </span>
                       )}
                     </div>
-                  </div>
+                  </Link>
                   <div className="flex items-center gap-2 shrink-0">
                     {cr.routine?.difficulty && (
                       <Badge
