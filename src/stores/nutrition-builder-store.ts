@@ -9,6 +9,10 @@ export interface BuilderFood {
   protein: number;
   carbs: number;
   fat: number;
+  calories_per_100g: number;
+  protein_per_100g: number;
+  carbs_per_100g: number;
+  fat_per_100g: number;
   order_index: number;
   notes: string;
 }
@@ -104,15 +108,26 @@ export const useNutritionBuilderStore = create<NutritionBuilderState>(
       const meal = meals[mealIndex];
       if (!meal) return;
 
+      const qty = food?.quantity ?? 100;
+      const calPer100 = food?.calories_per_100g ?? food?.calories ?? 0;
+      const proPer100 = food?.protein_per_100g ?? food?.protein ?? 0;
+      const carbPer100 = food?.carbs_per_100g ?? food?.carbs ?? 0;
+      const fatPer100 = food?.fat_per_100g ?? food?.fat ?? 0;
+      const ratio = qty / 100;
+
       const newFood: BuilderFood = {
         id: tempId(),
         name: food?.name ?? "",
-        quantity: food?.quantity ?? 100,
+        quantity: qty,
         unit: food?.unit ?? "g",
-        calories: food?.calories ?? 0,
-        protein: food?.protein ?? 0,
-        carbs: food?.carbs ?? 0,
-        fat: food?.fat ?? 0,
+        calories: Math.round(calPer100 * ratio),
+        protein: Math.round(proPer100 * ratio * 10) / 10,
+        carbs: Math.round(carbPer100 * ratio * 10) / 10,
+        fat: Math.round(fatPer100 * ratio * 10) / 10,
+        calories_per_100g: calPer100,
+        protein_per_100g: proPer100,
+        carbs_per_100g: carbPer100,
+        fat_per_100g: fatPer100,
         order_index: meal.foods.length,
         notes: food?.notes ?? "",
       };
@@ -145,10 +160,22 @@ export const useNutritionBuilderStore = create<NutritionBuilderState>(
       if (!meal) return;
 
       const newFoods = [...meal.foods];
-      newFoods[foodIndex] = {
-        ...newFoods[foodIndex],
-        ...data,
-      };
+      const current = newFoods[foodIndex];
+      let updated = { ...current, ...data };
+
+      // Recalculate macros when quantity changes and per_100g values exist
+      if (data.quantity !== undefined && current.calories_per_100g) {
+        const ratio = data.quantity / 100;
+        updated = {
+          ...updated,
+          calories: Math.round(current.calories_per_100g * ratio),
+          protein: Math.round(current.protein_per_100g * ratio * 10) / 10,
+          carbs: Math.round(current.carbs_per_100g * ratio * 10) / 10,
+          fat: Math.round(current.fat_per_100g * ratio * 10) / 10,
+        };
+      }
+
+      newFoods[foodIndex] = updated;
 
       const newMeals = [...meals];
       newMeals[mealIndex] = { ...meal, foods: newFoods };

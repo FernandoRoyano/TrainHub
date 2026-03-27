@@ -96,18 +96,25 @@ export function NutritionBuilder({ mode, mealPlan }: NutritionBuilderProps) {
         meal_type: meal.meal_type,
         order_index: meal.order_index,
         notes: meal.notes ?? "",
-        foods: meal.foods.map((food) => ({
-          id: `loaded_${food.id}`,
-          name: food.name,
-          quantity: food.quantity,
-          unit: food.unit,
-          calories: food.calories,
-          protein: food.protein,
-          carbs: food.carbs,
-          fat: food.fat,
-          order_index: food.order_index,
-          notes: food.notes ?? "",
-        })),
+        foods: meal.foods.map((food) => {
+          const ratio = food.quantity > 0 ? 100 / food.quantity : 1;
+          return {
+            id: `loaded_${food.id}`,
+            name: food.name,
+            quantity: food.quantity,
+            unit: food.unit,
+            calories: food.calories,
+            protein: food.protein,
+            carbs: food.carbs,
+            fat: food.fat,
+            calories_per_100g: Math.round(food.calories * ratio),
+            protein_per_100g: Math.round(food.protein * ratio * 10) / 10,
+            carbs_per_100g: Math.round(food.carbs * ratio * 10) / 10,
+            fat_per_100g: Math.round(food.fat * ratio * 10) / 10,
+            order_index: food.order_index,
+            notes: food.notes ?? "",
+          };
+        }),
       }));
       setMeals(builderMeals);
     } else {
@@ -510,6 +517,10 @@ export function NutritionBuilder({ mode, mealPlan }: NutritionBuilderProps) {
                         protein: food.protein_per_100g,
                         carbs: food.carbs_per_100g,
                         fat: food.fat_per_100g,
+                        calories_per_100g: food.calories_per_100g,
+                        protein_per_100g: food.protein_per_100g,
+                        carbs_per_100g: food.carbs_per_100g,
+                        fat_per_100g: food.fat_per_100g,
                       });
                     }}
                   />
