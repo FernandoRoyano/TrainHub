@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import type { Exercise } from "@/services/exercises.service";
+import { ExerciseDetailDialog } from "@/components/workout/exercise-detail-dialog";
 import { useMyRoutine, useMyClient, useWorkoutLogs, useStartWorkout, useCompleteWorkout, useLogExercise } from "@/hooks/use-client-app";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +21,7 @@ export default function MyRoutinePage() {
   const te = useTranslations("exercises");
   const tr = useTranslations("routines");
   const locale = useLocale();
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const { data: routine, isLoading } = useMyRoutine();
   const { data: client } = useMyClient();
   const { data: logs } = useWorkoutLogs(routine?.id ?? "");
@@ -176,16 +179,28 @@ export default function MyRoutinePage() {
                   <CardContent className="p-3">
                     <div className="flex items-start gap-3">
                       {ex.exercise?.thumbnail_url && (
-                        <img
-                          src={ex.exercise.thumbnail_url}
-                          alt={ex.exercise.name}
-                          className="w-12 h-12 rounded-md object-cover shrink-0"
-                        />
+                        <button
+                          type="button"
+                          onClick={() => ex.exercise && setSelectedExercise(ex.exercise as Exercise)}
+                          className="shrink-0"
+                        >
+                          <img
+                            src={ex.exercise.thumbnail_url}
+                            alt={ex.exercise.name}
+                            className="w-14 h-14 rounded-md object-cover hover:opacity-80 transition-opacity"
+                          />
+                        </button>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">
-                          {(locale === "es" ? ex.exercise?.name_es : null) ?? ex.exercise?.name ?? "Exercise"}
-                        </p>
+                        <button
+                          type="button"
+                          onClick={() => ex.exercise && setSelectedExercise(ex.exercise as Exercise)}
+                          className="text-left"
+                        >
+                          <p className="font-medium text-sm hover:text-primary transition-colors">
+                            {(locale === "es" ? ex.exercise?.name_es : null) ?? ex.exercise?.name ?? "Exercise"}
+                          </p>
+                        </button>
                         <div className="flex gap-1 mt-1">
                           {ex.exercise?.muscle_groups?.slice(0, 2).map((mg) => (
                             <Badge
@@ -289,6 +304,12 @@ export default function MyRoutinePage() {
       )}
 
       <RestTimer />
+
+      <ExerciseDetailDialog
+        exercise={selectedExercise}
+        open={!!selectedExercise}
+        onOpenChange={(open) => !open && setSelectedExercise(null)}
+      />
     </div>
   );
 }
