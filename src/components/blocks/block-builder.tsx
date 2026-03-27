@@ -12,6 +12,7 @@ import { useBlockBuilderStore } from "@/stores/block-builder-store";
 import type { ExerciseBlock } from "@/services/blocks.service";
 import { BLOCK_TYPES } from "@/lib/constants";
 import { ExercisePicker } from "@/components/routines/exercise-picker";
+import { ExerciseSidebar } from "@/components/routines/exercise-sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -148,7 +149,17 @@ export function BlockBuilder({ mode, block }: BlockBuilderProps) {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="flex gap-4">
+            {/* Exercise sidebar - 30% */}
+            <div className="hidden lg:block w-[30%] shrink-0">
+              <div className="sticky top-20">
+                <ExerciseSidebar onSelect={(exercise) => addExercise(exercise)} />
+              </div>
+            </div>
+
+            {/* Main content - 70% */}
+            <div className="flex-1 min-w-0 space-y-4">
           {/* Metadata Card */}
           <Card>
             <CardHeader>
@@ -383,11 +394,11 @@ export function BlockBuilder({ mode, block }: BlockBuilderProps) {
                 </div>
               )}
 
-              {/* Add exercise button */}
+              {/* Add exercise button - mobile only */}
               <Button
                 type="button"
                 variant="outline"
-                className="w-full"
+                className="w-full lg:hidden"
                 onClick={() => setShowPicker(true)}
               >
                 <Plus className="mr-2 h-4 w-4" />
@@ -407,6 +418,8 @@ export function BlockBuilder({ mode, block }: BlockBuilderProps) {
               )}
               {tc("save")}
             </Button>
+          </div>
+            </div>
           </div>
         </form>
       </Form>
