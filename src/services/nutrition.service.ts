@@ -5,6 +5,7 @@ export interface MealFood {
   id: string;
   meal_plan_meal_id: string;
   name: string;
+  name_es?: string | null;
   quantity: number;
   unit: string;
   calories: number;

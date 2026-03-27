@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { MealPlanMeal } from "@/services/nutrition.service";
@@ -12,6 +12,7 @@ interface MealCardProps {
 
 export function MealCard({ meal, showCalories = true }: MealCardProps) {
   const t = useTranslations("nutrition");
+  const locale = useLocale();
 
   const subtotal = meal.foods.reduce(
     (acc, food) => ({
@@ -65,7 +66,7 @@ export function MealCard({ meal, showCalories = true }: MealCardProps) {
               <tbody>
                 {meal.foods.map((food) => (
                   <tr key={food.id} className="border-b border-border/50">
-                    <td className="py-1.5 pr-3 font-medium">{food.name}</td>
+                    <td className="py-1.5 pr-3 font-medium">{(locale === "es" && food.name_es) ? food.name_es : food.name}</td>
                     <td className="py-1.5 pr-3 text-right text-muted-foreground">
                       {food.quantity}
                       {food.unit}
