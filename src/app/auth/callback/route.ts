@@ -8,11 +8,25 @@ import { getEmailTranslations, getLocaleForEmail } from "@/lib/email/translation
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type");
   const next = searchParams.get("next") ?? "/dashboard";
 
+  const supabase = await createClient();
+
+  // Handle token_hash flow (from email template with {{ .TokenHash }})
+  if (token_hash && type === "recovery") {
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash,
+      type: "recovery",
+    });
+    if (!error) {
+      return NextResponse.redirect(`${origin}/es/reset-password`);
+    }
+    return NextResponse.redirect(`${origin}/es/login`);
+  }
+
   if (code) {
-    const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     // If this is a password recovery flow, redirect to reset page
