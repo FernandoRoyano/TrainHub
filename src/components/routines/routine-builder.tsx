@@ -13,6 +13,7 @@ import type { Routine } from "@/services/routines.service";
 import type { ExerciseBlock } from "@/services/blocks.service";
 import { DIFFICULTY_LEVELS } from "@/lib/constants";
 import { ExercisePicker } from "./exercise-picker";
+import { ExerciseSidebar } from "./exercise-sidebar";
 import { BlockPicker } from "@/components/blocks/block-picker";
 import {
   DndContext,
@@ -422,6 +423,16 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="flex gap-4">
+            {/* Exercise sidebar - desktop only */}
+            <div className="hidden lg:block w-[30%] shrink-0">
+              <div className="sticky top-20">
+                <ExerciseSidebar onSelect={(exercise) => addExercise(activeDayIndex, exercise)} />
+              </div>
+            </div>
+
+            {/* Main content */}
+            <div className="flex-1 min-w-0 space-y-4">
           {/* Metadata Card */}
           <Card>
             <CardHeader>
@@ -680,7 +691,7 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                     <Button
                       type="button"
                       variant="outline"
-                      className="flex-1"
+                      className="flex-1 lg:hidden"
                       onClick={() => setShowPicker(true)}
                     >
                       <Plus className="mr-2 h-4 w-4" />
@@ -713,6 +724,8 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
               {tc("save")}
             </Button>
           </div>
+            </div>{/* end main content */}
+          </div>{/* end flex layout */}
         </form>
       </Form>
 
