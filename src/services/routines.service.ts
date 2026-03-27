@@ -431,4 +431,19 @@ export const routinesService = {
       .eq("trainer_id", user.id);
     if (error) throw error;
   },
+
+  async deleteClientRoutine(id: string) {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    const { error } = await supabase
+      .from("client_routines")
+      .delete()
+      .eq("id", id)
+      .eq("trainer_id", user.id);
+    if (error) throw error;
+  },
 };

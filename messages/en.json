@@ -681,6 +681,8 @@
     "cancelRoutine": "Cancel routine",
     "cancelRoutineConfirm": "Are you sure you want to cancel this assigned routine? The client will no longer see it.",
     "cancelRoutineConfirmLabel": "Cancel routine",
+    "deleteRoutineAssignment": "Delete assigned routine",
+    "deleteRoutineAssignmentConfirm": "This will permanently delete this routine assignment from the client. Continue?",
     "recentNotes": "Recent session notes",
     "viewAll": "View all",
     "noNotes": "No session notes",

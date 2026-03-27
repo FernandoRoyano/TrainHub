@@ -161,3 +161,20 @@ export function useCancelClientRoutine() {
     },
   });
 }
+
+export function useDeleteClientRoutine() {
+  const qc = useQueryClient();
+  const t = useTranslations("routines");
+  return useMutation({
+    mutationFn: (id: string) => routinesService.deleteClientRoutine(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["client-routines"] });
+      const { toast } = require("sonner");
+      toast.success(t("routineDeleted"));
+    },
+    onError: () => {
+      const { toast } = require("sonner");
+      toast.error(t("routineDeleteError"));
+    },
+  });
+}

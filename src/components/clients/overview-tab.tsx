@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useClientRoutines, useCancelClientRoutine } from "@/hooks/use-routines";
+import { useClientRoutines, useCancelClientRoutine, useDeleteClientRoutine } from "@/hooks/use-routines";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { useSessionNotes } from "@/hooks/use-session-notes";
 import { useMeasurements } from "@/hooks/use-measurements";
@@ -31,6 +31,7 @@ import {
   UserPlus,
   Check,
   X,
+  Trash2,
 } from "lucide-react";
 
 interface OverviewTabProps {
@@ -109,7 +110,9 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
   const { data: routines, isLoading: loadingRoutines } =
     useClientRoutines(clientId);
   const cancelRoutine = useCancelClientRoutine();
+  const deleteRoutine = useDeleteClientRoutine();
   const [cancelId, setCancelId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const { data: notes, isLoading: loadingNotes } = useSessionNotes(clientId);
   const { data: measurements, isLoading: loadingMeasurements } =
     useMeasurements(clientId);
@@ -289,8 +292,20 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
                         size="icon"
                         className="h-7 w-7 text-destructive hover:text-destructive"
                         onClick={() => setCancelId(cr.id)}
+                        title={t("cancelRoutine")}
                       >
                         <X className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                    {cr.status !== "active" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive hover:text-destructive"
+                        onClick={() => setDeleteId(cr.id)}
+                        title={t("deleteRoutineAssignment")}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     )}
                   </div>
@@ -588,6 +603,22 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
           if (cancelId) {
             cancelRoutine.mutate(cancelId, {
               onSuccess: () => setCancelId(null),
+            });
+          }
+        }}
+      />
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        title={t("deleteRoutineAssignment")}
+        description={t("deleteRoutineAssignmentConfirm")}
+        confirmLabel={tc("delete")}
+        cancelLabel={tc("cancel")}
+        isLoading={deleteRoutine.isPending}
+        onConfirm={() => {
+          if (deleteId) {
+            deleteRoutine.mutate(deleteId, {
+              onSuccess: () => setDeleteId(null),
             });
           }
         }}

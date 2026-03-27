@@ -175,6 +175,13 @@ export default function MyRoutinePage() {
                 <Card key={ex.id} className={inSuperset ? "border-primary/30" : ""}>
                   <CardContent className="p-3">
                     <div className="flex items-start gap-3">
+                      {ex.exercise?.thumbnail_url && (
+                        <img
+                          src={ex.exercise.thumbnail_url}
+                          alt={ex.exercise.name}
+                          className="w-12 h-12 rounded-md object-cover shrink-0"
+                        />
+                      )}
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm">
                           {(locale === "es" ? ex.exercise?.name_es : null) ?? ex.exercise?.name ?? "Exercise"}

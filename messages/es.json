@@ -681,6 +681,8 @@
     "cancelRoutine": "Cancelar rutina",
     "cancelRoutineConfirm": "Estas seguro de que quieres cancelar esta rutina asignada? El cliente dejara de verla.",
     "cancelRoutineConfirmLabel": "Cancelar rutina",
+    "deleteRoutineAssignment": "Eliminar rutina asignada",
+    "deleteRoutineAssignmentConfirm": "Esto eliminara la asignacion de esta rutina al cliente de forma permanente. Continuar?",
     "recentNotes": "Ultimas notas de sesion",
     "viewAll": "Ver todas",
     "noNotes": "Sin notas de sesion",
