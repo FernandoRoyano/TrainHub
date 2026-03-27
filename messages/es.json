@@ -359,6 +359,8 @@
     "routineDuplicateError": "Error al duplicar rutina",
     "routineAssigned": "Rutina asignada",
     "routineAssignError": "Error al asignar rutina",
+    "routineCancelled": "Rutina cancelada",
+    "routineCancelError": "Error al cancelar rutina",
     "copySuffix": "(copia)"
   },
   "nutrition": {
@@ -676,6 +678,9 @@
     "noRoutinesDescription": "Aun no se han asignado rutinas a este cliente",
     "unknownRoutine": "Rutina desconocida",
     "daysPerWeek": "dias/sem",
+    "cancelRoutine": "Cancelar rutina",
+    "cancelRoutineConfirm": "Estas seguro de que quieres cancelar esta rutina asignada? El cliente dejara de verla.",
+    "cancelRoutineConfirmLabel": "Cancelar rutina",
     "recentNotes": "Ultimas notas de sesion",
     "viewAll": "Ver todas",
     "noNotes": "Sin notas de sesion",

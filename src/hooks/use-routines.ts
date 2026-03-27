@@ -144,3 +144,20 @@ export function useClientRoutines(clientId: string) {
     staleTime: 30 * 1000,
   });
 }
+
+export function useCancelClientRoutine() {
+  const qc = useQueryClient();
+  const t = useTranslations("routines");
+  return useMutation({
+    mutationFn: (id: string) => routinesService.cancelClientRoutine(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["client-routines"] });
+      const { toast } = require("sonner");
+      toast.success(t("routineCancelled"));
+    },
+    onError: () => {
+      const { toast } = require("sonner");
+      toast.error(t("routineCancelError"));
+    },
+  });
+}

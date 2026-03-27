@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useClientRoutines } from "@/hooks/use-routines";
+import { useClientRoutines, useCancelClientRoutine } from "@/hooks/use-routines";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { useSessionNotes } from "@/hooks/use-session-notes";
 import { useMeasurements } from "@/hooks/use-measurements";
 import { useClientTimeline, useClientCompliance } from "@/hooks/use-clients";
@@ -107,6 +108,8 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
   const tCal = useTranslations("calendar");
   const { data: routines, isLoading: loadingRoutines } =
     useClientRoutines(clientId);
+  const cancelRoutine = useCancelClientRoutine();
+  const [cancelId, setCancelId] = useState<string | null>(null);
   const { data: notes, isLoading: loadingNotes } = useSessionNotes(clientId);
   const { data: measurements, isLoading: loadingMeasurements } =
     useMeasurements(clientId);
@@ -280,6 +283,16 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
                     >
                       {tc(cr.status as "active" | "completed" | "cancelled")}
                     </Badge>
+                    {cr.status === "active" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive hover:text-destructive"
+                        onClick={() => setCancelId(cr.id)}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -563,6 +576,22 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
           </CardContent>
         </Card>
       )}
+      <ConfirmDialog
+        open={!!cancelId}
+        onOpenChange={(open) => !open && setCancelId(null)}
+        title={t("cancelRoutine")}
+        description={t("cancelRoutineConfirm")}
+        confirmLabel={t("cancelRoutineConfirmLabel")}
+        cancelLabel={tc("cancel")}
+        isLoading={cancelRoutine.isPending}
+        onConfirm={() => {
+          if (cancelId) {
+            cancelRoutine.mutate(cancelId, {
+              onSuccess: () => setCancelId(null),
+            });
+          }
+        }}
+      />
     </div>
   );
 }

@@ -359,6 +359,8 @@
     "routineDuplicateError": "Error duplicating routine",
     "routineAssigned": "Routine assigned",
     "routineAssignError": "Error assigning routine",
+    "routineCancelled": "Routine cancelled",
+    "routineCancelError": "Error cancelling routine",
     "copySuffix": "(copy)"
   },
   "nutrition": {
@@ -676,6 +678,9 @@
     "noRoutinesDescription": "No routines have been assigned to this client yet",
     "unknownRoutine": "Unknown routine",
     "daysPerWeek": "days/wk",
+    "cancelRoutine": "Cancel routine",
+    "cancelRoutineConfirm": "Are you sure you want to cancel this assigned routine? The client will no longer see it.",
+    "cancelRoutineConfirmLabel": "Cancel routine",
     "recentNotes": "Recent session notes",
     "viewAll": "View all",
     "noNotes": "No session notes",
