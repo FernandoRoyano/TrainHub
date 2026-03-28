@@ -141,8 +141,12 @@ export function useGenerateInviteLink() {
       navigator.clipboard.writeText(data.link);
       toast.success(t("inviteLinkCopied"));
     },
-    onError: () => {
-      toast.error(t("inviteLinkError"));
+    onError: (error: Error) => {
+      if (error.message === "Client already has an account") {
+        toast.info(t("clientAlreadyRegistered"));
+      } else {
+        toast.error(t("inviteLinkError"));
+      }
     },
   });
 }

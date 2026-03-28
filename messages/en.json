@@ -173,6 +173,7 @@
     "copyInviteLink": "Copy link",
     "inviteLinkCopied": "Link copied to clipboard",
     "inviteLinkError": "Error generating link",
+    "clientAlreadyRegistered": "This client already has a registered account",
     "noNotes": "No notes",
     "lastActive": "Last active",
     "lastActiveToday": "Today",

@@ -173,6 +173,7 @@
     "copyInviteLink": "Copiar link",
     "inviteLinkCopied": "Link copiado al portapapeles",
     "inviteLinkError": "Error al generar el link",
+    "clientAlreadyRegistered": "Este cliente ya tiene cuenta registrada",
     "noNotes": "Sin notas",
     "lastActive": "Ultima actividad",
     "lastActiveToday": "Hoy",
