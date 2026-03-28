@@ -105,9 +105,18 @@ export function RoutineList() {
           {routines.map((routine) => (
             <Card
               key={routine.id}
-              className="cursor-pointer hover:bg-accent/50 transition-colors"
+              className="cursor-pointer hover:bg-accent/50 transition-colors overflow-hidden"
               onClick={() => router.push(`/routines/${routine.id}`)}
             >
+              {routine.cover_image && (
+                <div className="h-32 w-full overflow-hidden">
+                  <img
+                    src={routine.cover_image}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              )}
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="min-w-0 flex-1">

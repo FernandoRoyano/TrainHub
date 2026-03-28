@@ -12,6 +12,7 @@ import type { BuilderExercise } from "@/stores/routine-builder-store";
 import type { Routine } from "@/services/routines.service";
 import type { ExerciseBlock } from "@/services/blocks.service";
 import { DIFFICULTY_LEVELS } from "@/lib/constants";
+import { useUploadMedia } from "@/hooks/use-exercises";
 import { ExercisePicker } from "./exercise-picker";
 import { ExerciseSidebar } from "./exercise-sidebar";
 import { BlockPicker } from "@/components/blocks/block-picker";
@@ -296,6 +297,9 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
 
   const [showPicker, setShowPicker] = useState(false);
   const [showBlockPicker, setShowBlockPicker] = useState(false);
+  const uploadMedia = useUploadMedia();
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [coverPreview, setCoverPreview] = useState<string | null>(routine?.cover_image ?? null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -315,6 +319,7 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
       target_gender:
         (routine?.target_gender as RoutineFormData["target_gender"]) ?? "unisex",
       is_template: routine?.is_template ?? defaultTemplate ?? false,
+      cover_image: routine?.cover_image ?? "",
       days: [],
     },
   });
@@ -466,6 +471,63 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                   </FormItem>
                 )}
               />
+
+              {/* Cover Image */}
+              <div>
+                <label className="text-sm font-medium">{t("coverImage")}</label>
+                <div className="flex items-center gap-4 mt-2">
+                  {coverPreview ? (
+                    <div className="relative">
+                      <img
+                        src={coverPreview}
+                        alt=""
+                        className="h-24 w-40 rounded-lg object-cover border"
+                      />
+                      <button
+                        type="button"
+                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-0.5"
+                        onClick={() => {
+                          setCoverPreview(null);
+                          form.setValue("cover_image", "");
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="h-24 w-40 rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-primary/50 transition-colors">
+                      {isUploadingCover ? (
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                      ) : (
+                        <>
+                          <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">{t("uploadCover")}</span>
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setIsUploadingCover(true);
+                          try {
+                            const url = await uploadMedia.mutateAsync({
+                              file,
+                              folder: "routine-covers",
+                            });
+                            setCoverPreview(url);
+                            form.setValue("cover_image", url);
+                          } finally {
+                            setIsUploadingCover(false);
+                          }
+                        }}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <FormField

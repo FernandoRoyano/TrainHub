@@ -34,6 +34,7 @@ export interface Routine {
   difficulty: string | null;
   target_gender: string;
   is_template: boolean;
+  cover_image: string | null;
   created_at: string;
   updated_at: string;
   days?: RoutineDay[];
@@ -158,6 +159,7 @@ export const routinesService = {
         difficulty: data.difficulty,
         target_gender: data.target_gender,
         is_template: data.is_template,
+        cover_image: data.cover_image || null,
       })
       .select()
       .single();
@@ -240,6 +242,7 @@ export const routinesService = {
         difficulty: data.difficulty,
         target_gender: data.target_gender,
         is_template: data.is_template,
+        cover_image: data.cover_image || null,
       })
       .eq("id", id)
       .eq("trainer_id", user.id);

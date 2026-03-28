@@ -308,6 +308,8 @@
   "routines": {
     "title": "Routines",
     "addRoutine": "Create routine",
+    "coverImage": "Cover image",
+    "uploadCover": "Upload image",
     "editRoutine": "Edit routine",
     "routineDetail": "Routine detail",
     "name": "Name",

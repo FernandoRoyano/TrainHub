@@ -29,6 +29,7 @@ export function createRoutineSchema(t: T) {
     difficulty: z.enum(["beginner", "intermediate", "advanced"]),
     target_gender: z.enum(["male", "female", "unisex"]),
     is_template: z.boolean(),
+    cover_image: z.string().optional().or(z.literal("")),
     days: z.array(routineDaySchema),
   });
 }
