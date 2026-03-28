@@ -235,7 +235,7 @@ describe("POST /api/generate-invite-link", () => {
     const res = await POST(req);
     const data = await res.json();
 
-    expect(data.link).toBe("https://myapp.com/join/token-abc");
+    expect(data.link).toBe("https://myapp.com/es/join/token-abc");
 
     delete process.env.NEXT_PUBLIC_APP_URL;
   });
@@ -275,6 +275,6 @@ describe("POST /api/generate-invite-link", () => {
     const res = await POST(req);
     const data = await res.json();
 
-    expect(data.link).toBe("https://train-hub-five.vercel.app/join/token-abc");
+    expect(data.link).toBe("https://train-hub-five.vercel.app/es/join/token-abc");
   });
 });
