@@ -4,6 +4,7 @@ import type { Exercise } from "@/services/exercises.service";
 import { useLocale, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Image as ImageIcon } from "lucide-react";
+import { ExerciseAnimation } from "./exercise-animation";
 import {
   Dialog,
   DialogContent,
@@ -53,7 +54,7 @@ export function ExerciseDetailDialog({
         </DialogHeader>
 
         {/* Main media */}
-        <div className="w-full rounded-lg overflow-hidden bg-muted">
+        <div className="w-full rounded-lg overflow-hidden bg-muted flex items-center justify-center min-h-[200px]">
           {exercise.video_url ? (
             <video
               src={exercise.video_url}
@@ -65,8 +66,8 @@ export function ExerciseDetailDialog({
               className="w-full max-h-80 object-contain"
             />
           ) : mainImage ? (
-            <img
-              src={mainImage}
+            <ExerciseAnimation
+              thumbnailUrl={mainImage}
               alt={name}
               className="w-full max-h-80 object-contain"
             />

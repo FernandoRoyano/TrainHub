@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import type { Exercise } from "@/services/exercises.service";
 import { ExerciseDetailDialog } from "@/components/workout/exercise-detail-dialog";
+import { ExerciseAnimation } from "@/components/workout/exercise-animation";
 import { useMyRoutine, useMyClient, useWorkoutLogs, useStartWorkout, useCompleteWorkout, useLogExercise } from "@/hooks/use-client-app";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -178,19 +179,17 @@ export default function MyRoutinePage() {
                 <Card key={ex.id} className={inSuperset ? "border-primary/30" : ""}>
                   <CardContent className="p-3">
                     <div className="flex items-start gap-3">
-                      {ex.exercise?.thumbnail_url && (
-                        <button
-                          type="button"
-                          onClick={() => ex.exercise && setSelectedExercise(ex.exercise as Exercise)}
-                          className="shrink-0"
-                        >
-                          <img
-                            src={ex.exercise.thumbnail_url}
-                            alt={ex.exercise.name}
-                            className="w-14 h-14 rounded-md object-cover hover:opacity-80 transition-opacity"
-                          />
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => ex.exercise && setSelectedExercise(ex.exercise as Exercise)}
+                        className="shrink-0"
+                      >
+                        <ExerciseAnimation
+                          thumbnailUrl={ex.exercise?.thumbnail_url}
+                          alt={ex.exercise?.name}
+                          className="w-14 h-14 rounded-md object-cover hover:opacity-80 transition-opacity"
+                        />
+                      </button>
                       <div className="flex-1 min-w-0">
                         <button
                           type="button"
