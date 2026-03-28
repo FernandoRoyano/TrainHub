@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import { sendEmail } from "@/lib/email/send-email";
-import { InviteEmail } from "@/lib/email/templates/invite";
+import { sendGmail } from "@/lib/email/gmail-smtp";
 import { getEmailTranslations, getLocaleForEmail } from "@/lib/email/translations";
 
 export async function POST(request: Request) {
@@ -71,18 +70,40 @@ export async function POST(request: Request) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || origin;
   const locale = getLocaleForEmail();
   const joinUrl = `${appUrl}/${locale}/join/${token}`;
-
-  // Send branded email via Resend
   const t = getEmailTranslations(locale);
-  const { success, error: emailError } = await sendEmail({
+  const trainerName = trainer?.full_name || "Tu entrenador";
+  const clientName = client.full_name || client.email;
+
+  // Send branded email via Gmail SMTP
+  const html = `
+    <div style="font-family: 'Inter', Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 40px 20px; background: #f8f8f8;">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <span style="font-size: 24px; font-weight: 700; color: #6dbd57;">TrainHub</span>
+      </div>
+      <div style="background: #ffffff; border-radius: 12px; padding: 32px 28px; border: 1px solid #e5e7eb;">
+        <p style="font-size: 20px; font-weight: 600; color: #1a1f36;">
+          ${t.inviteTitle.replace("{name}", clientName)}
+        </p>
+        <p style="font-size: 14px; color: #4b5563; line-height: 1.6;">
+          ${t.inviteBody.replace("{trainer}", trainerName)}
+        </p>
+        <a href="${joinUrl}" style="display: inline-block; margin-top: 16px; background: #6dbd57; color: #ffffff; border-radius: 8px; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none;">
+          ${t.inviteCta}
+        </a>
+        <p style="font-size: 12px; color: #9ca3af; margin-top: 24px; line-height: 1.5;">
+          ${t.inviteFooter}
+        </p>
+      </div>
+      <div style="text-align: center; margin-top: 32px;">
+        <span style="font-size: 12px; color: #6b7280;">TrainHub - Personal Training Platform</span>
+      </div>
+    </div>
+  `;
+
+  const { success, error: emailError } = await sendGmail({
     to: client.email,
-    subject: t.inviteSubject.replace("{trainer}", trainer?.full_name || "Tu entrenador"),
-    react: InviteEmail({
-      clientName: client.full_name || client.email,
-      trainerName: trainer?.full_name || "Tu entrenador",
-      joinUrl,
-      t,
-    }),
+    subject: t.inviteSubject.replace("{trainer}", trainerName),
+    html,
   });
 
   if (!success) {
