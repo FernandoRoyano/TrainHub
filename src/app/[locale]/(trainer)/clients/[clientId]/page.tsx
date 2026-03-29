@@ -62,7 +62,7 @@ export default function ClientDetailPage() {
     .slice(0, 2);
 
   return (
-    <div className="space-y-6 overflow-x-hidden">
+    <div className="space-y-6 max-w-full overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" className="shrink-0" asChild>
@@ -74,45 +74,44 @@ export default function ClientDetailPage() {
       </div>
 
       {/* Profile Card */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row items-start gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarFallback className="text-lg">{initials}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap min-w-0">
-                <h2 className="text-lg sm:text-xl font-semibold truncate">{client.full_name}</h2>
-                <Badge
-                  variant="outline"
-                  className={statusColors[client.status] || ""}
-                >
-                  {tc(client.status as "active" | "inactive" | "paused" | "pending")}
-                </Badge>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-1 sm:gap-4 mt-2 text-sm text-muted-foreground">
-                {client.email && (
-                  <span className="flex items-center gap-1 truncate">
-                    <Mail className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">{client.email}</span>
-                  </span>
-                )}
-                {client.phone && (
-                  <span className="flex items-center gap-1">
-                    <Phone className="h-3.5 w-3.5 shrink-0" /> {client.phone}
-                  </span>
-                )}
-              </div>
-              {client.tags.length > 0 && (
-                <div className="flex gap-1 mt-2 flex-wrap">
-                  {client.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
+      <Card className="overflow-hidden">
+        <CardContent className="pt-6 overflow-hidden">
+          <div className="flex flex-col items-start gap-4">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12 sm:h-16 sm:w-16 shrink-0">
+                <AvatarFallback className="text-base sm:text-lg">{initials}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                  <h2 className="text-lg sm:text-xl font-semibold truncate">{client.full_name}</h2>
+                  <Badge variant="outline" className={statusColors[client.status] || ""}>
+                    {tc(client.status as "active" | "inactive" | "paused" | "pending")}
+                  </Badge>
                 </div>
-              )}
+                <div className="flex flex-col gap-0.5 mt-1 text-sm text-muted-foreground">
+                  {client.email && (
+                    <span className="flex items-center gap-1">
+                      <Mail className="h-3 w-3 shrink-0" /> <span className="truncate text-xs">{client.email}</span>
+                    </span>
+                  )}
+                  {client.phone && (
+                    <span className="flex items-center gap-1">
+                      <Phone className="h-3 w-3 shrink-0" /> <span className="text-xs">{client.phone}</span>
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-            <div className="flex gap-2 flex-wrap w-full sm:w-auto mt-3 sm:mt-0">
+            {client.tags.length > 0 && (
+              <div className="flex gap-1 flex-wrap">
+                {client.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2 flex-wrap w-full">
               {client.email && !client.user_id && (
                 <Button
                   size="sm"
@@ -137,34 +136,29 @@ export default function ClientDetailPage() {
                 </Button>
               )}
               {client.user_id && (
-                <>
-                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 h-8 px-3 flex items-center">
-                    {t("accountLinked")}
-                  </Badge>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setShowResetPassword(true)}
-                    title={t("resetPassword")}
-                  >
-                    <KeyRound className="h-3.5 w-3.5" />
-                  </Button>
-                </>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowResetPassword(true)}
+                >
+                  <KeyRound className="mr-1 h-3.5 w-3.5" />
+                  <span className="text-xs">{t("resetPassword")}</span>
+                </Button>
               )}
-              <Button variant="outline" size="icon" className="h-8 w-8" asChild>
-                <Link href={`/clients/${client.id}/edit`} title={tc("edit")}>
-                  <Pencil className="h-3.5 w-3.5" />
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/clients/${client.id}/edit`}>
+                  <Pencil className="mr-1 h-3.5 w-3.5" />
+                  <span className="text-xs">{tc("edit")}</span>
                 </Link>
               </Button>
               <Button
                 variant="outline"
-                size="icon"
-                className="h-8 w-8 text-destructive"
+                size="sm"
+                className="text-destructive"
                 onClick={() => setShowDelete(true)}
-                title={tc("delete")}
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                <Trash2 className="mr-1 h-3.5 w-3.5" />
+                <span className="text-xs">{tc("delete")}</span>
               </Button>
             </div>
           </div>
@@ -173,8 +167,8 @@ export default function ClientDetailPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="overflow-x-auto -mx-4 px-4 scrollbar-thin">
-          <TabsList className="w-max">
+        <div className="overflow-x-auto scrollbar-thin pb-1">
+          <TabsList className="inline-flex w-max">
             <TabsTrigger value="overview">{t("overview")}</TabsTrigger>
             <TabsTrigger value="physical">{t("physicalData")}</TabsTrigger>
             <TabsTrigger value="notes">{t("notes")}</TabsTrigger>
