@@ -819,11 +819,11 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                             };
 
                             const groupLabel: Record<string, string> = {
-                              superset: "Superserie",
-                              triset: "Triserie",
-                              circuit: "Circuito",
-                              emom: "EMOM",
-                              amrap: "AMRAP",
+                              superset: t("supersetGroup"),
+                              triset: t("trisetGroup"),
+                              circuit: t("circuitGroup"),
+                              emom: t("emomGroup"),
+                              amrap: t("amrapGroup"),
                             };
 
                             const groupIcon: Record<string, React.ReactNode> = {
