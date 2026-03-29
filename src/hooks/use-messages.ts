@@ -103,6 +103,17 @@ export function useMarkAsRead() {
   });
 }
 
+export function useStartConversation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (clientId: string) =>
+      messagesService.getOrCreateConversation(clientId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    },
+  });
+}
+
 export function useClientConversation() {
   return useQuery({
     queryKey: ["client-conversation"],

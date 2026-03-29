@@ -524,7 +524,9 @@
     "unread": "{count} unread",
     "sendError": "Error sending message",
     "backToConversations": "Back to conversations",
-    "selectConversation": "Select a conversation"
+    "selectConversation": "Select a conversation",
+    "newConversation": "New conversation",
+    "noAvailableClients": "All clients already have a conversation"
   },
   "settings": {
     "title": "Settings",
