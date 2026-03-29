@@ -160,16 +160,18 @@ export const analyticsService = {
       return d >= startOfLastWeek && d < startOfThisWeek;
     });
 
+    const totalActiveClients = (clientsResult.data ?? []).filter((c) => c.status === "active").length;
+
     const weeklyComparison = {
       thisWeek: {
         sessions: thisWeekWorkouts.length,
         volume: 0,
-        activeClients: new Set(thisWeekWorkouts.map((w) => w.client_id)).size,
+        activeClients: totalActiveClients,
       },
       lastWeek: {
         sessions: lastWeekWorkouts.length,
         volume: 0,
-        activeClients: new Set(lastWeekWorkouts.map((w) => w.client_id)).size,
+        activeClients: totalActiveClients,
       },
     };
 
