@@ -14,8 +14,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
-import { Dumbbell, Check, Play, Timer, Loader2 } from "lucide-react";
+import { Dumbbell, Check, Play, Timer, Loader2, MessageSquare } from "lucide-react";
 import { RestTimer } from "@/components/workout/rest-timer";
+import { WorkoutTimer } from "@/components/workout/workout-timer";
 import { useRestTimerStore } from "@/stores/rest-timer-store";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -34,8 +35,8 @@ function ExerciseCard({
   te,
 }: {
   ex: any;
-  exerciseData: Record<string, { sets: number; weight: string; reps: string }>;
-  setExerciseData: React.Dispatch<React.SetStateAction<Record<string, { sets: number; weight: string; reps: string }>>>;
+  exerciseData: Record<string, { sets: number; weight: string; reps: string; feedback: string }>;
+  setExerciseData: React.Dispatch<React.SetStateAction<Record<string, { sets: number; weight: string; reps: string; feedback: string }>>>;
   activeWorkoutId: string | null;
   todayLog: any;
   logExercise: any;
@@ -46,7 +47,7 @@ function ExerciseCard({
   t: any;
   te: any;
 }) {
-  const exData = exerciseData[ex.id] ?? { sets: ex.sets, weight: "", reps: ex.reps ?? "" };
+  const exData = exerciseData[ex.id] ?? { sets: ex.sets, weight: "", reps: ex.reps ?? "", feedback: "" };
 
   return (
     <Card key={ex.id}>
@@ -112,7 +113,7 @@ function ExerciseCard({
                   max={20}
                   value={exData.sets}
                   onChange={(e) =>
-                    setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string }>) => ({
+                    setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string; feedback: string }>) => ({
                       ...prev,
                       [ex.id]: { ...exData, sets: parseInt(e.target.value) || 0 },
                     }))
@@ -128,7 +129,7 @@ function ExerciseCard({
                   type="text"
                   value={exData.reps}
                   onChange={(e) =>
-                    setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string }>) => ({
+                    setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string; feedback: string }>) => ({
                       ...prev,
                       [ex.id]: { ...exData, reps: e.target.value },
                     }))
@@ -146,7 +147,7 @@ function ExerciseCard({
                   step="0.5"
                   value={exData.weight}
                   onChange={(e) =>
-                    setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string }>) => ({
+                    setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string; feedback: string }>) => ({
                       ...prev,
                       [ex.id]: { ...exData, weight: e.target.value },
                     }))
@@ -167,6 +168,23 @@ function ExerciseCard({
             </div>
           )}
         </div>
+        {/* Feedback field */}
+        {(activeWorkoutId || (todayLog && !todayLog.completed)) && (
+          <div className="mt-2 flex items-start gap-2">
+            <MessageSquare className="h-3.5 w-3.5 text-muted-foreground mt-2 shrink-0" />
+            <Input
+              value={exData.feedback}
+              onChange={(e) =>
+                setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string; feedback: string }>) => ({
+                  ...prev,
+                  [ex.id]: { ...exData, feedback: e.target.value },
+                }))
+              }
+              placeholder={t("exerciseFeedbackPlaceholder")}
+              className="h-8 text-xs"
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -190,8 +208,9 @@ export default function MyRoutinePage() {
 
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [activeWorkoutId, setActiveWorkoutId] = useState<string | null>(null);
+  const [workoutStartedAt, setWorkoutStartedAt] = useState<string | null>(null);
   const [exerciseData, setExerciseData] = useState<
-    Record<string, { sets: number; weight: string; reps: string }>
+    Record<string, { sets: number; weight: string; reps: string; feedback: string }>
   >({});
   const [workoutNotes, setWorkoutNotes] = useState("");
 
@@ -232,7 +251,10 @@ export default function MyRoutinePage() {
         routineDayId: activeDay.id,
       },
       {
-        onSuccess: (log) => setActiveWorkoutId(log.id),
+        onSuccess: (log) => {
+          setActiveWorkoutId(log.id);
+          setWorkoutStartedAt(new Date().toISOString());
+        },
       }
     );
   };
@@ -253,6 +275,7 @@ export default function MyRoutinePage() {
           sets_completed: data?.sets ?? 0,
           weight_used: data?.weight ? parseFloat(data.weight) : undefined,
           reps_completed: data?.reps || undefined,
+          feedback: data?.feedback || undefined,
         },
       },
       {
@@ -302,14 +325,27 @@ export default function MyRoutinePage() {
               {t("startWorkout")}
             </Button>
           ) : todayLog?.completed ? (
-            <div className="text-center py-2">
+            <div className="text-center py-2 space-y-1">
               <Badge variant="secondary" className="text-sm">
                 <Check className="mr-1 h-3 w-3" />
                 {t("workoutCompleted")}
               </Badge>
+              {(todayLog as any)?.duration_minutes != null && (
+                <p className="text-xs text-muted-foreground">
+                  {t("duration")}: {(todayLog as any).duration_minutes} min
+                </p>
+              )}
             </div>
           ) : (
             <div className="space-y-2">
+              {/* Workout Timer */}
+              <div className="flex items-center justify-between">
+                <WorkoutTimer startedAt={workoutStartedAt || (todayLog as any)?.started_at || new Date().toISOString()} />
+                <Badge variant="outline" className="text-xs text-primary animate-pulse">
+                  {t("inProgress")}
+                </Badge>
+              </div>
+
               <Textarea
                 placeholder={t("workoutNotesPlaceholder")}
                 value={workoutNotes}

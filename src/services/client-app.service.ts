@@ -199,6 +199,7 @@ export const clientAppService = {
         client_routine_id: clientRoutineId,
         routine_day_id: routineDayId,
         date: new Date().toISOString().split("T")[0],
+        started_at: new Date().toISOString(),
       })
       .select()
       .single();
@@ -208,9 +209,25 @@ export const clientAppService = {
 
   async completeWorkout(workoutLogId: string, notes?: string) {
     const { supabase, clientId } = await getAuthenticatedClient();
+
+    // Get started_at to calculate duration
+    const { data: wl } = await supabase
+      .from("workout_logs")
+      .select("started_at")
+      .eq("id", workoutLogId)
+      .eq("client_id", clientId)
+      .single();
+
+    const now = new Date();
+    let durationMinutes: number | null = null;
+    if (wl?.started_at) {
+      durationMinutes = Math.round((now.getTime() - new Date(wl.started_at).getTime()) / 60000);
+    }
+
     const updateData: Record<string, unknown> = {
       completed: true,
-      completed_at: new Date().toISOString(),
+      completed_at: now.toISOString(),
+      duration_minutes: durationMinutes,
     };
     if (notes !== undefined) updateData.notes = notes || null;
     const { error } = await supabase
@@ -224,7 +241,7 @@ export const clientAppService = {
   async logExercise(
     workoutLogId: string,
     routineExerciseId: string,
-    data: { sets_completed: number; weight_used?: number; reps_completed?: string }
+    data: { sets_completed: number; weight_used?: number; reps_completed?: string; feedback?: string }
   ) {
     const { supabase, clientId } = await getAuthenticatedClient();
 

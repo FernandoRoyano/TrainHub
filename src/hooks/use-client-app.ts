@@ -80,7 +80,7 @@ export function useLogExercise() {
     }: {
       workoutLogId: string;
       routineExerciseId: string;
-      data: { sets_completed: number; weight_used?: number; reps_completed?: string };
+      data: { sets_completed: number; weight_used?: number; reps_completed?: string; feedback?: string };
     }) =>
       clientAppService.logExercise(workoutLogId, routineExerciseId, data),
     onSuccess: () => {
