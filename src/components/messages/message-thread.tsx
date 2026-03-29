@@ -7,8 +7,17 @@ import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Send, MessageCircle } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Send, MessageCircle, Smile } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const EMOJI_CATEGORIES = [
+  { label: "😀", emojis: ["😀","😂","🤣","😊","😍","🥰","😘","😎","🤩","🥳","😄","😁","😆","🙂","😉","😋","🤪","😜","😝","🤗"] },
+  { label: "💪", emojis: ["💪","🏋️","🔥","⚡","💥","🎯","🏆","🥇","👏","🙌","✅","❌","⭐","💯","🚀","💪🏻","🦾","💦","🏃","🧘"] },
+  { label: "🍎", emojis: ["🍎","🥗","🥑","🍗","🥩","🍳","🥛","💧","🍌","🥦","🍚","🥕","🍇","🫐","🥜","🍠","🥒","🍞","🧀","🥚"] },
+  { label: "❤️", emojis: ["❤️","🧡","💛","💚","💙","💜","🖤","🤍","💔","❣️","💕","💞","💓","💗","💖","💝","♥️","🫶","🤝","👍"] },
+  { label: "📝", emojis: ["📝","📊","📈","📉","⏰","🔔","📅","💬","📱","🎉","👋","🤔","😴","🤒","😤","😢","😰","🙏","✨","🌟"] },
+];
 
 interface MessageThreadProps {
   conversationId: string;
@@ -21,7 +30,10 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
   const markAsRead = useMarkAsRead();
   const { profile } = useAuth();
   const [input, setInput] = useState("");
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const [emojiTab, setEmojiTab] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Mark as read when viewing
   useEffect(() => {
@@ -110,8 +122,47 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
       </div>
 
       {/* Input */}
-      <div className="border-t p-3 flex gap-2">
+      <div className="border-t p-3 flex gap-2 items-end">
+        <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0">
+              <Smile className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-2" side="top" align="start">
+            <div className="flex gap-1 border-b pb-1 mb-1">
+              {EMOJI_CATEGORIES.map((cat, i) => (
+                <button
+                  key={i}
+                  onClick={() => setEmojiTab(i)}
+                  className={cn(
+                    "text-lg p-1 rounded hover:bg-accent transition-colors",
+                    emojiTab === i && "bg-accent"
+                  )}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+            <div className="grid grid-cols-8 gap-0.5 max-h-36 overflow-y-auto">
+              {EMOJI_CATEGORIES[emojiTab].emojis.map((emoji) => (
+                <button
+                  key={emoji}
+                  className="text-xl p-1 rounded hover:bg-accent transition-colors"
+                  onClick={() => {
+                    setInput((prev) => prev + emoji);
+                    setEmojiOpen(false);
+                    inputRef.current?.focus();
+                  }}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
         <Input
+          ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
