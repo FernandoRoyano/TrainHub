@@ -24,9 +24,47 @@ export async function POST(request: Request) {
 
     if (!conversation) return NextResponse.json({ skipped: true });
 
-    // Only notify when the trainer is the sender
-    if (conversation.trainer_id !== user.id) {
-      return NextResponse.json({ skipped: true });
+    // Determine sender and receiver
+    const isTrainerSender = conversation.trainer_id === user.id;
+
+    // Create in-app notification for the receiver
+    const { data: client } = await admin
+      .from("clients")
+      .select("email, full_name, user_id")
+      .eq("id", conversation.client_id)
+      .single();
+
+    const { data: trainer } = await admin
+      .from("users")
+      .select("full_name")
+      .eq("id", conversation.trainer_id)
+      .single();
+
+    if (isTrainerSender && client?.user_id) {
+      // Notify client in-app
+      await admin.from("notifications").insert({
+        user_id: client.user_id,
+        type: "message",
+        title: `Nuevo mensaje de ${trainer?.full_name || "tu entrenador"}`,
+        body: messageContent?.substring(0, 100) || "",
+        link: "/my-messages",
+        metadata: { conversation_id: conversationId },
+      });
+    } else if (!isTrainerSender) {
+      // Notify trainer in-app
+      await admin.from("notifications").insert({
+        user_id: conversation.trainer_id,
+        type: "message",
+        title: `Nuevo mensaje de ${client?.full_name || "un cliente"}`,
+        body: messageContent?.substring(0, 100) || "",
+        link: "/messages",
+        metadata: { conversation_id: conversationId },
+      });
+    }
+
+    // Email notification only when trainer sends to client
+    if (!isTrainerSender) {
+      return NextResponse.json({ success: true, inAppOnly: true });
     }
 
     // Debounce: skip if email was sent less than 5 min ago
@@ -36,12 +74,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ skipped: true, reason: "debounce" });
       }
     }
-
-    const { data: client } = await admin
-      .from("clients")
-      .select("email, full_name, user_id")
-      .eq("id", conversation.client_id)
-      .single();
 
     if (!client?.email || !client.user_id) {
       return NextResponse.json({ skipped: true });
@@ -57,12 +89,6 @@ export async function POST(request: Request) {
       (userRecord?.settings as Record<string, string> | null)?.locale
     );
     const t = getEmailTranslations(locale);
-
-    const { data: trainer } = await admin
-      .from("users")
-      .select("full_name")
-      .eq("id", conversation.trainer_id)
-      .single();
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 

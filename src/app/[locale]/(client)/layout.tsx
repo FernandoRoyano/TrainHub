@@ -7,6 +7,7 @@ import { Dumbbell, UtensilsCrossed, BarChart3, Ruler, MessageCircle, User } from
 import { cn } from "@/lib/utils";
 import { NavigationProgress } from "@/components/shared/navigation-progress";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { NotificationBell } from "@/components/shared/notification-bell";
 
 const navItems = [
   { href: "/my-routine", icon: Dumbbell, labelKey: "myRoutine" as const },
@@ -28,7 +29,8 @@ export default function ClientLayout({
   return (
     <div className="flex flex-col min-h-screen">
       <NavigationProgress />
-      <header className="sticky top-0 z-40 flex items-center justify-end h-12 px-4">
+      <header className="sticky top-0 z-40 flex items-center justify-end h-12 px-4 gap-2">
+        <NotificationBell />
         <ThemeToggle />
       </header>
       <main className="flex-1 p-4 pb-24">{children}</main>
