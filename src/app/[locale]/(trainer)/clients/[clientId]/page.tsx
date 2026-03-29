@@ -90,15 +90,15 @@ export default function ClientDetailPage() {
                   {tc(client.status as "active" | "inactive" | "paused" | "pending")}
                 </Badge>
               </div>
-              <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row gap-1 sm:gap-4 mt-2 text-sm text-muted-foreground">
                 {client.email && (
-                  <span className="flex items-center gap-1">
-                    <Mail className="h-3.5 w-3.5" /> {client.email}
+                  <span className="flex items-center gap-1 truncate">
+                    <Mail className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">{client.email}</span>
                   </span>
                 )}
                 {client.phone && (
                   <span className="flex items-center gap-1">
-                    <Phone className="h-3.5 w-3.5" /> {client.phone}
+                    <Phone className="h-3.5 w-3.5 shrink-0" /> {client.phone}
                   </span>
                 )}
               </div>
@@ -112,10 +112,11 @@ export default function ClientDetailPage() {
                 </div>
               )}
             </div>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap w-full sm:w-auto mt-3 sm:mt-0">
               {client.email && !client.user_id && (
                 <Button
                   size="sm"
+                  className="flex-1 sm:flex-none"
                   onClick={() => inviteClient.mutate(client.id)}
                   disabled={inviteClient.isPending}
                 >
@@ -127,6 +128,7 @@ export default function ClientDetailPage() {
                 <Button
                   size="sm"
                   variant="outline"
+                  className="flex-1 sm:flex-none"
                   onClick={() => generateLink.mutate(client.id)}
                   disabled={generateLink.isPending}
                 >
@@ -141,28 +143,28 @@ export default function ClientDetailPage() {
                   </Badge>
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="icon"
+                    className="h-8 w-8"
                     onClick={() => setShowResetPassword(true)}
+                    title={t("resetPassword")}
                   >
-                    <KeyRound className="mr-1 h-3.5 w-3.5" />
-                    {t("resetPassword")}
+                    <KeyRound className="h-3.5 w-3.5" />
                   </Button>
                 </>
               )}
-              <Button variant="outline" size="sm" asChild>
-                <Link href={`/clients/${client.id}/edit`}>
-                  <Pencil className="mr-1 h-3.5 w-3.5" />
-                  {tc("edit")}
+              <Button variant="outline" size="icon" className="h-8 w-8" asChild>
+                <Link href={`/clients/${client.id}/edit`} title={tc("edit")}>
+                  <Pencil className="h-3.5 w-3.5" />
                 </Link>
               </Button>
               <Button
                 variant="outline"
-                size="sm"
-                className="text-destructive"
+                size="icon"
+                className="h-8 w-8 text-destructive"
                 onClick={() => setShowDelete(true)}
+                title={tc("delete")}
               >
-                <Trash2 className="mr-1 h-3.5 w-3.5" />
-                {tc("delete")}
+                <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
@@ -171,15 +173,17 @@ export default function ClientDetailPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="overview">{t("overview")}</TabsTrigger>
-          <TabsTrigger value="physical">{t("physicalData")}</TabsTrigger>
-          <TabsTrigger value="notes">{t("notes")}</TabsTrigger>
-          <TabsTrigger value="workouts">{t("workoutsTab")}</TabsTrigger>
-          <TabsTrigger value="session-notes">{t("sessionNotes")}</TabsTrigger>
-          <TabsTrigger value="measurements">{t("measurements")}</TabsTrigger>
-          <TabsTrigger value="checkins">{t("checkins")}</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 scrollbar-thin">
+          <TabsList className="w-max">
+            <TabsTrigger value="overview">{t("overview")}</TabsTrigger>
+            <TabsTrigger value="physical">{t("physicalData")}</TabsTrigger>
+            <TabsTrigger value="notes">{t("notes")}</TabsTrigger>
+            <TabsTrigger value="workouts">{t("workoutsTab")}</TabsTrigger>
+            <TabsTrigger value="session-notes">{t("sessionNotes")}</TabsTrigger>
+            <TabsTrigger value="measurements">{t("measurements")}</TabsTrigger>
+            <TabsTrigger value="checkins">{t("checkins")}</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="overview">
           <OverviewTab clientId={client.id} onTabChange={setActiveTab} />
