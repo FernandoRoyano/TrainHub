@@ -62,15 +62,15 @@ export default function ClientDetailPage() {
     .slice(0, 2);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" asChild>
+        <Button variant="ghost" size="icon" className="shrink-0" asChild>
           <Link href="/clients">
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="text-2xl font-bold">{t("clientDetail")}</h1>
+        <h1 className="text-xl sm:text-2xl font-bold truncate">{t("clientDetail")}</h1>
       </div>
 
       {/* Profile Card */}
@@ -81,8 +81,8 @@ export default function ClientDetailPage() {
               <AvatarFallback className="text-lg">{initials}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-xl font-semibold">{client.full_name}</h2>
+              <div className="flex items-center gap-2 flex-wrap min-w-0">
+                <h2 className="text-lg sm:text-xl font-semibold truncate">{client.full_name}</h2>
                 <Badge
                   variant="outline"
                   className={statusColors[client.status] || ""}

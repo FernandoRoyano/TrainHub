@@ -78,19 +78,19 @@ export default function RoutineDetailPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="space-y-3">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" asChild>
+          <Button variant="ghost" size="icon" className="shrink-0" asChild>
             <Link href="/routines">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold">{routine.name}</h1>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold truncate">{routine.name}</h1>
             {routine.description && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground line-clamp-2">
                 {routine.description}
               </p>
             )}
@@ -98,35 +98,37 @@ export default function RoutineDetailPage() {
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button
+            size="sm"
             variant={clientView ? "default" : "outline"}
             onClick={() => setClientView(!clientView)}
           >
-            {clientView ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
-            {clientView ? t("trainerView") : t("clientView")}
+            {clientView ? <EyeOff className="mr-1 h-3.5 w-3.5" /> : <Eye className="mr-1 h-3.5 w-3.5" />}
+            <span className="hidden sm:inline">{clientView ? t("trainerView") : t("clientView")}</span>
           </Button>
-          <Button variant="outline" onClick={() => setShowAssign(true)}>
-            <Users className="mr-2 h-4 w-4" />
-            {t("assignToClient")}
+          <Button size="sm" variant="outline" onClick={() => setShowAssign(true)}>
+            <Users className="mr-1 h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{t("assignToClient")}</span>
           </Button>
           <Button
+            size="sm"
             variant="outline"
             onClick={() => duplicateRoutine.mutate(routine.id)}
             disabled={duplicateRoutine.isPending}
           >
-            <Copy className="mr-2 h-4 w-4" />
-            {t("duplicate")}
+            <Copy className="mr-1 h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{t("duplicate")}</span>
           </Button>
           <RoutinePdfButton routine={routine} />
           <RoutinePrintView routine={routine} />
-          <Button variant="outline" asChild>
+          <Button size="sm" variant="outline" asChild>
             <Link href={`/routines/${routine.id}/edit`}>
-              <Pencil className="mr-2 h-4 w-4" />
-              {tc("edit")}
+              <Pencil className="mr-1 h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{tc("edit")}</span>
             </Link>
           </Button>
-          <Button variant="destructive" onClick={() => setShowDelete(true)}>
-            <Trash2 className="mr-2 h-4 w-4" />
-            {tc("delete")}
+          <Button size="sm" variant="destructive" onClick={() => setShowDelete(true)}>
+            <Trash2 className="mr-1 h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{tc("delete")}</span>
           </Button>
         </div>
       </div>
