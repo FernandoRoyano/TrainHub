@@ -359,6 +359,10 @@
     "assignToClient": "Asignar a cliente",
     "selectClient": "Seleccionar cliente",
     "startDate": "Fecha de inicio",
+    "endDate": "Fecha de fin",
+    "durationInfo": "Duración: {weeks} semanas. La fecha de fin se calcula automáticamente.",
+    "reviewDate": "Fecha de revisión",
+    "reviewDateHint": "El cliente recibirá una notificación el día de la revisión.",
     "duplicate": "Duplicar",
     "deleteConfirm": "¿Estás seguro de que quieres eliminar esta rutina?",
     "noRoutines": "No hay rutinas",
@@ -1093,5 +1097,10 @@
     "noCheckins": "Sin check-ins",
     "noCheckinsDesc": "Este cliente aún no ha enviado ningún check-in semanal",
     "weekOf": "Semana del"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "No tienes notificaciones",
+    "markAllRead": "Marcar todas como leídas"
   }
 }

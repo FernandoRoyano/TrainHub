@@ -3,6 +3,7 @@
 import { MobileSidebar } from "./mobile-sidebar";
 import { LocaleSwitcher } from "./locale-switcher";
 import { ThemeToggle } from "./theme-toggle";
+import { NotificationBell } from "./notification-bell";
 
 interface TopBarProps {
   title?: string;
@@ -16,6 +17,7 @@ export function TopBar({ title }: TopBarProps) {
         {title && <h1 className="text-lg font-semibold">{title}</h1>}
       </div>
       <div className="flex items-center gap-2">
+        <NotificationBell />
         <ThemeToggle />
         <LocaleSwitcher />
       </div>

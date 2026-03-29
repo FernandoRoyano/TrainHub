@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { useClients } from "@/hooks/use-clients";
-import { useAssignRoutine } from "@/hooks/use-routines";
+import { useAssignRoutine, useRoutine } from "@/hooks/use-routines";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+import { Loader2, Calendar, CalendarCheck } from "lucide-react";
 
 interface AssignRoutineDialogProps {
   routineId: string;
@@ -38,14 +38,24 @@ export function AssignRoutineDialog({
   const t = useTranslations("routines");
   const tc = useTranslations("common");
   const { data: clientsData } = useClients();
+  const { data: routine } = useRoutine(routineId);
   const assignRoutine = useAssignRoutine();
 
   const [clientId, setClientId] = useState("");
   const [startDate, setStartDate] = useState(
     new Date().toISOString().split("T")[0]
   );
+  const [reviewDate, setReviewDate] = useState("");
 
   const clients = clientsData?.data ?? [];
+  const durationWeeks = routine?.duration_weeks ?? 4;
+
+  const endDate = useMemo(() => {
+    if (!startDate) return "";
+    const start = new Date(startDate);
+    start.setDate(start.getDate() + durationWeeks * 7);
+    return start.toISOString().split("T")[0];
+  }, [startDate, durationWeeks]);
 
   const handleAssign = () => {
     if (!clientId || !startDate) return;
@@ -54,11 +64,25 @@ export function AssignRoutineDialog({
         client_id: clientId,
         routine_id: routineId,
         start_date: startDate,
+        notes: reviewDate ? `review_date:${reviewDate}|end_date:${endDate}` : `end_date:${endDate}`,
       },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
+          // Update end_date and review_date via API
+          const res = await fetch("/api/update-routine-dates", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              routineId,
+              clientId,
+              endDate,
+              reviewDate: reviewDate || null,
+            }),
+          });
+          if (!res.ok) console.error("Failed to set dates");
           onOpenChange(false);
           setClientId("");
+          setReviewDate("");
         },
       }
     );
@@ -95,13 +119,50 @@ export function AssignRoutineDialog({
             </Select>
           </div>
 
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1">
+                <Calendar className="h-3.5 w-3.5" />
+                {t("startDate")}
+              </Label>
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1 text-muted-foreground">
+                <Calendar className="h-3.5 w-3.5" />
+                {t("endDate")}
+              </Label>
+              <Input
+                type="date"
+                value={endDate}
+                disabled
+                className="bg-muted"
+              />
+            </div>
+          </div>
+
+          <div className="rounded-lg border bg-muted/50 p-3">
+            <p className="text-xs text-muted-foreground">
+              {t("durationInfo", { weeks: durationWeeks })}
+            </p>
+          </div>
+
           <div className="space-y-2">
-            <Label>{t("startDate")}</Label>
+            <Label className="flex items-center gap-1">
+              <CalendarCheck className="h-3.5 w-3.5" />
+              {t("reviewDate")}
+            </Label>
             <Input
               type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              value={reviewDate}
+              onChange={(e) => setReviewDate(e.target.value)}
+              min={startDate}
             />
+            <p className="text-xs text-muted-foreground">{t("reviewDateHint")}</p>
           </div>
         </div>
 
