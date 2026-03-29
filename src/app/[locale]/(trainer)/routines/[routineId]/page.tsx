@@ -20,9 +20,16 @@ import {
   Users,
   Calendar,
   Image as ImageIcon,
+  Eye,
+  EyeOff,
+  Repeat,
+  Timer,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import type { Exercise } from "@/services/exercises.service";
+import type { ExerciseGroup } from "@/services/routines.service";
+import { ExerciseAnimation } from "@/components/workout/exercise-animation";
 
 function getExerciseDisplayName(exercise: Exercise, locale: string): string {
   if (locale === "es" && exercise.name_es) return exercise.name_es;
@@ -54,6 +61,7 @@ export default function RoutineDetailPage() {
 
   const [showDelete, setShowDelete] = useState(false);
   const [showAssign, setShowAssign] = useState(false);
+  const [clientView, setClientView] = useState(false);
 
   if (isLoading) {
     return (
@@ -89,6 +97,13 @@ export default function RoutineDetailPage() {
           </div>
         </div>
         <div className="flex gap-2 flex-wrap">
+          <Button
+            variant={clientView ? "default" : "outline"}
+            onClick={() => setClientView(!clientView)}
+          >
+            {clientView ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
+            {clientView ? t("trainerView") : t("clientView")}
+          </Button>
           <Button variant="outline" onClick={() => setShowAssign(true)}>
             <Users className="mr-2 h-4 w-4" />
             {t("assignToClient")}
@@ -154,82 +169,184 @@ export default function RoutineDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {day.exercises.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    {t("noExercisesInDay")}
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    {day.exercises.map((ex, i) => {
-                      const inSuperset = ex.superset_group !== null;
-                      const exData = ex.exercise as Exercise | undefined;
-                      const displayName = exData
-                        ? getExerciseDisplayName(exData, locale)
-                        : ex.exercise_id;
-                      const thumbnail = exData
-                        ? getExerciseFirstImage(exData)
-                        : null;
-                      const muscles = exData?.primary_muscles?.length
-                        ? exData.primary_muscles
-                        : exData?.muscle_groups ?? [];
+                {/* Day description (both views) */}
+                {day.description && (
+                  <div className="rounded-lg border bg-muted/50 p-3 mb-4">
+                    <p className="text-sm text-muted-foreground whitespace-pre-line">{day.description}</p>
+                  </div>
+                )}
 
-                      return (
-                        <div
-                          key={ex.id}
-                          className={`flex items-center gap-3 p-2 rounded ${inSuperset ? "bg-primary/5 border border-primary/20" : "bg-muted/50"}`}
-                        >
-                          <span className="text-xs text-muted-foreground font-mono w-5">
-                            {i + 1}
-                          </span>
-                          <div className="h-10 w-10 rounded bg-muted flex items-center justify-center shrink-0 overflow-hidden">
-                            {thumbnail ? (
-                              <img
-                                src={thumbnail}
-                                alt=""
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <ImageIcon className="h-4 w-4 text-muted-foreground/40" />
+                {/* Day notes (trainer view only) */}
+                {!clientView && day.notes && (
+                  <p className="text-xs text-muted-foreground mb-3 italic">{day.notes}</p>
+                )}
+
+                {clientView ? (
+                  /* ===== CLIENT VIEW ===== */
+                  <div className="space-y-3">
+                    {day.groups && day.groups.length > 0 ? (
+                      day.groups.map((group: ExerciseGroup) => {
+                        const groupLabel =
+                          group.group_type === "superset" ? t("supersetGroup") :
+                          group.group_type === "triset" ? t("trisetGroup") :
+                          group.group_type === "circuit" ? t("circuitGroup") :
+                          group.group_type === "emom" ? t("emomGroup") :
+                          group.group_type === "amrap" ? t("amrapGroup") : null;
+
+                        const isSolo = group.group_type === "solo";
+
+                        const groupIcon =
+                          group.group_type === "circuit" ? <Repeat className="h-3 w-3" /> :
+                          group.group_type === "emom" ? <Timer className="h-3 w-3" /> :
+                          group.group_type === "amrap" ? <Zap className="h-3 w-3" /> : null;
+
+                        return (
+                          <div key={group.id} className={!isSolo ? "border-l-4 border-primary/40 pl-3 space-y-2" : "space-y-2"}>
+                            {!isSolo && (
+                              <div className="flex items-center gap-2">
+                                <Badge variant="secondary" className="text-xs font-semibold">
+                                  {groupIcon} {groupLabel}
+                                </Badge>
+                                {group.rounds && (
+                                  <span className="text-xs text-muted-foreground">{group.rounds} {t("roundsLabel")}</span>
+                                )}
+                                {group.time_limit_seconds && (
+                                  <span className="text-xs text-muted-foreground">{Math.floor(group.time_limit_seconds / 60)} min</span>
+                                )}
+                                {group.rest_between_rounds != null && group.rest_between_rounds > 0 && (
+                                  <span className="text-xs text-muted-foreground">· {group.rest_between_rounds}s descanso</span>
+                                )}
+                              </div>
                             )}
+                            {group.exercises.map((ex) => {
+                              const exData = ex.exercise as Exercise | undefined;
+                              const displayName = exData ? getExerciseDisplayName(exData, locale) : ex.exercise_id;
+                              const muscles = exData?.primary_muscles?.length ? exData.primary_muscles : exData?.muscle_groups ?? [];
+
+                              return (
+                                <div key={ex.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/30">
+                                  <ExerciseAnimation
+                                    thumbnailUrl={exData?.thumbnail_url}
+                                    alt={exData?.name}
+                                    className="w-14 h-14 rounded-md object-cover"
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium truncate">{displayName}</p>
+                                    <div className="flex gap-1 mt-0.5">
+                                      {muscles.slice(0, 2).map((mg) => (
+                                        <Badge key={mg} variant="outline" className="text-[10px] px-1 py-0">
+                                          {te(`muscle_${mg}` as Parameters<typeof te>[0])}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                    {ex.notes && (
+                                      <p className="text-xs text-muted-foreground mt-0.5 truncate">{ex.notes}</p>
+                                    )}
+                                  </div>
+                                  <div className="flex gap-3 text-xs text-muted-foreground shrink-0">
+                                    <span>{ex.sets}x{ex.reps}</span>
+                                    {ex.rest_seconds > 0 && <span>{ex.rest_seconds}s</span>}
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">
-                              {displayName}
-                            </p>
-                            <div className="flex gap-1 mt-0.5">
-                              {muscles
-                                .slice(0, 2)
-                                .map((mg) => (
+                        );
+                      })
+                    ) : (
+                      /* Fallback: flat exercises in client view */
+                      day.exercises.map((ex) => {
+                        const exData = ex.exercise as Exercise | undefined;
+                        const displayName = exData ? getExerciseDisplayName(exData, locale) : ex.exercise_id;
+                        return (
+                          <div key={ex.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/30">
+                            <ExerciseAnimation
+                              thumbnailUrl={exData?.thumbnail_url}
+                              alt={exData?.name}
+                              className="w-14 h-14 rounded-md object-cover"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{displayName}</p>
+                            </div>
+                            <div className="flex gap-3 text-xs text-muted-foreground shrink-0">
+                              <span>{ex.sets}x{ex.reps}</span>
+                              <span>{ex.rest_seconds}s</span>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                ) : (
+                  /* ===== TRAINER VIEW (original) ===== */
+                  day.exercises.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      {t("noExercisesInDay")}
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {day.exercises.map((ex, i) => {
+                        const inSuperset = ex.superset_group !== null;
+                        const exData = ex.exercise as Exercise | undefined;
+                        const displayName = exData
+                          ? getExerciseDisplayName(exData, locale)
+                          : ex.exercise_id;
+                        const thumbnail = exData
+                          ? getExerciseFirstImage(exData)
+                          : null;
+                        const muscles = exData?.primary_muscles?.length
+                          ? exData.primary_muscles
+                          : exData?.muscle_groups ?? [];
+
+                        return (
+                          <div
+                            key={ex.id}
+                            className={`flex items-center gap-3 p-2 rounded ${inSuperset ? "bg-primary/5 border border-primary/20" : "bg-muted/50"}`}
+                          >
+                            <span className="text-xs text-muted-foreground font-mono w-5">
+                              {i + 1}
+                            </span>
+                            <div className="h-10 w-10 rounded bg-muted flex items-center justify-center shrink-0 overflow-hidden">
+                              {thumbnail ? (
+                                <img
+                                  src={thumbnail}
+                                  alt=""
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <ImageIcon className="h-4 w-4 text-muted-foreground/40" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">
+                                {displayName}
+                              </p>
+                              <div className="flex gap-1 mt-0.5">
+                                {muscles.slice(0, 2).map((mg) => (
                                   <Badge
                                     key={mg}
                                     variant="outline"
                                     className="text-[10px] px-1 py-0"
                                   >
-                                    {te(
-                                      `muscle_${mg}` as Parameters<typeof te>[0]
-                                    )}
+                                    {te(`muscle_${mg}` as Parameters<typeof te>[0])}
                                   </Badge>
                                 ))}
+                              </div>
                             </div>
+                            <div className="flex gap-3 text-xs text-muted-foreground shrink-0">
+                              <span>{ex.sets}x{ex.reps}</span>
+                              <span>{ex.rest_seconds}s</span>
+                            </div>
+                            {inSuperset && (
+                              <Badge variant="secondary" className="text-[10px] shrink-0">
+                                SS
+                              </Badge>
+                            )}
                           </div>
-                          <div className="flex gap-3 text-xs text-muted-foreground shrink-0">
-                            <span>
-                              {ex.sets}x{ex.reps}
-                            </span>
-                            <span>{ex.rest_seconds}s</span>
-                          </div>
-                          {inSuperset && (
-                            <Badge
-                              variant="secondary"
-                              className="text-[10px] shrink-0"
-                            >
-                              SS
-                            </Badge>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  )
                 )}
               </CardContent>
             </Card>
