@@ -352,6 +352,7 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
         day_number: day.day_number,
         name: day.name ?? "",
         notes: day.notes ?? "",
+        description: day.description ?? "",
         exercises: day.exercises.map((ex) => ({
           id: `loaded_${ex.id}`,
           exercise_id: ex.exercise_id,
