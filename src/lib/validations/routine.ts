@@ -3,6 +3,9 @@ import { z } from "zod";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type T = (key: string, values?: any) => string;
 
+export const GROUP_TYPES = ["solo", "superset", "triset", "circuit", "emom", "amrap"] as const;
+export type GroupType = (typeof GROUP_TYPES)[number];
+
 export const routineExerciseSchema = z.object({
   exercise_id: z.string().uuid(),
   order_index: z.number().int().min(0),
@@ -13,11 +16,24 @@ export const routineExerciseSchema = z.object({
   superset_group: z.number().int().nullable().optional(),
 });
 
+export const exerciseGroupSchema = z.object({
+  group_type: z.enum(GROUP_TYPES),
+  order_index: z.number().int().min(0),
+  rounds: z.number().int().min(1).max(100).nullable().optional(),
+  time_limit_seconds: z.number().int().min(0).max(7200).nullable().optional(),
+  rest_between_rounds: z.number().int().min(0).max(600).nullable().optional(),
+  label: z.string().optional().or(z.literal("")),
+  notes: z.string().optional().or(z.literal("")),
+  exercises: z.array(routineExerciseSchema),
+});
+
 export const routineDaySchema = z.object({
   day_number: z.number().int().min(1),
   name: z.string().optional().or(z.literal("")),
   notes: z.string().optional().or(z.literal("")),
-  exercises: z.array(routineExerciseSchema),
+  description: z.string().optional().or(z.literal("")),
+  groups: z.array(exerciseGroupSchema).optional(),
+  exercises: z.array(routineExerciseSchema), // backward compat
 });
 
 export function createRoutineSchema(t: T) {
@@ -44,4 +60,5 @@ export const assignRoutineSchema = z.object({
 export type RoutineFormData = z.infer<ReturnType<typeof createRoutineSchema>>;
 export type RoutineDayData = z.infer<typeof routineDaySchema>;
 export type RoutineExerciseData = z.infer<typeof routineExerciseSchema>;
+export type ExerciseGroupData = z.infer<typeof exerciseGroupSchema>;
 export type AssignRoutineData = z.infer<typeof assignRoutineSchema>;

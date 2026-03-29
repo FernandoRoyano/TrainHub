@@ -15,13 +15,28 @@ export interface RoutineExercise {
   exercise?: Exercise;
 }
 
+export interface ExerciseGroup {
+  id: string;
+  routine_day_id: string;
+  group_type: "solo" | "superset" | "triset" | "circuit" | "emom" | "amrap";
+  order_index: number;
+  rounds: number | null;
+  time_limit_seconds: number | null;
+  rest_between_rounds: number | null;
+  label: string | null;
+  notes: string | null;
+  exercises: RoutineExercise[];
+}
+
 export interface RoutineDay {
   id: string;
   routine_id: string;
   day_number: number;
   name: string | null;
   notes: string | null;
+  description: string | null;
   exercises: RoutineExercise[];
+  groups?: ExerciseGroup[];
 }
 
 export interface Routine {
@@ -131,11 +146,36 @@ export const routinesService = {
       exercises = (exData ?? []) as RoutineExercise[];
     }
 
+    // Get exercise groups
+    let groups: ExerciseGroup[] = [];
+    if (dayIds.length > 0) {
+      const { data: groupData } = await supabase
+        .from("exercise_groups")
+        .select("*")
+        .in("routine_day_id", dayIds)
+        .order("order_index", { ascending: true });
+      groups = (groupData ?? []) as ExerciseGroup[];
+    }
+
     // Assemble
-    const assembledDays: RoutineDay[] = (days ?? []).map((day) => ({
-      ...day,
-      exercises: exercises.filter((e) => e.routine_day_id === day.id),
-    }));
+    const assembledDays: RoutineDay[] = (days ?? []).map((day) => {
+      const dayExercises = exercises.filter((e) => e.routine_day_id === day.id);
+      const dayGroups = groups
+        .filter((g) => g.routine_day_id === day.id)
+        .map((g) => ({
+          ...g,
+          exercises: dayExercises
+            .filter((e) => (e as RoutineExercise & { exercise_group_id?: string }).exercise_group_id === g.id)
+            .sort((a, b) => a.order_index - b.order_index),
+        }));
+
+      return {
+        ...day,
+        description: day.description ?? null,
+        exercises: dayExercises,
+        groups: dayGroups.length > 0 ? dayGroups : undefined,
+      };
+    });
 
     return { ...routine, days: assembledDays } as Routine;
   },
@@ -172,6 +212,7 @@ export const routinesService = {
         day_number: day.day_number,
         name: day.name || null,
         notes: day.notes || null,
+        description: day.description || null,
       }));
 
       const { data: insertedDays, error: daysError } = await supabase
@@ -180,27 +221,53 @@ export const routinesService = {
         .select();
       if (daysError) throw daysError;
 
-      // 3. Create exercises for each day
-      const exercisesToInsert: Array<{
-        routine_day_id: string;
-        exercise_id: string;
-        order_index: number;
-        sets: number;
-        reps: string;
-        rest_seconds: number;
-        notes: string | null;
-        superset_group: number | null;
-      }> = [];
-
-      // Match inserted days by day_number
+      // 3. Create groups and exercises for each day
       for (const day of data.days) {
         const insertedDay = (insertedDays ?? []).find(
           (d) => d.day_number === day.day_number
         );
         if (!insertedDay) continue;
 
-        for (const ex of day.exercises) {
-          exercisesToInsert.push({
+        // If day has groups, use them
+        if (day.groups && day.groups.length > 0) {
+          for (const group of day.groups) {
+            const { data: insertedGroup, error: groupError } = await supabase
+              .from("exercise_groups")
+              .insert({
+                routine_day_id: insertedDay.id,
+                group_type: group.group_type,
+                order_index: group.order_index,
+                rounds: group.rounds ?? null,
+                time_limit_seconds: group.time_limit_seconds ?? null,
+                rest_between_rounds: group.rest_between_rounds ?? null,
+                label: group.label || null,
+                notes: group.notes || null,
+              })
+              .select()
+              .single();
+            if (groupError) throw groupError;
+
+            if (group.exercises.length > 0) {
+              const exToInsert = group.exercises.map((ex) => ({
+                routine_day_id: insertedDay.id,
+                exercise_group_id: insertedGroup.id,
+                exercise_id: ex.exercise_id,
+                order_index: ex.order_index,
+                sets: ex.sets,
+                reps: ex.reps,
+                rest_seconds: ex.rest_seconds,
+                notes: ex.notes || null,
+                superset_group: ex.superset_group ?? null,
+              }));
+              const { error: exError } = await supabase
+                .from("routine_exercises")
+                .insert(exToInsert);
+              if (exError) throw exError;
+            }
+          }
+        } else {
+          // Fallback: flat exercises (backward compat)
+          const exercisesToInsert = day.exercises.map((ex) => ({
             routine_day_id: insertedDay.id,
             exercise_id: ex.exercise_id,
             order_index: ex.order_index,
@@ -209,15 +276,14 @@ export const routinesService = {
             rest_seconds: ex.rest_seconds,
             notes: ex.notes || null,
             superset_group: ex.superset_group ?? null,
-          });
+          }));
+          if (exercisesToInsert.length > 0) {
+            const { error: exError } = await supabase
+              .from("routine_exercises")
+              .insert(exercisesToInsert);
+            if (exError) throw exError;
+          }
         }
-      }
-
-      if (exercisesToInsert.length > 0) {
-        const { error: exError } = await supabase
-          .from("routine_exercises")
-          .insert(exercisesToInsert);
-        if (exError) throw exError;
       }
     }
 
@@ -255,13 +321,14 @@ export const routinesService = {
       .eq("routine_id", id);
     if (deleteError) throw deleteError;
 
-    // 3. Re-create days and exercises
+    // 3. Re-create days, groups and exercises (same logic as create)
     if (data.days.length > 0) {
       const daysToInsert = data.days.map((day) => ({
         routine_id: id,
         day_number: day.day_number,
         name: day.name || null,
         notes: day.notes || null,
+        description: day.description || null,
       }));
 
       const { data: insertedDays, error: daysError } = await supabase
@@ -270,25 +337,50 @@ export const routinesService = {
         .select();
       if (daysError) throw daysError;
 
-      const exercisesToInsert: Array<{
-        routine_day_id: string;
-        exercise_id: string;
-        order_index: number;
-        sets: number;
-        reps: string;
-        rest_seconds: number;
-        notes: string | null;
-        superset_group: number | null;
-      }> = [];
-
       for (const day of data.days) {
         const insertedDay = (insertedDays ?? []).find(
           (d) => d.day_number === day.day_number
         );
         if (!insertedDay) continue;
 
-        for (const ex of day.exercises) {
-          exercisesToInsert.push({
+        if (day.groups && day.groups.length > 0) {
+          for (const group of day.groups) {
+            const { data: insertedGroup, error: groupError } = await supabase
+              .from("exercise_groups")
+              .insert({
+                routine_day_id: insertedDay.id,
+                group_type: group.group_type,
+                order_index: group.order_index,
+                rounds: group.rounds ?? null,
+                time_limit_seconds: group.time_limit_seconds ?? null,
+                rest_between_rounds: group.rest_between_rounds ?? null,
+                label: group.label || null,
+                notes: group.notes || null,
+              })
+              .select()
+              .single();
+            if (groupError) throw groupError;
+
+            if (group.exercises.length > 0) {
+              const exToInsert = group.exercises.map((ex) => ({
+                routine_day_id: insertedDay.id,
+                exercise_group_id: insertedGroup.id,
+                exercise_id: ex.exercise_id,
+                order_index: ex.order_index,
+                sets: ex.sets,
+                reps: ex.reps,
+                rest_seconds: ex.rest_seconds,
+                notes: ex.notes || null,
+                superset_group: ex.superset_group ?? null,
+              }));
+              const { error: exError } = await supabase
+                .from("routine_exercises")
+                .insert(exToInsert);
+              if (exError) throw exError;
+            }
+          }
+        } else {
+          const exercisesToInsert = day.exercises.map((ex) => ({
             routine_day_id: insertedDay.id,
             exercise_id: ex.exercise_id,
             order_index: ex.order_index,
@@ -297,15 +389,14 @@ export const routinesService = {
             rest_seconds: ex.rest_seconds,
             notes: ex.notes || null,
             superset_group: ex.superset_group ?? null,
-          });
+          }));
+          if (exercisesToInsert.length > 0) {
+            const { error: exError } = await supabase
+              .from("routine_exercises")
+              .insert(exercisesToInsert);
+            if (exError) throw exError;
+          }
         }
-      }
-
-      if (exercisesToInsert.length > 0) {
-        const { error: exError } = await supabase
-          .from("routine_exercises")
-          .insert(exercisesToInsert);
-        if (exError) throw exError;
       }
     }
   },

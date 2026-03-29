@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
-import type { Routine, RoutineDay, RoutineExercise } from "./routines.service";
+import type { Routine, RoutineDay, RoutineExercise, ExerciseGroup } from "./routines.service";
 import type { BodyMeasurement } from "./measurements.service";
 import type { MealPlan, MealPlanMeal, MealFood } from "./nutrition.service";
 
@@ -115,19 +115,42 @@ export const clientAppService = {
 
     const dayIds = (days ?? []).map((d) => d.id);
     let exercises: RoutineExercise[] = [];
+    let groups: ExerciseGroup[] = [];
     if (dayIds.length > 0) {
-      const { data: exData } = await supabase
-        .from("routine_exercises")
-        .select("*, exercise:exercises(*)")
-        .in("routine_day_id", dayIds)
-        .order("order_index");
-      exercises = (exData ?? []) as RoutineExercise[];
+      const [exResult, groupResult] = await Promise.all([
+        supabase
+          .from("routine_exercises")
+          .select("*, exercise:exercises(*)")
+          .in("routine_day_id", dayIds)
+          .order("order_index"),
+        supabase
+          .from("exercise_groups")
+          .select("*")
+          .in("routine_day_id", dayIds)
+          .order("order_index", { ascending: true }),
+      ]);
+      exercises = (exResult.data ?? []) as RoutineExercise[];
+      groups = (groupResult.data ?? []) as ExerciseGroup[];
     }
 
-    const assembledDays = (days ?? []).map((day) => ({
-      ...day,
-      exercises: exercises.filter((e) => e.routine_day_id === day.id),
-    }));
+    const assembledDays = (days ?? []).map((day) => {
+      const dayExercises = exercises.filter((e) => e.routine_day_id === day.id);
+      const dayGroups = groups
+        .filter((g) => g.routine_day_id === day.id)
+        .map((g) => ({
+          ...g,
+          exercises: dayExercises
+            .filter((e) => (e as RoutineExercise & { exercise_group_id?: string }).exercise_group_id === g.id)
+            .sort((a, b) => a.order_index - b.order_index),
+        }));
+
+      return {
+        ...day,
+        description: day.description ?? null,
+        exercises: dayExercises,
+        groups: dayGroups.length > 0 ? dayGroups : undefined,
+      };
+    });
 
     return {
       ...assignment,

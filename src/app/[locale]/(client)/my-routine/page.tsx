@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import type { Exercise } from "@/services/exercises.service";
+import type { ExerciseGroup, RoutineExercise } from "@/services/routines.service";
 import { ExerciseDetailDialog } from "@/components/workout/exercise-detail-dialog";
 import { ExerciseAnimation } from "@/components/workout/exercise-animation";
 import { useMyRoutine, useMyClient, useWorkoutLogs, useStartWorkout, useCompleteWorkout, useLogExercise } from "@/hooks/use-client-app";
@@ -16,6 +17,161 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Dumbbell, Check, Play, Timer, Loader2 } from "lucide-react";
 import { RestTimer } from "@/components/workout/rest-timer";
 import { useRestTimerStore } from "@/stores/rest-timer-store";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function ExerciseCard({
+  ex,
+  exerciseData,
+  setExerciseData,
+  activeWorkoutId,
+  todayLog,
+  logExercise,
+  handleLogExercise,
+  startCountdown,
+  setSelectedExercise,
+  locale,
+  t,
+  te,
+}: {
+  ex: any;
+  exerciseData: Record<string, { sets: number; weight: string; reps: string }>;
+  setExerciseData: React.Dispatch<React.SetStateAction<Record<string, { sets: number; weight: string; reps: string }>>>;
+  activeWorkoutId: string | null;
+  todayLog: any;
+  logExercise: any;
+  handleLogExercise: (id: string, rest?: number, name?: string) => void;
+  startCountdown: (seconds: number, name?: string) => void;
+  setSelectedExercise: (e: Exercise | null) => void;
+  locale: string;
+  t: any;
+  te: any;
+}) {
+  const exData = exerciseData[ex.id] ?? { sets: ex.sets, weight: "", reps: ex.reps ?? "" };
+
+  return (
+    <Card key={ex.id}>
+      <CardContent className="p-3">
+        <div className="flex items-start gap-3">
+          <button
+            type="button"
+            onClick={() => ex.exercise && setSelectedExercise(ex.exercise as Exercise)}
+            className="shrink-0"
+          >
+            <ExerciseAnimation
+              thumbnailUrl={ex.exercise?.thumbnail_url}
+              alt={ex.exercise?.name}
+              className="w-14 h-14 rounded-md object-cover hover:opacity-80 transition-opacity"
+            />
+          </button>
+          <div className="flex-1 min-w-0">
+            <button
+              type="button"
+              onClick={() => ex.exercise && setSelectedExercise(ex.exercise as Exercise)}
+              className="text-left"
+            >
+              <p className="font-medium text-sm hover:text-primary transition-colors">
+                {(locale === "es" ? ex.exercise?.name_es : null) ?? ex.exercise?.name ?? "Exercise"}
+              </p>
+            </button>
+            <div className="flex gap-1 mt-1">
+              {ex.exercise?.muscle_groups?.slice(0, 2).map((mg: string) => (
+                <Badge
+                  key={mg}
+                  variant="outline"
+                  className="text-[10px] px-1 py-0"
+                >
+                  {te(`muscle_${mg}` as Parameters<typeof te>[0])}
+                </Badge>
+              ))}
+            </div>
+            <div className="flex items-center gap-1 mt-1">
+              <p className="text-xs text-muted-foreground">
+                {ex.sets}x{ex.reps} - {ex.rest_seconds}s
+              </p>
+              {(activeWorkoutId || (todayLog && !todayLog.completed)) && ex.rest_seconds > 0 && (
+                <button
+                  onClick={() => startCountdown(ex.rest_seconds, ex.exercise?.name)}
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  title={t("startRestTimer")}
+                >
+                  <Timer className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {(activeWorkoutId || (todayLog && !todayLog.completed)) && (
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="text-center">
+                <label className="text-[10px] text-muted-foreground block">
+                  {t("setsCompleted")}
+                </label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={20}
+                  value={exData.sets}
+                  onChange={(e) =>
+                    setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string }>) => ({
+                      ...prev,
+                      [ex.id]: { ...exData, sets: parseInt(e.target.value) || 0 },
+                    }))
+                  }
+                  className="h-7 w-14 text-xs text-center"
+                />
+              </div>
+              <div className="text-center">
+                <label className="text-[10px] text-muted-foreground block">
+                  {t("repsCompleted")}
+                </label>
+                <Input
+                  type="text"
+                  value={exData.reps}
+                  onChange={(e) =>
+                    setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string }>) => ({
+                      ...prev,
+                      [ex.id]: { ...exData, reps: e.target.value },
+                    }))
+                  }
+                  className="h-7 w-14 text-xs text-center"
+                  placeholder={ex.reps ?? ""}
+                />
+              </div>
+              <div className="text-center">
+                <label className="text-[10px] text-muted-foreground block">
+                  {t("weightUsed")}
+                </label>
+                <Input
+                  type="number"
+                  step="0.5"
+                  value={exData.weight}
+                  onChange={(e) =>
+                    setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string }>) => ({
+                      ...prev,
+                      [ex.id]: { ...exData, weight: e.target.value },
+                    }))
+                  }
+                  className="h-7 w-14 text-xs text-center"
+                  placeholder="kg"
+                />
+              </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2"
+                disabled={logExercise.isPending}
+                onClick={() => handleLogExercise(ex.id, ex.rest_seconds, ex.exercise?.name)}
+              >
+                {logExercise.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+              </Button>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export default function MyRoutinePage() {
   const t = useTranslations("clientApp");
@@ -132,6 +288,12 @@ export default function MyRoutinePage() {
         ))}
       </div>
 
+      {activeDay?.description && (
+        <div className="rounded-lg border bg-muted/50 px-4 py-3">
+          <p className="text-sm text-muted-foreground">{activeDay.description}</p>
+        </div>
+      )}
+
       {activeDay && (
         <div className="space-y-3">
           {!todayLog && !activeWorkoutId ? (
@@ -171,133 +333,96 @@ export default function MyRoutinePage() {
           )}
 
           <div className="space-y-2">
-            {activeDay.exercises.map((ex) => {
-              const exData = exerciseData[ex.id] ?? { sets: ex.sets, weight: "", reps: ex.reps ?? "" };
-              const inSuperset = ex.superset_group !== null;
+            {activeDay.groups && activeDay.groups.length > 0
+              ? activeDay.groups.map((group: ExerciseGroup) => {
+                  const groupLabel =
+                    group.group_type === "superset"
+                      ? tr("supersetGroup")
+                      : group.group_type === "triset"
+                      ? tr("trisetGroup")
+                      : group.group_type === "circuit"
+                      ? `${tr("circuitGroup")} - ${group.rounds ?? 1} ${tr("roundsLabel").toLowerCase()}`
+                      : group.group_type === "emom"
+                      ? `${tr("emomGroup")} - ${Math.floor((group.time_limit_seconds ?? 0) / 60)} min`
+                      : group.group_type === "amrap"
+                      ? `${tr("amrapGroup")} - ${Math.floor((group.time_limit_seconds ?? 0) / 60)} min`
+                      : null;
 
-              return (
-                <Card key={ex.id} className={inSuperset ? "border-primary/30" : ""}>
-                  <CardContent className="p-3">
-                    <div className="flex items-start gap-3">
-                      <button
-                        type="button"
-                        onClick={() => ex.exercise && setSelectedExercise(ex.exercise as Exercise)}
-                        className="shrink-0"
-                      >
-                        <ExerciseAnimation
-                          thumbnailUrl={ex.exercise?.thumbnail_url}
-                          alt={ex.exercise?.name}
-                          className="w-14 h-14 rounded-md object-cover hover:opacity-80 transition-opacity"
-                        />
-                      </button>
-                      <div className="flex-1 min-w-0">
-                        <button
-                          type="button"
-                          onClick={() => ex.exercise && setSelectedExercise(ex.exercise as Exercise)}
-                          className="text-left"
-                        >
-                          <p className="font-medium text-sm hover:text-primary transition-colors">
-                            {(locale === "es" ? ex.exercise?.name_es : null) ?? ex.exercise?.name ?? "Exercise"}
-                          </p>
-                        </button>
-                        <div className="flex gap-1 mt-1">
-                          {ex.exercise?.muscle_groups?.slice(0, 2).map((mg) => (
-                            <Badge
-                              key={mg}
-                              variant="outline"
-                              className="text-[10px] px-1 py-0"
-                            >
-                              {te(`muscle_${mg}` as Parameters<typeof te>[0])}
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="flex items-center gap-1 mt-1">
-                          <p className="text-xs text-muted-foreground">
-                            {ex.sets}x{ex.reps} - {ex.rest_seconds}s
-                          </p>
-                          {(activeWorkoutId || (todayLog && !todayLog.completed)) && ex.rest_seconds > 0 && (
-                            <button
-                              onClick={() => startCountdown(ex.rest_seconds, ex.exercise?.name)}
-                              className="text-muted-foreground hover:text-primary transition-colors"
-                              title={t("startRestTimer")}
-                            >
-                              <Timer className="h-3.5 w-3.5" />
-                            </button>
-                          )}
-                        </div>
+                  const isSolo = group.group_type === "solo";
+                  const exercises = group.exercises ?? [];
+
+                  if (isSolo) {
+                    return exercises.map((ex) => (
+                      <ExerciseCard
+                        key={ex.id}
+                        ex={ex}
+                        exerciseData={exerciseData}
+                        setExerciseData={setExerciseData}
+                        activeWorkoutId={activeWorkoutId}
+                        todayLog={todayLog}
+                        logExercise={logExercise}
+                        handleLogExercise={handleLogExercise}
+                        startCountdown={startCountdown}
+                        setSelectedExercise={setSelectedExercise}
+                        locale={locale}
+                        t={t}
+                        te={te}
+                      />
+                    ));
+                  }
+
+                  return (
+                    <div key={group.id} className="rounded-lg border-l-4 border-primary/40 bg-muted/30 p-2 space-y-2">
+                      <div className="flex items-center gap-2 px-1">
+                        <Badge variant="secondary" className="text-xs font-semibold">
+                          {groupLabel}
+                        </Badge>
+                        {group.rest_between_rounds != null && group.rest_between_rounds > 0 && (
+                          <span className="text-[10px] text-muted-foreground">
+                            ({group.rest_between_rounds}s rest)
+                          </span>
+                        )}
+                        {group.notes && (
+                          <span className="text-[10px] text-muted-foreground italic">{group.notes}</span>
+                        )}
                       </div>
-
-                      {(activeWorkoutId || (todayLog && !todayLog.completed)) && (
-                        <div className="flex items-center gap-2 shrink-0">
-                          <div className="text-center">
-                            <label className="text-[10px] text-muted-foreground block">
-                              {t("setsCompleted")}
-                            </label>
-                            <Input
-                              type="number"
-                              min={0}
-                              max={20}
-                              value={exData.sets}
-                              onChange={(e) =>
-                                setExerciseData((prev) => ({
-                                  ...prev,
-                                  [ex.id]: { ...exData, sets: parseInt(e.target.value) || 0 },
-                                }))
-                              }
-                              className="h-7 w-14 text-xs text-center"
-                            />
-                          </div>
-                          <div className="text-center">
-                            <label className="text-[10px] text-muted-foreground block">
-                              {t("repsCompleted")}
-                            </label>
-                            <Input
-                              type="text"
-                              value={exData.reps}
-                              onChange={(e) =>
-                                setExerciseData((prev) => ({
-                                  ...prev,
-                                  [ex.id]: { ...exData, reps: e.target.value },
-                                }))
-                              }
-                              className="h-7 w-14 text-xs text-center"
-                              placeholder={ex.reps ?? ""}
-                            />
-                          </div>
-                          <div className="text-center">
-                            <label className="text-[10px] text-muted-foreground block">
-                              {t("weightUsed")}
-                            </label>
-                            <Input
-                              type="number"
-                              step="0.5"
-                              value={exData.weight}
-                              onChange={(e) =>
-                                setExerciseData((prev) => ({
-                                  ...prev,
-                                  [ex.id]: { ...exData, weight: e.target.value },
-                                }))
-                              }
-                              className="h-7 w-14 text-xs text-center"
-                              placeholder="kg"
-                            />
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 px-2"
-                            disabled={logExercise.isPending}
-                            onClick={() => handleLogExercise(ex.id, ex.rest_seconds, ex.exercise?.name)}
-                          >
-                            {logExercise.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
-                          </Button>
-                        </div>
-                      )}
+                      {exercises.map((ex) => (
+                        <ExerciseCard
+                          key={ex.id}
+                          ex={ex}
+                          exerciseData={exerciseData}
+                          setExerciseData={setExerciseData}
+                          activeWorkoutId={activeWorkoutId}
+                          todayLog={todayLog}
+                          logExercise={logExercise}
+                          handleLogExercise={handleLogExercise}
+                          startCountdown={startCountdown}
+                          setSelectedExercise={setSelectedExercise}
+                          locale={locale}
+                          t={t}
+                          te={te}
+                        />
+                      ))}
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                  );
+                })
+              : activeDay.exercises.map((ex) => (
+                  <ExerciseCard
+                    key={ex.id}
+                    ex={ex}
+                    exerciseData={exerciseData}
+                    setExerciseData={setExerciseData}
+                    activeWorkoutId={activeWorkoutId}
+                    todayLog={todayLog}
+                    logExercise={logExercise}
+                    handleLogExercise={handleLogExercise}
+                    startCountdown={startCountdown}
+                    setSelectedExercise={setSelectedExercise}
+                    locale={locale}
+                    t={t}
+                    te={te}
+                  />
+                ))}
           </div>
         </div>
       )}

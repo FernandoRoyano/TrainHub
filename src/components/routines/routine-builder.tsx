@@ -8,7 +8,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { createRoutineSchema, type RoutineFormData } from "@/lib/validations/routine";
 import { useCreateRoutine, useUpdateRoutine } from "@/hooks/use-routines";
 import { useRoutineBuilderStore } from "@/stores/routine-builder-store";
-import type { BuilderExercise } from "@/stores/routine-builder-store";
+import type { BuilderExercise, GroupType } from "@/stores/routine-builder-store";
 import type { Routine } from "@/services/routines.service";
 import type { ExerciseBlock } from "@/services/blocks.service";
 import { DIFFICULTY_LEVELS } from "@/lib/constants";
@@ -54,6 +54,13 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
   Loader2,
   ArrowLeft,
   Plus,
@@ -63,6 +70,12 @@ import {
   X,
   Puzzle,
   Image as ImageIcon,
+  ChevronDown,
+  MoreVertical,
+  Repeat,
+  Timer,
+  Zap,
+  Layers,
 } from "lucide-react";
 import Link from "next/link";
 import type { Exercise } from "@/services/exercises.service";
@@ -285,6 +298,7 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
     addDay,
     removeDay,
     updateDay,
+    updateDayDescription,
     setActiveDayIndex,
     addExercise,
     removeExercise,
@@ -292,11 +306,17 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
     toggleSuperset,
     addExercisesFromBlock,
     reorderExercise,
+    addGroup,
+    removeGroup,
+    updateGroup,
+    addExerciseToGroup,
+    changeGroupType,
     reset,
   } = useRoutineBuilderStore();
 
   const [showPicker, setShowPicker] = useState(false);
   const [showBlockPicker, setShowBlockPicker] = useState(false);
+  const [groupPickerIndex, setGroupPickerIndex] = useState<number | null>(null);
   const uploadMedia = useUploadMedia();
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(routine?.cover_image ?? null);
@@ -386,6 +406,25 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
           day_number: day.day_number,
           name: day.name,
           notes: day.notes,
+          description: day.description,
+          groups: day.groups.map((g) => ({
+            group_type: g.group_type,
+            order_index: g.order_index,
+            rounds: g.rounds,
+            time_limit_seconds: g.time_limit_seconds,
+            rest_between_rounds: g.rest_between_rounds,
+            label: g.label,
+            notes: g.notes,
+            exercises: g.exercises.map((ex) => ({
+              exercise_id: ex.exercise_id,
+              order_index: ex.order_index,
+              sets: ex.sets,
+              reps: ex.reps,
+              rest_seconds: ex.rest_seconds,
+              notes: ex.notes,
+              superset_group: ex.superset_group,
+            })),
+          })),
           exercises: day.exercises.map((ex) => ({
             exercise_id: ex.exercise_id,
             order_index: ex.order_index,
@@ -703,8 +742,24 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                     )}
                   </div>
 
-                  {/* Exercises list with drag & drop */}
-                  {activeDay.exercises.length === 0 ? (
+                  {/* Day description */}
+                  <div>
+                    <label className="text-xs text-muted-foreground">
+                      {t("dayDescription")}
+                    </label>
+                    <Textarea
+                      placeholder={t("dayDescriptionPlaceholder")}
+                      value={activeDay?.description || ""}
+                      onChange={(e) =>
+                        updateDayDescription(activeDayIndex, e.target.value)
+                      }
+                      rows={2}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  {/* Group-based exercises */}
+                  {activeDay.groups.length === 0 ? (
                     <div className="text-center py-8 text-sm text-muted-foreground border rounded-lg border-dashed">
                       {t("noExercisesInDay")}
                     </div>
@@ -718,29 +773,218 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                         items={activeDay.exercises.map((e) => e.id)}
                         strategy={verticalListSortingStrategy}
                       >
-                        <div className="space-y-2">
-                          {activeDay.exercises.map((ex, exIndex) => {
-                            const inSuperset = ex.superset_group !== null;
-                            const prevInSameSuperset =
-                              exIndex > 0 &&
-                              activeDay.exercises[exIndex - 1].superset_group ===
-                                ex.superset_group &&
-                              inSuperset;
+                        <div className="space-y-3">
+                          {activeDay.groups.map((group, groupIndex) => {
+                            if (group.group_type === "solo") {
+                              // Solo: render exercises directly (no group wrapper)
+                              return group.exercises.map((ex) => {
+                                const flatIndex = activeDay.exercises.findIndex((e) => e.id === ex.id);
+                                return (
+                                  <SortableExerciseItem
+                                    key={ex.id}
+                                    ex={ex}
+                                    exIndex={flatIndex}
+                                    activeDayIndex={activeDayIndex}
+                                    prevInSameSuperset={false}
+                                    locale={locale}
+                                    t={t}
+                                    te={te}
+                                    updateExercise={updateExercise}
+                                    toggleSuperset={toggleSuperset}
+                                    removeExercise={removeExercise}
+                                  />
+                                );
+                              });
+                            }
+
+                            // Non-solo group rendering
+                            const isSuperset = group.group_type === "superset" || group.group_type === "triset";
+                            const isTimedGroup = group.group_type === "circuit" || group.group_type === "emom" || group.group_type === "amrap";
+
+                            const groupBadgeColor: Record<string, string> = {
+                              superset: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+                              triset: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
+                              circuit: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+                              emom: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
+                              amrap: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+                            };
+
+                            const groupBorderColor: Record<string, string> = {
+                              superset: "border-purple-200 dark:border-purple-800",
+                              triset: "border-indigo-200 dark:border-indigo-800",
+                              circuit: "border-orange-200 dark:border-orange-800",
+                              emom: "border-rose-200 dark:border-rose-800",
+                              amrap: "border-emerald-200 dark:border-emerald-800",
+                            };
+
+                            const groupLabel: Record<string, string> = {
+                              superset: "Superserie",
+                              triset: "Triserie",
+                              circuit: "Circuito",
+                              emom: "EMOM",
+                              amrap: "AMRAP",
+                            };
+
+                            const groupIcon: Record<string, React.ReactNode> = {
+                              superset: <Link2 className="h-3 w-3" />,
+                              triset: <Layers className="h-3 w-3" />,
+                              circuit: <Repeat className="h-3 w-3" />,
+                              emom: <Timer className="h-3 w-3" />,
+                              amrap: <Zap className="h-3 w-3" />,
+                            };
 
                             return (
-                              <SortableExerciseItem
-                                key={ex.id}
-                                ex={ex}
-                                exIndex={exIndex}
-                                activeDayIndex={activeDayIndex}
-                                prevInSameSuperset={prevInSameSuperset}
-                                locale={locale}
-                                t={t}
-                                te={te}
-                                updateExercise={updateExercise}
-                                toggleSuperset={toggleSuperset}
-                                removeExercise={removeExercise}
-                              />
+                              <div
+                                key={group.id}
+                                className={`border-2 rounded-lg p-3 space-y-2 ${groupBorderColor[group.group_type] || "border-muted"}`}
+                              >
+                                {/* Group header */}
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${groupBadgeColor[group.group_type] || ""}`}>
+                                      {groupIcon[group.group_type]}
+                                      {groupLabel[group.group_type] || group.group_type}
+                                    </span>
+                                    {group.exercises.length > 0 && (
+                                      <span className="text-xs text-muted-foreground">
+                                        {group.exercises.length} {group.exercises.length === 1 ? "ejercicio" : "ejercicios"}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button type="button" variant="ghost" size="icon" className="h-7 w-7">
+                                        <MoreVertical className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      {(["superset", "triset", "circuit", "emom", "amrap"] as GroupType[])
+                                        .filter((gt) => gt !== group.group_type)
+                                        .map((gt) => (
+                                          <DropdownMenuItem
+                                            key={gt}
+                                            onClick={() => changeGroupType(activeDayIndex, groupIndex, gt)}
+                                          >
+                                            {groupLabel[gt]}
+                                          </DropdownMenuItem>
+                                        ))}
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        className="text-destructive"
+                                        onClick={() => removeGroup(activeDayIndex, groupIndex)}
+                                      >
+                                        <Trash2 className="h-3.5 w-3.5 mr-2" />
+                                        {tc("delete")}
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+
+                                {/* Group config fields for timed groups */}
+                                {isTimedGroup && (
+                                  <div className="grid grid-cols-3 gap-2">
+                                    <div>
+                                      <label className="text-xs text-muted-foreground">
+                                        {t("roundsLabel")}
+                                      </label>
+                                      <Input
+                                        type="number"
+                                        min={1}
+                                        max={50}
+                                        value={group.rounds ?? ""}
+                                        onChange={(e) =>
+                                          updateGroup(activeDayIndex, groupIndex, {
+                                            rounds: e.target.value ? parseInt(e.target.value) : null,
+                                          })
+                                        }
+                                        placeholder="3"
+                                        className="h-8 text-sm"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-xs text-muted-foreground">
+                                        {t("timeLimitLabel")}
+                                      </label>
+                                      <Input
+                                        type="number"
+                                        min={0}
+                                        max={3600}
+                                        value={group.time_limit_seconds ?? ""}
+                                        onChange={(e) =>
+                                          updateGroup(activeDayIndex, groupIndex, {
+                                            time_limit_seconds: e.target.value ? parseInt(e.target.value) : null,
+                                          })
+                                        }
+                                        placeholder="60"
+                                        className="h-8 text-sm"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-xs text-muted-foreground">
+                                        {t("restBetweenRoundsLabel")}
+                                      </label>
+                                      <Input
+                                        type="number"
+                                        min={0}
+                                        max={600}
+                                        value={group.rest_between_rounds ?? ""}
+                                        onChange={(e) =>
+                                          updateGroup(activeDayIndex, groupIndex, {
+                                            rest_between_rounds: e.target.value ? parseInt(e.target.value) : null,
+                                          })
+                                        }
+                                        placeholder="60"
+                                        className="h-8 text-sm"
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Superset/triset connecting line indicator */}
+                                {isSuperset && group.exercises.length > 1 && (
+                                  <div className="flex items-center gap-1 ml-2">
+                                    <div className={`w-0.5 h-3 rounded ${group.group_type === "superset" ? "bg-purple-400" : "bg-indigo-400"}`} />
+                                    <span className="text-[10px] text-muted-foreground">{t("superset")}</span>
+                                  </div>
+                                )}
+
+                                {/* Group exercises */}
+                                <div className="space-y-2">
+                                  {group.exercises.map((ex) => {
+                                    const flatIndex = activeDay.exercises.findIndex((e) => e.id === ex.id);
+                                    return (
+                                      <SortableExerciseItem
+                                        key={ex.id}
+                                        ex={ex}
+                                        exIndex={flatIndex}
+                                        activeDayIndex={activeDayIndex}
+                                        prevInSameSuperset={false}
+                                        locale={locale}
+                                        t={t}
+                                        te={te}
+                                        updateExercise={updateExercise}
+                                        toggleSuperset={toggleSuperset}
+                                        removeExercise={removeExercise}
+                                      />
+                                    );
+                                  })}
+                                </div>
+
+                                {/* Add exercise to group button */}
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full border border-dashed"
+                                  onClick={() => {
+                                    setGroupPickerIndex(groupIndex);
+                                    setShowPicker(true);
+                                  }}
+                                >
+                                  <Plus className="h-3.5 w-3.5 mr-1" />
+                                  {t("addExercise")}
+                                </Button>
+                              </div>
                             );
                           })}
                         </div>
@@ -754,11 +998,48 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                       type="button"
                       variant="outline"
                       className="flex-1 lg:hidden"
-                      onClick={() => setShowPicker(true)}
+                      onClick={() => {
+                        setGroupPickerIndex(null);
+                        setShowPicker(true);
+                      }}
                     >
                       <Plus className="mr-2 h-4 w-4" />
                       {t("addExercise")}
                     </Button>
+
+                    {/* Add Group dropdown */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button type="button" variant="outline" className="flex-1">
+                          <Layers className="mr-2 h-4 w-4" />
+                          {t("addGroup")}
+                          <ChevronDown className="ml-2 h-3.5 w-3.5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => addGroup(activeDayIndex, "superset")}>
+                          <Link2 className="h-3.5 w-3.5 mr-2" />
+                          Superserie
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => addGroup(activeDayIndex, "triset")}>
+                          <Layers className="h-3.5 w-3.5 mr-2" />
+                          Triserie
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => addGroup(activeDayIndex, "circuit")}>
+                          <Repeat className="h-3.5 w-3.5 mr-2" />
+                          Circuito
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => addGroup(activeDayIndex, "emom")}>
+                          <Timer className="h-3.5 w-3.5 mr-2" />
+                          EMOM
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => addGroup(activeDayIndex, "amrap")}>
+                          <Zap className="h-3.5 w-3.5 mr-2" />
+                          AMRAP
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+
                     <Button
                       type="button"
                       variant="outline"
@@ -794,8 +1075,17 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
       {/* Exercise Picker Modal */}
       <ExercisePicker
         open={showPicker}
-        onOpenChange={setShowPicker}
-        onSelect={(exercise) => addExercise(activeDayIndex, exercise)}
+        onOpenChange={(open) => {
+          setShowPicker(open);
+          if (!open) setGroupPickerIndex(null);
+        }}
+        onSelect={(exercise) => {
+          if (groupPickerIndex !== null) {
+            addExerciseToGroup(activeDayIndex, groupPickerIndex, exercise);
+          } else {
+            addExercise(activeDayIndex, exercise);
+          }
+        }}
       />
 
       {/* Block Picker Modal */}
