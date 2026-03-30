@@ -23,6 +23,7 @@ export async function POST(request: Request) {
       notes,
       routine_override_id,
       meal_plan_override_id,
+      questionnaire_template_ids,
     } = body;
 
     if (!client_id || !coaching_plan_id || !start_date) {
@@ -77,9 +78,10 @@ export async function POST(request: Request) {
       .select("questionnaire_template_id")
       .eq("coaching_plan_id", coaching_plan_id);
 
-    const questionnaireTemplateIds = (questLinks ?? []).map(
-      (q) => q.questionnaire_template_id
-    );
+    // Use override if provided, otherwise use plan's linked questionnaires
+    const questionnaireTemplateIds = Array.isArray(questionnaire_template_ids) && questionnaire_template_ids.length > 0
+      ? questionnaire_template_ids
+      : (questLinks ?? []).map((q) => q.questionnaire_template_id);
 
     let client_routine_id: string | null = null;
     let client_meal_plan_id: string | null = null;

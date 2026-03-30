@@ -1401,6 +1401,7 @@
     "save": "Save",
     "useDefault": "Use plan template",
     "selected": "Selected",
-    "notesPlaceholder": "Additional notes..."
+    "notesPlaceholder": "Additional notes...",
+    "questionnaires": "Questionnaires to send"
   }
 }

@@ -1401,6 +1401,7 @@
     "save": "Guardar",
     "useDefault": "Usar plantilla del plan",
     "selected": "Seleccionado",
-    "notesPlaceholder": "Notas adicionales..."
+    "notesPlaceholder": "Notas adicionales...",
+    "questionnaires": "Cuestionarios a enviar"
   }
 }

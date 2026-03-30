@@ -6,6 +6,7 @@ import { useCoachingPlans } from "@/hooks/use-coaching-plans";
 import { useServiceTiers } from "@/hooks/use-service-tiers";
 import { useRoutines } from "@/hooks/use-routines";
 import { useMealPlans } from "@/hooks/use-nutrition";
+import { useQuestionnaireTemplates } from "@/hooks/use-questionnaires";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
@@ -73,6 +74,7 @@ export function AssignPlanWizardDialog({
   const { data: tiers } = useServiceTiers();
   const { data: routinesData } = useRoutines({ is_template: true } as never);
   const { data: mealPlansData } = useMealPlans({ is_template: true } as never);
+  const { data: questionnaireTemplates } = useQuestionnaireTemplates();
 
   const plans = plansData?.data ?? [];
   const routineTemplates = (routinesData as { data?: { id: string; name: string }[] })?.data ??
@@ -86,7 +88,10 @@ export function AssignPlanWizardDialog({
   const [routineOverrideId, setRoutineOverrideId] = useState("");
   const [mealPlanOverrideId, setMealPlanOverrideId] = useState("");
   const [notes, setNotes] = useState("");
+  const [selectedQuestionnaireIds, setSelectedQuestionnaireIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const allQuestionnaires = questionnaireTemplates ?? [];
 
   const selectedPlan = plans.find((p) => p.id === selectedPlanId);
 
@@ -118,6 +123,10 @@ export function AssignPlanWizardDialog({
     setSelectedPlanId(planId);
     setRoutineOverrideId("");
     setMealPlanOverrideId("");
+    // Pre-select all questionnaires linked to this plan
+    const plan = plans.find((p) => p.id === planId);
+    const linkedIds = (plan as { questionnaire_template_ids?: string[] })?.questionnaire_template_ids ?? [];
+    setSelectedQuestionnaireIds(linkedIds.length > 0 ? linkedIds : allQuestionnaires.map((q) => q.id));
     setStep(2);
   };
 
@@ -139,6 +148,7 @@ export function AssignPlanWizardDialog({
           notes: notes || undefined,
           routine_override_id: routineOverrideId && routineOverrideId !== "default" ? routineOverrideId : undefined,
           meal_plan_override_id: mealPlanOverrideId && mealPlanOverrideId !== "default" ? mealPlanOverrideId : undefined,
+          questionnaire_template_ids: selectedQuestionnaireIds.length > 0 ? selectedQuestionnaireIds : undefined,
         }),
       });
       if (!res.ok) {
@@ -356,6 +366,32 @@ export function AssignPlanWizardDialog({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            )}
+
+            {/* Questionnaires selection */}
+            {allQuestionnaires.length > 0 && (
+              <div className="space-y-2">
+                <Label>{t("questionnaires")}</Label>
+                <div className="space-y-1.5 rounded-lg border p-3">
+                  {allQuestionnaires.map((qt) => (
+                    <label key={qt.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                      <input
+                        type="checkbox"
+                        checked={selectedQuestionnaireIds.includes(qt.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedQuestionnaireIds((prev) => [...prev, qt.id]);
+                          } else {
+                            setSelectedQuestionnaireIds((prev) => prev.filter((id) => id !== qt.id));
+                          }
+                        }}
+                        className="rounded border-input"
+                      />
+                      {qt.name}
+                    </label>
+                  ))}
+                </div>
               </div>
             )}
 
