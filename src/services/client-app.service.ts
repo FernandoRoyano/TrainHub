@@ -512,6 +512,21 @@ export const clientAppService = {
     if (updateError) throw updateError;
   },
 
+  async getMyActiveCoachingPlan() {
+    const { supabase, clientId } = await getAuthenticatedClient();
+
+    const { data, error } = await supabase
+      .from("client_coaching_plans")
+      .select("*, coaching_plan:coaching_plans(*, service_tier:service_tiers(id, name, color, features))")
+      .eq("client_id", clientId)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  },
+
   async getMyActiveServiceTier() {
     const { supabase, clientId } = await getAuthenticatedClient();
 

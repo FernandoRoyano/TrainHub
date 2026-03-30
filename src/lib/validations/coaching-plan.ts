@@ -26,6 +26,8 @@ export const assignCoachingPlanSchema = z.object({
   coaching_plan_id: z.string().uuid(),
   start_date: z.string().min(1),
   notes: z.string().optional().or(z.literal("")),
+  routine_override_id: z.string().uuid().optional().or(z.literal("")),
+  meal_plan_override_id: z.string().uuid().optional().or(z.literal("")),
 });
 
 export type CoachingPlanFormData = z.infer<ReturnType<typeof createCoachingPlanSchema>>;

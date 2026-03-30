@@ -3,7 +3,7 @@
 import { usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { Dumbbell, UtensilsCrossed, BarChart3, Ruler, MessageCircle, User, FileQuestion } from "lucide-react";
+import { Dumbbell, UtensilsCrossed, BarChart3, Ruler, MessageCircle, User, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NavigationProgress } from "@/components/shared/navigation-progress";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
@@ -19,11 +19,11 @@ const navItems: {
   labelKey: string;
   featureKey?: FeatureKey;
 }[] = [
+  { href: "/my-plan", icon: ClipboardList, labelKey: "myPlan" },
   { href: "/my-routine", icon: Dumbbell, labelKey: "myRoutine", featureKey: "training" },
   { href: "/my-nutrition", icon: UtensilsCrossed, labelKey: "myNutrition", featureKey: "nutrition" },
   { href: "/my-progress", icon: BarChart3, labelKey: "myProgress", featureKey: "progress_tracking" },
   { href: "/my-measurements", icon: Ruler, labelKey: "myMeasurements", featureKey: "measurements" },
-  { href: "/my-questionnaires", icon: FileQuestion, labelKey: "myQuestionnaires", featureKey: "questionnaires" },
   { href: "/my-messages", icon: MessageCircle, labelKey: "myMessages", featureKey: "messaging" },
   { href: "/my-profile", icon: User, labelKey: "myProfile" },
 ];

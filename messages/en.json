@@ -87,7 +87,8 @@
     "analytics": "Analytics",
     "templates": "Templates",
     "serviceTiers": "Tiers",
-    "coachingPlans": "Plans"
+    "coachingPlans": "Plans",
+    "myPlan": "My Plan"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -209,7 +210,11 @@
     "pendingQuestionnaires": "Pending questionnaires",
     "unknownQuestionnaire": "Unknown questionnaire",
     "trainerNotes": "Trainer notes",
-    "notesPlaceholder": "Write notes about this client..."
+    "notesPlaceholder": "Write notes about this client...",
+    "assignPlan": "Assign Plan",
+    "changePlan": "Change Plan",
+    "price": "Price",
+    "pendingCount": "{count} pending"
   },
   "statsTab": {
     "profileData": "Profile data",
@@ -1354,5 +1359,48 @@
     "planDuplicateError": "Error duplicating coaching plan",
     "planAssigned": "Coaching plan assigned to client",
     "planAssignError": "Error assigning coaching plan"
+  },
+  "myPlan": {
+    "title": "My Plan",
+    "noPlan": "You don't have an assigned plan",
+    "contactTrainer": "Contact your trainer to get a plan assigned.",
+    "whatsIncluded": "What's included in your plan",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "renewalDate": "Renewal date",
+    "price": "Price",
+    "training": "Training",
+    "nutrition": "Nutrition",
+    "messaging": "Messaging",
+    "progressTracking": "Progress tracking",
+    "measurements": "Measurements",
+    "checkins": "Check-ins",
+    "questionnaires": "Questionnaires",
+    "pendingQuestionnaires": "Pending questionnaires",
+    "fillQuestionnaire": "Fill out",
+    "viewRoutine": "View my routine",
+    "viewNutrition": "View my nutrition"
+  },
+  "assignPlanWizard": {
+    "title": "Assign Plan",
+    "selectPlan": "Select plan",
+    "confirmAssignment": "Confirm assignment",
+    "withNutrition": "With nutrition",
+    "withoutNutrition": "Without nutrition",
+    "overrideRoutine": "Override routine (optional)",
+    "overrideMealPlan": "Override meal plan (optional)",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "notes": "Notes",
+    "assignButton": "Assign",
+    "changePlan": "Change Plan",
+    "planAssigned": "Plan assigned successfully",
+    "planAssignError": "Error assigning plan",
+    "duration": "{weeks} weeks",
+    "perMonth": "/mo",
+    "save": "Save",
+    "useDefault": "Use plan template",
+    "selected": "Selected",
+    "notesPlaceholder": "Additional notes..."
   }
 }

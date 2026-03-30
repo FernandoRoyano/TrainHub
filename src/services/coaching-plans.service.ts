@@ -20,7 +20,7 @@ export interface CoachingPlan {
   updated_at: string;
   questionnaire_template_ids?: string[];
   // Joined relations
-  service_tier?: { id: string; name: string; color: string | null } | null;
+  service_tier?: { id: string; name: string; color: string | null; features?: Record<string, boolean> } | null;
   routine_template?: { id: string; name: string } | null;
   meal_plan_template?: { id: string; name: string } | null;
 }
@@ -65,7 +65,7 @@ export const coachingPlansService = {
     let query = supabase
       .from("coaching_plans")
       .select(
-        "*, service_tier:service_tiers(id, name, color), routine_template:routines!coaching_plans_routine_template_id_fkey(id, name), meal_plan_template:meal_plans!coaching_plans_meal_plan_template_id_fkey(id, name)",
+        "*, service_tier:service_tiers(id, name, color, features), routine_template:routines!coaching_plans_routine_template_id_fkey(id, name), meal_plan_template:meal_plans!coaching_plans_meal_plan_template_id_fkey(id, name)",
         { count: "exact" }
       )
       .eq("trainer_id", user.id)
@@ -95,7 +95,7 @@ export const coachingPlansService = {
     const { data: plan, error: planError } = await supabase
       .from("coaching_plans")
       .select(
-        "*, service_tier:service_tiers(id, name, color), routine_template:routines!coaching_plans_routine_template_id_fkey(id, name), meal_plan_template:meal_plans!coaching_plans_meal_plan_template_id_fkey(id, name)"
+        "*, service_tier:service_tiers(id, name, color, features), routine_template:routines!coaching_plans_routine_template_id_fkey(id, name), meal_plan_template:meal_plans!coaching_plans_meal_plan_template_id_fkey(id, name)"
       )
       .eq("id", id)
       .single();
@@ -252,7 +252,7 @@ export const coachingPlansService = {
 
     const { data, error } = await supabase
       .from("client_coaching_plans")
-      .select("*, coaching_plan:coaching_plans(*)")
+      .select("*, coaching_plan:coaching_plans(*, service_tier:service_tiers(id, name, color, features))")
       .eq("client_id", clientId)
       .eq("trainer_id", user.id)
       .eq("status", "active")

@@ -182,6 +182,14 @@ export function useSubmitQuestionnaireResponses() {
   });
 }
 
+export function useMyActiveCoachingPlan() {
+  return useQuery({
+    queryKey: ["my-coaching-plan"],
+    queryFn: () => clientAppService.getMyActiveCoachingPlan(),
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
 export function useMyActiveServiceTier() {
   return useQuery({
     queryKey: ["my-service-tier"],

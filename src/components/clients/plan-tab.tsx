@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EmptyState } from "@/components/shared/empty-state";
+import { AssignPlanWizardDialog } from "./assign-plan-wizard-dialog";
 import Link from "next/link";
 import {
   ClipboardList,
@@ -23,7 +23,9 @@ import {
   Calendar,
   Save,
   ExternalLink,
+  Check,
 } from "lucide-react";
+import type { ServiceTierFeatures } from "@/lib/validations/service-tier";
 
 interface PlanTabProps {
   clientId: string;
@@ -37,9 +39,21 @@ const statusColors: Record<string, string> = {
   assigned: "bg-blue-500/10 text-blue-400 border-blue-500/20",
 };
 
+const featureLabelKeys: Record<string, string> = {
+  training: "training",
+  nutrition: "nutrition",
+  messaging: "messaging",
+  progress_tracking: "progressTracking",
+  measurements: "measurements",
+  checkins: "checkins",
+  questionnaires: "questionnaires",
+};
+
 export function PlanTab({ clientId }: PlanTabProps) {
   const t = useTranslations("planTab");
   const tc = useTranslations("common");
+  const tMyPlan = useTranslations("myPlan");
+  const tWizard = useTranslations("assignPlanWizard");
   const { data: client } = useClient(clientId);
   const { data: coachingPlan, isLoading: loadingPlan } = useClientCoachingPlan(clientId);
   const { data: routines, isLoading: loadingRoutines } = useClientRoutines(clientId);
@@ -49,6 +63,7 @@ export function PlanTab({ clientId }: PlanTabProps) {
 
   const [notes, setNotes] = useState<string | null>(null);
   const [notesEdited, setNotesEdited] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   const currentNotes = notes ?? client?.notes ?? "";
 
@@ -85,54 +100,84 @@ export function PlanTab({ clientId }: PlanTabProps) {
     (q: { status: string }) => q.status === "pending" || q.status === "assigned"
   );
 
+  const tierFeatures = (coachingPlan?.coaching_plan?.service_tier as { features?: ServiceTierFeatures } | undefined)?.features;
+  const enabledFeatures = tierFeatures
+    ? Object.entries(tierFeatures).filter(([, v]) => v)
+    : [];
+
   return (
     <div className="space-y-4">
       {/* Active Coaching Plan */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <ClipboardList className="h-4 w-4" />
-            {t("coachingPlan")}
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <ClipboardList className="h-4 w-4" />
+              {t("coachingPlan")}
+            </CardTitle>
+            <Button size="sm" variant="outline" onClick={() => setWizardOpen(true)}>
+              {coachingPlan ? t("changePlan") : t("assignPlan")}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {coachingPlan ? (
-            <div className="flex items-start gap-4">
-              {coachingPlan.coaching_plan?.cover_image && (
-                <img
-                  src={coachingPlan.coaching_plan.cover_image}
-                  alt=""
-                  className="w-16 h-16 rounded-lg object-cover shrink-0"
-                />
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-medium text-sm">
-                    {coachingPlan.coaching_plan?.name ?? t("unknownPlan")}
-                  </p>
-                  <Badge variant="outline" className={statusColors[coachingPlan.status] ?? ""}>
-                    {tc(coachingPlan.status as "active" | "completed" | "cancelled")}
-                  </Badge>
-                  {coachingPlan.coaching_plan?.service_tier && (
-                    <Badge
-                      variant="outline"
-                      style={{
-                        borderColor: coachingPlan.coaching_plan.service_tier.color ?? undefined,
-                        color: coachingPlan.coaching_plan.service_tier.color ?? undefined,
-                      }}
-                    >
-                      {coachingPlan.coaching_plan.service_tier.name}
+            <div className="space-y-3">
+              <div className="flex items-start gap-4">
+                {coachingPlan.coaching_plan?.cover_image && (
+                  <img
+                    src={coachingPlan.coaching_plan.cover_image}
+                    alt=""
+                    className="w-16 h-16 rounded-lg object-cover shrink-0"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-medium text-sm">
+                      {coachingPlan.coaching_plan?.name ?? t("unknownPlan")}
+                    </p>
+                    <Badge variant="outline" className={statusColors[coachingPlan.status] ?? ""}>
+                      {tc(coachingPlan.status as "active" | "completed" | "cancelled")}
                     </Badge>
+                    {coachingPlan.coaching_plan?.service_tier && (
+                      <Badge
+                        variant="outline"
+                        style={{
+                          borderColor: coachingPlan.coaching_plan.service_tier.color ?? undefined,
+                          color: coachingPlan.coaching_plan.service_tier.color ?? undefined,
+                        }}
+                      >
+                        {coachingPlan.coaching_plan.service_tier.name}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                    <Calendar className="h-3 w-3" />
+                    <span>
+                      {coachingPlan.start_date}
+                      {coachingPlan.end_date && ` — ${coachingPlan.end_date}`}
+                    </span>
+                  </div>
+                  {coachingPlan.coaching_plan?.price != null && coachingPlan.coaching_plan.price > 0 && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t("price")}: {coachingPlan.coaching_plan.price}
+                      {coachingPlan.coaching_plan.currency ? ` ${coachingPlan.coaching_plan.currency}` : ""}
+                    </p>
                   )}
                 </div>
-                <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                  <Calendar className="h-3 w-3" />
-                  <span>
-                    {coachingPlan.start_date}
-                    {coachingPlan.end_date && ` — ${coachingPlan.end_date}`}
-                  </span>
-                </div>
               </div>
+
+              {/* Tier features */}
+              {enabledFeatures.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {enabledFeatures.map(([key]) => (
+                    <span key={key} className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Check className="h-3 w-3 text-emerald-400" />
+                      {tMyPlan(featureLabelKeys[key] ?? key)}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-4">
@@ -141,6 +186,43 @@ export function PlanTab({ clientId }: PlanTabProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* Pending Questionnaires */}
+      {pendingQuestionnaires && pendingQuestionnaires.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileQuestion className="h-4 w-4" />
+              {t("pendingQuestionnaires")}
+              <Badge variant="secondary" className="ml-1">
+                {t("pendingCount", { count: pendingQuestionnaires.length })}
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {pendingQuestionnaires.map((q: { id: string; status: string; template?: { name: string }; due_date: string | null }) => (
+                <div
+                  key={q.id}
+                  className="flex items-center justify-between rounded-lg border p-3"
+                >
+                  <p className="text-sm font-medium">
+                    {q.template?.name ?? t("unknownQuestionnaire")}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    {q.due_date && (
+                      <span className="text-xs text-muted-foreground">{q.due_date}</span>
+                    )}
+                    <Badge variant="outline" className={statusColors[q.status] ?? ""}>
+                      {q.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Current Routine */}
       <Card>
@@ -223,40 +305,6 @@ export function PlanTab({ clientId }: PlanTabProps) {
         </CardContent>
       </Card>
 
-      {/* Pending Questionnaires */}
-      {pendingQuestionnaires && pendingQuestionnaires.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <FileQuestion className="h-4 w-4" />
-              {t("pendingQuestionnaires")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {pendingQuestionnaires.map((q: { id: string; status: string; template?: { name: string }; due_date: string | null }) => (
-                <div
-                  key={q.id}
-                  className="flex items-center justify-between rounded-lg border p-3"
-                >
-                  <p className="text-sm font-medium">
-                    {q.template?.name ?? t("unknownQuestionnaire")}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    {q.due_date && (
-                      <span className="text-xs text-muted-foreground">{q.due_date}</span>
-                    )}
-                    <Badge variant="outline" className={statusColors[q.status] ?? ""}>
-                      {q.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Trainer Notes */}
       <Card>
         <CardHeader className="pb-3">
@@ -286,6 +334,13 @@ export function PlanTab({ clientId }: PlanTabProps) {
           />
         </CardContent>
       </Card>
+
+      {/* Wizard Dialog */}
+      <AssignPlanWizardDialog
+        clientId={clientId}
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+      />
     </div>
   );
 }

@@ -87,7 +87,8 @@
     "analytics": "Analíticas",
     "templates": "Plantillas",
     "serviceTiers": "Seguimiento",
-    "coachingPlans": "Planes"
+    "coachingPlans": "Planes",
+    "myPlan": "Mi Plan"
   },
   "dashboard": {
     "title": "Panel de control",
@@ -209,7 +210,11 @@
     "pendingQuestionnaires": "Cuestionarios pendientes",
     "unknownQuestionnaire": "Cuestionario desconocido",
     "trainerNotes": "Notas del entrenador",
-    "notesPlaceholder": "Escribe notas sobre este cliente..."
+    "notesPlaceholder": "Escribe notas sobre este cliente...",
+    "assignPlan": "Asignar Plan",
+    "changePlan": "Cambiar Plan",
+    "price": "Precio",
+    "pendingCount": "{count} pendientes"
   },
   "statsTab": {
     "profileData": "Datos del perfil",
@@ -1354,5 +1359,48 @@
     "planDuplicateError": "Error al duplicar el plan de asesoramiento",
     "planAssigned": "Plan de asesoramiento asignado al cliente",
     "planAssignError": "Error al asignar el plan de asesoramiento"
+  },
+  "myPlan": {
+    "title": "Mi Plan",
+    "noPlan": "No tienes un plan asignado",
+    "contactTrainer": "Contacta con tu entrenador para que te asigne un plan.",
+    "whatsIncluded": "Qué incluye tu plan",
+    "startDate": "Fecha de inicio",
+    "endDate": "Fecha de finalización",
+    "renewalDate": "Fecha de renovación",
+    "price": "Precio",
+    "training": "Entrenamiento",
+    "nutrition": "Nutrición",
+    "messaging": "Mensajería",
+    "progressTracking": "Seguimiento de progreso",
+    "measurements": "Mediciones",
+    "checkins": "Check-ins",
+    "questionnaires": "Cuestionarios",
+    "pendingQuestionnaires": "Cuestionarios pendientes",
+    "fillQuestionnaire": "Rellenar",
+    "viewRoutine": "Ver mi rutina",
+    "viewNutrition": "Ver mi nutrición"
+  },
+  "assignPlanWizard": {
+    "title": "Asignar Plan",
+    "selectPlan": "Seleccionar plan",
+    "confirmAssignment": "Confirmar asignación",
+    "withNutrition": "Con nutrición",
+    "withoutNutrition": "Sin nutrición",
+    "overrideRoutine": "Cambiar rutina (opcional)",
+    "overrideMealPlan": "Cambiar plan nutricional (opcional)",
+    "startDate": "Fecha de inicio",
+    "endDate": "Fecha de fin",
+    "notes": "Notas",
+    "assignButton": "Asignar",
+    "changePlan": "Cambiar Plan",
+    "planAssigned": "Plan asignado correctamente",
+    "planAssignError": "Error al asignar el plan",
+    "duration": "{weeks} semanas",
+    "perMonth": "/mes",
+    "save": "Guardar",
+    "useDefault": "Usar plantilla del plan",
+    "selected": "Seleccionado",
+    "notesPlaceholder": "Notas adicionales..."
   }
 }
