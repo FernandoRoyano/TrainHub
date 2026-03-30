@@ -36,6 +36,7 @@ const navItems = [
   { key: "routines", href: "/routines", icon: ClipboardList, badgeKey: null },
   { key: "templates", href: "/templates", icon: LayoutTemplate, badgeKey: null },
   { key: "questionnaires", href: "/questionnaires", icon: FileQuestion, badgeKey: null },
+  { key: "serviceTiers", href: "/service-tiers", icon: Shield, badgeKey: null },
   { key: "coachingPlans", href: "/coaching-plans", icon: Briefcase, badgeKey: null },
   { key: "nutrition", href: "/nutrition", icon: UtensilsCrossed, badgeKey: null },
   { key: "messages", href: "/messages", icon: MessageSquare, badgeKey: "unreadMessages" as const },
