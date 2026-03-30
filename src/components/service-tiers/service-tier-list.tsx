@@ -132,15 +132,10 @@ export function ServiceTierList() {
                   </DropdownMenu>
                 </div>
 
-                {/* Price */}
-                {tier.price != null && tier.price > 0 && (
-                  <p className="text-lg font-semibold mt-3">
-                    {tier.price} {tier.currency || "EUR"}
-                    {tier.billing_interval && (
-                      <span className="text-xs font-normal text-muted-foreground ml-1">
-                        / {t(`interval_${tier.billing_interval}`)}
-                      </span>
-                    )}
+                {/* Max revisions */}
+                {tier.max_revisions_per_month != null && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {tier.max_revisions_per_month} {t("maxRevisions").toLowerCase()}/mes
                   </p>
                 )}
 

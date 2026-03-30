@@ -200,83 +200,9 @@ export function ServiceTierForm({ mode, tier }: ServiceTierFormProps) {
             </CardContent>
           </Card>
 
-          {/* Pricing */}
+          {/* Revisiones */}
           <Card>
-            <CardHeader>
-              <CardTitle>{t("pricing")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("price")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          step={0.01}
-                          placeholder="0.00"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value === ""
-                                ? undefined
-                                : parseFloat(e.target.value),
-                            )
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="currency"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("currency")}</FormLabel>
-                      <FormControl>
-                        <Input placeholder="EUR" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="billing_interval"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("billingInterval")}</FormLabel>
-                      <Select
-                        value={field.value ?? ""}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t("selectInterval")} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {BILLING_INTERVALS.map((interval) => (
-                            <SelectItem key={interval} value={interval}>
-                              {t(`interval_${interval}`)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
+            <CardContent className="pt-6">
               <FormField
                 control={form.control}
                 name="max_revisions_per_month"
