@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/client";
 import type { Routine, RoutineDay, RoutineExercise, ExerciseGroup } from "./routines.service";
 import type { BodyMeasurement } from "./measurements.service";
 import type { MealPlan, MealPlanMeal, MealFood } from "./nutrition.service";
+import type { ClientQuestionnaire, QuestionnaireQuestion, QuestionnaireResponse } from "./questionnaires.service";
+import type { ClientServiceTier } from "./service-tiers.service";
 
 export interface ClientRoutineView {
   id: string;
@@ -409,6 +411,119 @@ export const clientAppService = {
 
     if (error) throw error;
     return workouts as WorkoutWithExercises[];
+  },
+
+  async getMyQuestionnaires() {
+    const { supabase, clientId } = await getAuthenticatedClient();
+
+    const { data, error } = await supabase
+      .from("client_questionnaires")
+      .select("*, template:questionnaire_templates(id, name, description, category)")
+      .eq("client_id", clientId)
+      .order("assigned_at", { ascending: false });
+    if (error) throw error;
+    return data as ClientQuestionnaire[];
+  },
+
+  async getMyQuestionnaireDetail(clientQuestionnaireId: string) {
+    const { supabase, clientId } = await getAuthenticatedClient();
+
+    // Get client questionnaire (verify ownership)
+    const { data: clientQ, error: cqError } = await supabase
+      .from("client_questionnaires")
+      .select("*, template:questionnaire_templates(*)")
+      .eq("id", clientQuestionnaireId)
+      .eq("client_id", clientId)
+      .single();
+    if (cqError) throw cqError;
+
+    // Get questions for the template
+    const { data: questions, error: questionsError } = await supabase
+      .from("questionnaire_questions")
+      .select("*")
+      .eq("template_id", clientQ.template_id)
+      .order("order_index", { ascending: true });
+    if (questionsError) throw questionsError;
+
+    // Get existing responses
+    const { data: responses, error: responsesError } = await supabase
+      .from("questionnaire_responses")
+      .select("*")
+      .eq("client_questionnaire_id", clientQuestionnaireId);
+    if (responsesError) throw responsesError;
+
+    return {
+      ...clientQ,
+      template: {
+        ...clientQ.template,
+        questions: (questions ?? []) as QuestionnaireQuestion[],
+      },
+      responses: (responses ?? []) as QuestionnaireResponse[],
+    } as ClientQuestionnaire;
+  },
+
+  async submitQuestionnaireResponses(
+    clientQuestionnaireId: string,
+    responses: {
+      question_id: string;
+      answer_text?: string | null;
+      answer_number?: number | null;
+      answer_boolean?: boolean | null;
+      answer_date?: string | null;
+      answer_json?: Record<string, unknown> | null;
+    }[]
+  ) {
+    const { supabase, clientId } = await getAuthenticatedClient();
+
+    // Verify ownership
+    const { data: clientQ, error: cqError } = await supabase
+      .from("client_questionnaires")
+      .select("id")
+      .eq("id", clientQuestionnaireId)
+      .eq("client_id", clientId)
+      .single();
+    if (cqError || !clientQ) throw new Error("Not authorized");
+
+    // Upsert responses
+    const responsesToUpsert = responses.map((r) => ({
+      client_questionnaire_id: clientQuestionnaireId,
+      question_id: r.question_id,
+      answer_text: r.answer_text ?? null,
+      answer_number: r.answer_number ?? null,
+      answer_boolean: r.answer_boolean ?? null,
+      answer_date: r.answer_date ?? null,
+      answer_json: r.answer_json ?? null,
+    }));
+
+    const { error: upsertError } = await supabase
+      .from("questionnaire_responses")
+      .upsert(responsesToUpsert, {
+        onConflict: "client_questionnaire_id,question_id",
+        ignoreDuplicates: false,
+      });
+    if (upsertError) throw upsertError;
+
+    // Update status to completed
+    const { error: updateError } = await supabase
+      .from("client_questionnaires")
+      .update({ status: "completed", completed_at: new Date().toISOString() })
+      .eq("id", clientQuestionnaireId)
+      .eq("client_id", clientId);
+    if (updateError) throw updateError;
+  },
+
+  async getMyActiveServiceTier() {
+    const { supabase, clientId } = await getAuthenticatedClient();
+
+    const { data, error } = await supabase
+      .from("client_service_tiers")
+      .select("*, service_tier:service_tiers(*)")
+      .eq("client_id", clientId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return data as ClientServiceTier | null;
   },
 };
 

@@ -687,7 +687,22 @@
     "profileUpdated": "Perfil actualizado",
     "profileUpdateError": "Error al actualizar perfil",
     "fullName": "Nombre completo",
-    "save": "Guardar"
+    "save": "Guardar",
+    "myQuestionnaires": "Mis Cuestionarios",
+    "fillQuestionnaire": "Rellenar",
+    "questionnaireCompleted": "Cuestionario completado",
+    "questionnaireSubmitError": "Error al enviar cuestionario",
+    "submitQuestionnaire": "Enviar cuestionario",
+    "requiredField": "Campo obligatorio",
+    "pendingQuestionnaires": "Cuestionarios pendientes",
+    "noQuestionnaires": "No tienes cuestionarios asignados",
+    "noQuestionnairesDescription": "Tu entrenador te asignara cuestionarios cuando sea necesario",
+    "featureNotIncluded": "Esta funcion no esta incluida en tu plan",
+    "pending": "Pendiente",
+    "completed": "Completado",
+    "dueDate": "Fecha limite",
+    "completedAt": "Completado el",
+    "back": "Volver"
   },
   "workouts": {
     "noWorkoutsYet": "Sin entrenamientos registrados",

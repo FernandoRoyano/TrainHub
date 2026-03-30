@@ -687,7 +687,22 @@
     "profileUpdated": "Profile updated",
     "profileUpdateError": "Error updating profile",
     "fullName": "Full name",
-    "save": "Save"
+    "save": "Save",
+    "myQuestionnaires": "My Questionnaires",
+    "fillQuestionnaire": "Fill in",
+    "questionnaireCompleted": "Questionnaire completed",
+    "questionnaireSubmitError": "Error submitting questionnaire",
+    "submitQuestionnaire": "Submit questionnaire",
+    "requiredField": "Required field",
+    "pendingQuestionnaires": "Pending questionnaires",
+    "noQuestionnaires": "No questionnaires assigned",
+    "noQuestionnairesDescription": "Your trainer will assign questionnaires when needed",
+    "featureNotIncluded": "This feature is not included in your plan",
+    "pending": "Pending",
+    "completed": "Completed",
+    "dueDate": "Due date",
+    "completedAt": "Completed on",
+    "back": "Back"
   },
   "workouts": {
     "noWorkoutsYet": "No workouts logged yet",

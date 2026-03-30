@@ -129,3 +129,63 @@ export function useMyMealPlan() {
     staleTime: 2 * 60 * 1000,
   });
 }
+
+export function useMyQuestionnaires() {
+  return useQuery({
+    queryKey: ["my-questionnaires"],
+    queryFn: () => clientAppService.getMyQuestionnaires(),
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+export function useMyQuestionnaireDetail(id: string) {
+  return useQuery({
+    queryKey: ["my-questionnaire-detail", id],
+    queryFn: () => clientAppService.getMyQuestionnaireDetail(id),
+    enabled: !!id,
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useSubmitQuestionnaireResponses() {
+  const queryClient = useQueryClient();
+  const t = useTranslations("clientApp");
+  return useMutation({
+    mutationFn: ({
+      clientQuestionnaireId,
+      responses,
+    }: {
+      clientQuestionnaireId: string;
+      responses: {
+        question_id: string;
+        answer_text?: string | null;
+        answer_number?: number | null;
+        answer_boolean?: boolean | null;
+        answer_date?: string | null;
+        answer_json?: Record<string, unknown> | null;
+      }[];
+    }) =>
+      clientAppService.submitQuestionnaireResponses(
+        clientQuestionnaireId,
+        responses
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-questionnaires"] });
+      queryClient.invalidateQueries({
+        queryKey: ["my-questionnaire-detail"],
+      });
+      toast.success(t("questionnaireCompleted"));
+    },
+    onError: () => {
+      toast.error(t("questionnaireSubmitError"));
+    },
+  });
+}
+
+export function useMyActiveServiceTier() {
+  return useQuery({
+    queryKey: ["my-service-tier"],
+    queryFn: () => clientAppService.getMyActiveServiceTier(),
+    staleTime: 5 * 60 * 1000,
+  });
+}
