@@ -137,8 +137,8 @@ export function AssignPlanWizardDialog({
           coaching_plan_id: selectedPlanId,
           start_date: startDate,
           notes: notes || undefined,
-          routine_override_id: routineOverrideId || undefined,
-          meal_plan_override_id: mealPlanOverrideId || undefined,
+          routine_override_id: routineOverrideId && routineOverrideId !== "default" ? routineOverrideId : undefined,
+          meal_plan_override_id: mealPlanOverrideId && mealPlanOverrideId !== "default" ? mealPlanOverrideId : undefined,
         }),
       });
       if (!res.ok) {
@@ -329,7 +329,7 @@ export function AssignPlanWizardDialog({
                   <SelectValue placeholder={t("useDefault")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("useDefault")}</SelectItem>
+                  <SelectItem value="default">{t("useDefault")}</SelectItem>
                   {(routineTemplates as { id: string; name: string }[]).map((r) => (
                     <SelectItem key={r.id} value={r.id}>
                       {r.name}
@@ -348,7 +348,7 @@ export function AssignPlanWizardDialog({
                     <SelectValue placeholder={t("useDefault")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{t("useDefault")}</SelectItem>
+                    <SelectItem value="default">{t("useDefault")}</SelectItem>
                     {(mealPlanTemplates as { id: string; name: string }[]).map((m) => (
                       <SelectItem key={m.id} value={m.id}>
                         {m.name}
