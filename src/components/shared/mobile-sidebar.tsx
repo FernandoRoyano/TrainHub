@@ -23,6 +23,8 @@ import {
   LogOut,
   Menu,
   Puzzle,
+  FileQuestion,
+  Briefcase,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -33,6 +35,8 @@ const navItems = [
   { key: "blocks", href: "/blocks", icon: Puzzle, badgeKey: null },
   { key: "routines", href: "/routines", icon: ClipboardList, badgeKey: null },
   { key: "templates", href: "/templates", icon: LayoutTemplate, badgeKey: null },
+  { key: "questionnaires", href: "/questionnaires", icon: FileQuestion, badgeKey: null },
+  { key: "coachingPlans", href: "/coaching-plans", icon: Briefcase, badgeKey: null },
   { key: "nutrition", href: "/nutrition", icon: UtensilsCrossed, badgeKey: null },
   { key: "messages", href: "/messages", icon: MessageSquare, badgeKey: "unreadMessages" as const },
   { key: "calendar", href: "/calendar", icon: CalendarDays, badgeKey: null },

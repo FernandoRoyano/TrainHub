@@ -24,6 +24,7 @@ import {
   ChevronLeft,
   Puzzle,
   Shield,
+  Briefcase,
 } from "lucide-react";
 import { useUIStore } from "@/stores/ui-store";
 
@@ -35,6 +36,7 @@ const navItems = [
   { key: "routines", href: "/routines", icon: ClipboardList, badgeKey: null },
   { key: "templates", href: "/templates", icon: LayoutTemplate, badgeKey: null },
   { key: "questionnaires", href: "/questionnaires", icon: FileQuestion, badgeKey: null },
+  { key: "coachingPlans", href: "/coaching-plans", icon: Briefcase, badgeKey: null },
   { key: "nutrition", href: "/nutrition", icon: UtensilsCrossed, badgeKey: null },
   { key: "messages", href: "/messages", icon: MessageSquare, badgeKey: "unreadMessages" as const },
   { key: "calendar", href: "/calendar", icon: CalendarDays, badgeKey: null },

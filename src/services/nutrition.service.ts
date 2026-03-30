@@ -59,6 +59,7 @@ export interface ClientMealPlan {
 export interface NutritionFilters {
   search?: string;
   goal?: string;
+  is_template?: boolean;
   page?: number;
   pageSize?: number;
 }
@@ -89,6 +90,10 @@ export const nutritionService = {
 
     if (filters?.search) {
       query = query.ilike("name", `%${filters.search}%`);
+    }
+
+    if (filters?.is_template !== undefined) {
+      query = query.eq("is_template", filters.is_template);
     }
 
     const { data, count, error } = await query;
