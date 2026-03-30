@@ -10,11 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { OverviewTab } from "@/components/clients/overview-tab";
-import { SessionNotesTab } from "@/components/clients/session-notes-tab";
-import { MeasurementsTab } from "@/components/clients/measurements-tab";
-import { CheckinsTab } from "@/components/clients/checkins-tab";
-import { WorkoutsTab } from "@/components/clients/workouts-tab";
+import { PlanTab } from "@/components/clients/plan-tab";
+import { StatsTab } from "@/components/clients/stats-tab";
+import { TrackingTab } from "@/components/clients/tracking-tab";
+import { HistoryTab } from "@/components/clients/history-tab";
+import { PaymentsTab } from "@/components/clients/payments-tab";
 import { ResetPasswordDialog } from "@/components/clients/reset-password-dialog";
 import { ArrowLeft, Pencil, Trash2, Mail, Phone, Send, Link2, KeyRound } from "lucide-react";
 import Link from "next/link";
@@ -38,7 +38,7 @@ export default function ClientDetailPage() {
   const generateLink = useGenerateInviteLink();
   const [showDelete, setShowDelete] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("plan");
 
   if (isLoading) {
     return (
@@ -53,7 +53,6 @@ export default function ClientDetailPage() {
     return <p className="text-muted-foreground">Client not found</p>;
   }
 
-  const profileData = (client.profile_data ?? {}) as Record<string, unknown>;
   const initials = client.full_name
     .split(" ")
     .map((n) => n[0])
@@ -169,83 +168,32 @@ export default function ClientDetailPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="overflow-x-auto scrollbar-thin pb-1">
           <TabsList className="inline-flex w-max">
-            <TabsTrigger value="overview">{t("overview")}</TabsTrigger>
-            <TabsTrigger value="physical">{t("physicalData")}</TabsTrigger>
-            <TabsTrigger value="notes">{t("notes")}</TabsTrigger>
-            <TabsTrigger value="workouts">{t("workoutsTab")}</TabsTrigger>
-            <TabsTrigger value="session-notes">{t("sessionNotes")}</TabsTrigger>
-            <TabsTrigger value="measurements">{t("measurements")}</TabsTrigger>
-            <TabsTrigger value="checkins">{t("checkins")}</TabsTrigger>
+            <TabsTrigger value="plan">{t("planTab")}</TabsTrigger>
+            <TabsTrigger value="stats">{t("statsTab")}</TabsTrigger>
+            <TabsTrigger value="tracking">{t("trackingTab")}</TabsTrigger>
+            <TabsTrigger value="historico">{t("historicoTab")}</TabsTrigger>
+            <TabsTrigger value="payments">{t("paymentsTab")}</TabsTrigger>
           </TabsList>
         </div>
 
-        <TabsContent value="overview">
-          <OverviewTab clientId={client.id} onTabChange={setActiveTab} />
+        <TabsContent value="plan">
+          <PlanTab clientId={client.id} />
         </TabsContent>
 
-        <TabsContent value="physical">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {"weight" in profileData && profileData.weight != null && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t("weight")}</p>
-                    <p className="text-lg font-semibold">{String(profileData.weight)} kg</p>
-                  </div>
-                )}
-                {"height" in profileData && profileData.height != null && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t("height")}</p>
-                    <p className="text-lg font-semibold">{String(profileData.height)} cm</p>
-                  </div>
-                )}
-                {"birth_date" in profileData && profileData.birth_date != null && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t("birthDate")}</p>
-                    <p className="text-lg font-semibold">{String(profileData.birth_date)}</p>
-                  </div>
-                )}
-              </div>
-              {"goals" in profileData && profileData.goals != null && (
-                <div className="mt-4">
-                  <p className="text-sm text-muted-foreground">{t("goals")}</p>
-                  <p className="mt-1">{String(profileData.goals)}</p>
-                </div>
-              )}
-              {"injuries" in profileData && profileData.injuries != null && (
-                <div className="mt-4">
-                  <p className="text-sm text-muted-foreground">{t("injuries")}</p>
-                  <p className="mt-1">{String(profileData.injuries)}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        <TabsContent value="stats">
+          <StatsTab clientId={client.id} />
         </TabsContent>
 
-        <TabsContent value="notes">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="whitespace-pre-wrap">
-                {client.notes || <span className="text-muted-foreground">{t("noNotes")}</span>}
-              </p>
-            </CardContent>
-          </Card>
+        <TabsContent value="tracking">
+          <TrackingTab clientId={client.id} />
         </TabsContent>
 
-        <TabsContent value="workouts">
-          <WorkoutsTab clientId={client.id} />
+        <TabsContent value="historico">
+          <HistoryTab clientId={client.id} />
         </TabsContent>
 
-        <TabsContent value="session-notes">
-          <SessionNotesTab clientId={client.id} />
-        </TabsContent>
-
-        <TabsContent value="measurements">
-          <MeasurementsTab clientId={client.id} />
-        </TabsContent>
-
-        <TabsContent value="checkins">
-          <CheckinsTab clientId={client.id} />
+        <TabsContent value="payments">
+          <PaymentsTab clientId={client.id} />
         </TabsContent>
       </Tabs>
 
