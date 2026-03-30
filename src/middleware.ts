@@ -75,6 +75,9 @@ export async function middleware(request: NextRequest) {
       pathname.includes("/templates") ||
       pathname.includes("/analytics") ||
       pathname.includes("/blocks") ||
+      pathname.includes("/questionnaires") ||
+      pathname.includes("/service-tiers") ||
+      pathname.includes("/coaching-plans") ||
       pathname.includes("/calendar");
     const isClientRoute =
       pathname.includes("/my-routine") ||
