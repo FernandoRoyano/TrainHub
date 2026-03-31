@@ -10,12 +10,12 @@ export default function TrainerLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen max-w-[100vw] overflow-x-hidden">
       <NavigationProgress />
       <AppSidebar />
       <SectionBackground>
         <TopBar />
-        <main className="flex-1 p-6 overflow-y-auto scrollbar-thin">{children}</main>
+        <main className="flex-1 p-3 sm:p-6 overflow-x-hidden overflow-y-auto scrollbar-thin">{children}</main>
       </SectionBackground>
       <OnboardingDialog />
     </div>
