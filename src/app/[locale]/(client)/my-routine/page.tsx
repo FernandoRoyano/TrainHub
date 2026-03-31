@@ -359,7 +359,13 @@ export default function MyRoutinePage() {
                 disabled={completeWorkout.isPending}
                 onClick={() => {
                   const id = activeWorkoutId ?? todayLog?.id;
-                  if (id) completeWorkout.mutate({ id, notes: workoutNotes || undefined });
+                  if (id) completeWorkout.mutate({ id, notes: workoutNotes || undefined }, {
+                    onSuccess: () => {
+                      setActiveWorkoutId(null);
+                      setWorkoutStartedAt(null);
+                      setWorkoutNotes("");
+                    },
+                  });
                 }}
               >
                 {completeWorkout.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
