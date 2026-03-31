@@ -217,15 +217,19 @@ export const clientsService = {
 
     if (logsError) throw logsError;
 
-    // Get client updated_at for last connection fallback
-    const { data: clientsData } = await supabase
-      .from("clients")
-      .select("id, updated_at")
-      .in("id", clientIds);
-
-    const connectionMap: Record<string, string | null> = {};
-    for (const c of clientsData ?? []) {
-      connectionMap[c.id] = c.updated_at;
+    // Get last_sign_in_at from auth.users via API
+    let connectionMap: Record<string, string | null> = {};
+    try {
+      const res = await fetch("/api/clients-last-seen", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientIds }),
+      });
+      if (res.ok) {
+        connectionMap = await res.json();
+      }
+    } catch {
+      // Fallback: no connection data
     }
 
     // Query client_routines to get days_per_week for active routines per client
