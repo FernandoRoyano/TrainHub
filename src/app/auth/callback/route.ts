@@ -101,6 +101,37 @@ export async function GET(request: Request) {
             return NextResponse.redirect(`${origin}/my-routine`);
           }
         }
+
+        // Try linking by full_name match (fallback for clients created without email)
+        const fullName = user.user_metadata?.full_name;
+        if (fullName) {
+          const { data: nameClient } = await admin
+            .from("clients")
+            .select("id, trainer_id, full_name")
+            .ilike("full_name", fullName)
+            .is("user_id", null)
+            .maybeSingle();
+
+          if (nameClient) {
+            await admin
+              .from("clients")
+              .update({
+                user_id: user.id,
+                status: "active",
+                email: user.email,
+              })
+              .eq("id", nameClient.id);
+
+            await admin
+              .from("users")
+              .update({ role: "client" })
+              .eq("id", user.id);
+
+            sendWelcomeEmail(user.email!, nameClient.full_name, nameClient.trainer_id, origin).catch(() => {});
+
+            return NextResponse.redirect(`${origin}/my-routine`);
+          }
+        }
       }
 
       return NextResponse.redirect(`${origin}${next}`);

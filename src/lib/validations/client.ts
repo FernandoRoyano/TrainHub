@@ -15,7 +15,7 @@ export const clientProfileDataSchema = z.object({
 export function createClientSchema(t: T) {
   return z.object({
     full_name: z.string().min(2, t("minChars", { min: 2 })),
-    email: z.string().email(t("invalidEmail")).optional().or(z.literal("")),
+    email: z.string().min(1, t("required")).email(t("invalidEmail")),
     phone: z.string().optional().or(z.literal("")),
     status: z.enum(["active", "inactive", "paused", "pending"]),
     tags: z.array(z.string()),
