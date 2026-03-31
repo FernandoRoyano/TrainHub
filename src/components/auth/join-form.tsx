@@ -103,9 +103,12 @@ export function JoinForm({ token }: JoinFormProps) {
 
   if (success) {
     return (
-      <div className="text-center space-y-2 py-4">
-        <h3 className="text-lg font-semibold">{t("checkEmail")}</h3>
-        <p className="text-sm text-muted-foreground">{t("confirmEmail")}</p>
+      <div className="text-center space-y-4 py-4">
+        <h3 className="text-lg font-semibold">{t("accountCreated")}</h3>
+        <p className="text-sm text-muted-foreground">{t("accountCreatedDesc")}</p>
+        <Button asChild>
+          <Link href="/login">{ta("login")}</Link>
+        </Button>
       </div>
     );
   }

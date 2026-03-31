@@ -850,7 +850,9 @@
     "invalidToken": "This invitation link is not valid or has already been used",
     "goToLogin": "Go to login",
     "checkEmail": "Check your email",
-    "confirmEmail": "We sent you a confirmation email. Click the link to activate your account."
+    "confirmEmail": "We sent you a confirmation email. Click the link to activate your account.",
+    "accountCreated": "Account created successfully!",
+    "accountCreatedDesc": "You can now log in with your email and password."
   },
   "validation": {
     "invalidEmail": "Invalid email",
