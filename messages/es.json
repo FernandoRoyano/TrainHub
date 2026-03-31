@@ -186,6 +186,7 @@
     "lastActiveYesterday": "Ayer",
     "lastActiveDaysAgo": "Hace {days} días",
     "lastActiveNever": "Sin actividad",
+    "memberSince": "Desde {date}",
     "sendMessage": "Enviar mensaje",
     "assignRoutine": "Asignar rutina",
     "viewDetails": "Ver detalle",

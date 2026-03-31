@@ -61,17 +61,21 @@ function getLastActiveText(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: (key: string, values?: any) => string
 ): string {
-  const dateToUse = lastWorkoutDate || lastConnection;
-  if (!dateToUse) return t("lastActiveNever");
+  if (lastWorkoutDate) {
+    const now = new Date();
+    const last = new Date(lastWorkoutDate);
+    const diffDays = Math.floor((now.getTime() - last.getTime()) / 86400000);
+    if (diffDays === 0) return t("lastActiveToday");
+    if (diffDays === 1) return t("lastActiveYesterday");
+    return t("lastActiveDaysAgo", { days: diffDays });
+  }
 
-  const now = new Date();
-  const last = new Date(dateToUse);
-  const diffMs = now.getTime() - last.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (lastConnection) {
+    const date = new Date(lastConnection);
+    return t("memberSince", { date: date.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" }) });
+  }
 
-  if (diffDays === 0) return t("lastActiveToday");
-  if (diffDays === 1) return t("lastActiveYesterday");
-  return t("lastActiveDaysAgo", { days: diffDays });
+  return t("lastActiveNever");
 }
 
 export function ClientList() {
@@ -199,7 +203,7 @@ export function ClientList() {
             );
             const lastActiveText = getLastActiveText(
               activity?.lastWorkoutDate ?? null,
-              activity?.lastConnection ?? null,
+              activity?.lastConnection ?? client.created_at ?? null,
               t
             );
 
