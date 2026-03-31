@@ -57,17 +57,20 @@ function getComplianceDotClass(
 
 function getLastActiveText(
   lastWorkoutDate: string | null,
+  lastConnection: string | null,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: (key: string, values?: any) => string
 ): string {
-  if (!lastWorkoutDate) return t("lastActiveNever");
+  const dateToUse = lastWorkoutDate || lastConnection;
+  if (!dateToUse) return t("lastActiveNever");
 
   const now = new Date();
-  const last = new Date(lastWorkoutDate);
+  const last = new Date(dateToUse);
   const diffMs = now.getTime() - last.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
   if (diffDays === 0) return t("lastActiveToday");
+  if (diffDays === 1) return t("lastActiveYesterday");
   return t("lastActiveDaysAgo", { days: diffDays });
 }
 
@@ -196,6 +199,7 @@ export function ClientList() {
             );
             const lastActiveText = getLastActiveText(
               activity?.lastWorkoutDate ?? null,
+              activity?.lastConnection ?? null,
               t
             );
 

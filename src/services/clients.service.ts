@@ -3,6 +3,7 @@ import type { ClientFormData } from "@/lib/validations/client";
 
 export interface ClientActivity {
   lastWorkoutDate: string | null;
+  lastConnection: string | null;
   workoutsThisWeek: number;
   assignedDaysPerWeek: number | null;
 }
@@ -216,6 +217,17 @@ export const clientsService = {
 
     if (logsError) throw logsError;
 
+    // Get client updated_at for last connection fallback
+    const { data: clientsData } = await supabase
+      .from("clients")
+      .select("id, updated_at")
+      .in("id", clientIds);
+
+    const connectionMap: Record<string, string | null> = {};
+    for (const c of clientsData ?? []) {
+      connectionMap[c.id] = c.updated_at;
+    }
+
     // Query client_routines to get days_per_week for active routines per client
     const { data: routines, error: routinesError } = await supabase
       .from("client_routines")
@@ -245,6 +257,7 @@ export const clientsService = {
     for (const id of clientIds) {
       activityMap[id] = {
         lastWorkoutDate: null,
+        lastConnection: connectionMap[id] ?? null,
         workoutsThisWeek: 0,
         assignedDaysPerWeek: daysPerWeekMap[id] ?? null,
       };

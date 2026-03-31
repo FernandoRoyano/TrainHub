@@ -182,6 +182,7 @@
     "noNotes": "Sin notas",
     "lastActive": "Última actividad",
     "lastActiveToday": "Hoy",
+    "lastActiveYesterday": "Ayer",
     "lastActiveDaysAgo": "Hace {days} días",
     "lastActiveNever": "Sin actividad",
     "sendMessage": "Enviar mensaje",
