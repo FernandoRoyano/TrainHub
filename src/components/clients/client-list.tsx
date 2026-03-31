@@ -71,8 +71,12 @@ function getLastActiveText(
   }
 
   if (lastConnection) {
-    const date = new Date(lastConnection);
-    return t("memberSince", { date: date.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" }) });
+    const now = new Date();
+    const last = new Date(lastConnection);
+    const diffDays = Math.floor((now.getTime() - last.getTime()) / 86400000);
+    if (diffDays === 0) return t("lastConnectionToday");
+    if (diffDays === 1) return t("lastConnectionYesterday");
+    return t("lastConnectionDaysAgo", { days: diffDays });
   }
 
   return t("lastActiveNever");
