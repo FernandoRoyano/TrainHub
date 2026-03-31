@@ -217,19 +217,39 @@ export const clientsService = {
 
     if (logsError) throw logsError;
 
-    // Get last_sign_in_at from auth.users via API
-    let connectionMap: Record<string, string | null> = {};
-    try {
-      const res = await fetch("/api/clients-last-seen", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientIds }),
-      });
-      if (res.ok) {
-        connectionMap = await res.json();
+    // Get last connection from clients table (user_id + users.updated_at)
+    const { data: clientsWithUsers } = await supabase
+      .from("clients")
+      .select("id, user_id, updated_at")
+      .in("id", clientIds);
+
+    const connectionMap: Record<string, string | null> = {};
+    if (clientsWithUsers) {
+      // For clients with user_id, get the user's updated_at from public.users
+      const userIds = clientsWithUsers.filter((c) => c.user_id).map((c) => c.user_id as string);
+      if (userIds.length > 0) {
+        const { data: usersData } = await supabase
+          .from("users")
+          .select("id, updated_at")
+          .in("id", userIds);
+
+        const usersMap: Record<string, string> = {};
+        for (const u of usersData ?? []) {
+          usersMap[u.id] = u.updated_at;
+        }
+
+        for (const c of clientsWithUsers) {
+          if (c.user_id && usersMap[c.user_id]) {
+            connectionMap[c.id] = usersMap[c.user_id];
+          } else {
+            connectionMap[c.id] = c.updated_at;
+          }
+        }
+      } else {
+        for (const c of clientsWithUsers) {
+          connectionMap[c.id] = c.updated_at;
+        }
       }
-    } catch {
-      // Fallback: no connection data
     }
 
     // Query client_routines to get days_per_week for active routines per client
