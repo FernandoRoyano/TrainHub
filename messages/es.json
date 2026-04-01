@@ -1403,8 +1403,11 @@
     "questionnaires": "Cuestionarios",
     "pendingQuestionnaires": "Cuestionarios pendientes",
     "fillQuestionnaire": "Rellenar",
-    "viewRoutine": "Ver mi rutina",
-    "viewNutrition": "Ver mi nutrición"
+    "viewRoutine": "Mi Rutina",
+    "viewNutrition": "Mi Nutrición",
+    "daysPerWeek": "días/semana",
+    "weeks": "semanas",
+    "messages": "Mensajes"
   },
   "assignPlanWizard": {
     "title": "Asignar Plan",

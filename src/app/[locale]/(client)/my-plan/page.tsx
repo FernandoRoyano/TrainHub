@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMyActiveCoachingPlan, useMyQuestionnaires } from "@/hooks/use-client-app";
+import { useMyActiveCoachingPlan, useMyQuestionnaires, useMyRoutine } from "@/hooks/use-client-app";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,7 @@ const featureIcons: Record<string, typeof Dumbbell> = {
 export default function MyPlanPage() {
   const t = useTranslations("myPlan");
   const { data: planData, isLoading } = useMyActiveCoachingPlan();
+  const { data: routine } = useMyRoutine();
   const { data: questionnaires } = useMyQuestionnaires();
 
   const pendingQuestionnaires = questionnaires?.filter(
@@ -63,11 +64,73 @@ export default function MyPlanPage() {
     return (
       <div className="space-y-4">
         <h1 className="text-xl font-bold">{t("title")}</h1>
-        <EmptyState
-          icon={ClipboardList}
-          title={t("noPlan")}
-          description={t("contactTrainer")}
-        />
+
+        {/* Show routine even without coaching plan */}
+        {routine?.routine ? (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Dumbbell className="h-4 w-4" />
+                {t("viewRoutine")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Link href="/my-routine" className="flex items-center justify-between hover:opacity-80 transition-opacity">
+                <div>
+                  <p className="font-medium text-sm text-primary">{routine.routine.name}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {routine.routine.days_per_week} {t("daysPerWeek")} · {routine.routine.duration_weeks} {t("weeks")}
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
+            </CardContent>
+          </Card>
+        ) : (
+          <EmptyState
+            icon={ClipboardList}
+            title={t("noPlan")}
+            description={t("contactTrainer")}
+          />
+        )}
+
+        {/* Pending questionnaires */}
+        {pendingQuestionnaires && pendingQuestionnaires.length > 0 && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <FileQuestion className="h-4 w-4" />
+                {t("pendingQuestionnaires")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {pendingQuestionnaires.map((q) => (
+                  <Link
+                    key={q.id}
+                    href={`/my-questionnaires/${q.id}`}
+                    className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent transition-colors"
+                  >
+                    <p className="text-sm font-medium">{q.template?.name ?? "Cuestionario"}</p>
+                    <Badge variant="outline" className={statusColors[q.status] ?? ""}>{q.status}</Badge>
+                  </Link>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Quick links */}
+        <div className="grid grid-cols-2 gap-3">
+          <Link href="/my-routine" className="flex flex-col items-center gap-2 p-4 rounded-xl border hover:bg-accent transition-colors">
+            <Dumbbell className="h-6 w-6 text-primary" />
+            <span className="text-xs font-medium">{t("viewRoutine")}</span>
+          </Link>
+          <Link href="/my-messages" className="flex flex-col items-center gap-2 p-4 rounded-xl border hover:bg-accent transition-colors">
+            <MessageCircle className="h-6 w-6 text-primary" />
+            <span className="text-xs font-medium">{t("messages")}</span>
+          </Link>
+        </div>
       </div>
     );
   }
