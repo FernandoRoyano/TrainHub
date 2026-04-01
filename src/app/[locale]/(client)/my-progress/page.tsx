@@ -16,6 +16,7 @@ import { WeekComparison } from "@/components/progress/week-comparison";
 import { MuscleGroupChart } from "@/components/progress/muscle-group-chart";
 import { ExerciseHistory } from "@/components/progress/exercise-history";
 import { WeeklyCheckinForm } from "@/components/checkins/weekly-checkin-form";
+import { WorkoutCalendar } from "@/components/progress/workout-calendar";
 import { BarChart3, Calendar, Check, ChevronDown, ChevronUp } from "lucide-react";
 
 export default function MyProgressPage() {
@@ -93,6 +94,9 @@ export default function MyProgressPage() {
 
       {/* Weekly check-in */}
       <WeeklyCheckinForm />
+
+      {/* Workout Calendar */}
+      {logs && <WorkoutCalendar logs={logs} />}
 
       {/* Streak & consistency stats */}
       {logs && logs.length > 0 && <StreakStats logs={logs} />}

@@ -136,19 +136,21 @@ export function TrackingTab({ clientId }: TrackingTabProps) {
               {calendarGrid.map((cell, i) => (
                 <div
                   key={i}
-                  className={`aspect-square flex items-center justify-center rounded-md text-xs relative ${
+                  className={`aspect-square flex flex-col items-center justify-center rounded-lg text-xs transition-all ${
                     cell.day == null
                       ? ""
-                      : cell.isToday
-                        ? "bg-primary/10 font-bold"
-                        : "bg-muted/30"
+                      : cell.hasWorkout
+                        ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-semibold"
+                        : cell.isToday
+                          ? "bg-primary/10 border border-primary/30 font-bold"
+                          : "bg-muted/30"
                   }`}
                 >
                   {cell.day != null && (
                     <>
                       <span>{cell.day}</span>
                       {cell.hasWorkout && (
-                        <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                        <Dumbbell className="h-2.5 w-2.5 mt-0.5" />
                       )}
                     </>
                   )}
