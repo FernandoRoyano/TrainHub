@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { Timer, Play, Square, Flame, TrendingUp, Target, Trophy, Trash2 } from "lucide-react";
 
 const PROTOCOLS: Record<string, number> = {
@@ -30,6 +31,11 @@ const PROTOCOLS: Record<string, number> = {
   "18_6": 18,
   "20_4": 20,
   "23_1": 23,
+  "24": 24,
+  "36": 36,
+  "48": 48,
+  "72": 72,
+  "custom": 0,
 };
 
 function ProgressRing({
@@ -103,6 +109,7 @@ export default function MyFastingPage() {
   const updateSettings = useUpdateFastingSettings();
 
   const [selectedProtocol, setSelectedProtocol] = useState<string | null>(null);
+  const [customHours, setCustomHours] = useState<number>(24);
 
   const protocol = selectedProtocol ?? settings?.default_protocol ?? "16_8";
 
@@ -117,10 +124,10 @@ export default function MyFastingPage() {
   const progress = targetHours > 0 ? elapsedHours / targetHours : 0;
 
   const handleStart = () => {
-    const hours = PROTOCOLS[protocol] ?? 16;
+    const hours = protocol === "custom" ? customHours : (PROTOCOLS[protocol] ?? 16);
     startFast.mutate({ protocol, targetHours: hours });
     if (protocol !== settings?.default_protocol) {
-      updateSettings.mutate({ default_protocol: protocol });
+      updateSettings.mutate({ default_protocol: protocol, custom_hours: protocol === "custom" ? customHours : undefined });
     }
   };
 
@@ -160,17 +167,37 @@ export default function MyFastingPage() {
           </p>
 
           {!activeFast && (
-            <Select value={protocol} onValueChange={setSelectedProtocol}>
-              <SelectTrigger className="w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="16_8">{t("protocols.16_8")}</SelectItem>
-                <SelectItem value="18_6">{t("protocols.18_6")}</SelectItem>
-                <SelectItem value="20_4">{t("protocols.20_4")}</SelectItem>
-                <SelectItem value="23_1">{t("protocols.23_1")}</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col items-center gap-2 w-full max-w-xs">
+              <Select value={protocol} onValueChange={setSelectedProtocol}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="16_8">{t("protocols.16_8")}</SelectItem>
+                  <SelectItem value="18_6">{t("protocols.18_6")}</SelectItem>
+                  <SelectItem value="20_4">{t("protocols.20_4")}</SelectItem>
+                  <SelectItem value="23_1">{t("protocols.23_1")}</SelectItem>
+                  <SelectItem value="24">{t("protocols.24")}</SelectItem>
+                  <SelectItem value="36">{t("protocols.36")}</SelectItem>
+                  <SelectItem value="48">{t("protocols.48")}</SelectItem>
+                  <SelectItem value="72">{t("protocols.72")}</SelectItem>
+                  <SelectItem value="custom">{t("protocols.custom")}</SelectItem>
+                </SelectContent>
+              </Select>
+              {protocol === "custom" && (
+                <div className="flex items-center gap-2 w-full">
+                  <Input
+                    type="number"
+                    min={1}
+                    max={168}
+                    value={customHours}
+                    onChange={(e) => setCustomHours(parseInt(e.target.value) || 24)}
+                    className="h-9 text-center"
+                  />
+                  <span className="text-sm text-muted-foreground shrink-0">{t("hours")}</span>
+                </div>
+              )}
+            </div>
           )}
 
           {activeFast ? (
