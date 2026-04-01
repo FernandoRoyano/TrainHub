@@ -14,12 +14,15 @@ import {
   Ruler,
   User,
   X,
+  Timer,
+  Heart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NavigationProgress } from "@/components/shared/navigation-progress";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { ClientFeaturesProvider, useClientFeatures } from "@/contexts/client-features-context";
+import { useMyClient } from "@/hooks/use-client-app";
 import { isFeatureEnabled } from "@/lib/feature-gate";
 import type { FeatureKey } from "@/lib/validations/service-tier";
 import { toast } from "sonner";
@@ -36,11 +39,13 @@ const mainNavItems: NavItem[] = [
   { href: "/my-routine", icon: Dumbbell, labelKey: "myRoutine", featureKey: "training" },
   { href: "/my-nutrition", icon: UtensilsCrossed, labelKey: "myNutrition", featureKey: "nutrition" },
   { href: "/my-messages", icon: MessageCircle, labelKey: "myMessages", featureKey: "messaging" },
+  { href: "/my-fasting", icon: Timer, labelKey: "myFasting" },
 ];
 
 const moreNavItems: NavItem[] = [
   { href: "/my-progress", icon: BarChart3, labelKey: "myProgress", featureKey: "progress_tracking" },
   { href: "/my-measurements", icon: Ruler, labelKey: "myMeasurements", featureKey: "measurements" },
+  { href: "/my-cycle", icon: Heart, labelKey: "myCycle" },
   { href: "/my-profile", icon: User, labelKey: "myProfile" },
 ];
 
@@ -49,6 +54,7 @@ function ClientNavBar() {
   const tClient = useTranslations("clientApp");
   const pathname = usePathname();
   const { features } = useClientFeatures();
+  const { data: myClient } = useMyClient();
   const [moreOpen, setMoreOpen] = useState(false);
 
   const handleDisabledClick = (e: React.MouseEvent) => {
@@ -56,7 +62,12 @@ function ClientNavBar() {
     toast.info(tClient("featureNotIncluded"));
   };
 
-  const isMoreActive = moreNavItems.some((item) => pathname.includes(item.href));
+  const filteredMoreNavItems = moreNavItems.filter((item) => {
+    if (item.href === "/my-cycle" && myClient?.gender !== "female") return false;
+    return true;
+  });
+
+  const isMoreActive = filteredMoreNavItems.some((item) => pathname.includes(item.href));
 
   return (
     <>
@@ -74,7 +85,7 @@ function ClientNavBar() {
               </button>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              {moreNavItems.map((item) => {
+              {filteredMoreNavItems.map((item) => {
                 const isActive = pathname.includes(item.href);
                 const enabled = !item.featureKey || isFeatureEnabled(features, item.featureKey);
 

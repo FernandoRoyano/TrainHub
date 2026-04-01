@@ -18,6 +18,7 @@ export function createClientSchema(t: T) {
     email: z.string().min(1, t("required")).email(t("invalidEmail")),
     phone: z.string().optional().or(z.literal("")),
     status: z.enum(["active", "inactive", "paused", "pending"]),
+    gender: z.enum(["male", "female", "other"]).optional(),
     tags: z.array(z.string()),
     notes: z.string().optional().or(z.literal("")),
     profile_data: clientProfileDataSchema.optional(),

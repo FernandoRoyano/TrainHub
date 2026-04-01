@@ -91,7 +91,9 @@
     "coaching": "Coaching",
     "serviceTiers": "Tiers",
     "coachingPlans": "Plans",
-    "myPlan": "My Plan"
+    "myPlan": "My Plan",
+    "myFasting": "Fasting",
+    "myCycle": "My Cycle"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -136,6 +138,10 @@
     "name": "Name",
     "phone": "Phone",
     "status": "Status",
+    "gender": "Gender",
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "genderOther": "Other",
     "tags": "Tags",
     "notes": "Notes",
     "overview": "Overview",
@@ -1461,5 +1467,90 @@
     "paymentUpdateError": "Error updating payment",
     "paymentDeleted": "Payment deleted successfully",
     "paymentDeleteError": "Error deleting payment"
+  },
+  "fasting": {
+    "title": "Intermittent Fasting",
+    "protocol": "Protocol",
+    "startFast": "Start Fast",
+    "endFast": "End Fast",
+    "fastingNow": "Fasting now",
+    "notFasting": "Not fasting",
+    "protocols": {
+      "16_8": "16:8",
+      "18_6": "18:6",
+      "20_4": "20:4",
+      "23_1": "OMAD",
+      "custom": "Custom"
+    },
+    "elapsed": "Elapsed",
+    "remaining": "Remaining",
+    "targetHours": "Target hours",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "stats": {
+      "totalFasts": "Total fasts",
+      "avgDuration": "Avg duration",
+      "streak": "Streak",
+      "completionRate": "Completion rate"
+    },
+    "history": "History",
+    "noHistory": "No fasts recorded yet"
+  },
+  "menstrual": {
+    "title": "My Cycle",
+    "currentPhase": "Current phase",
+    "cycleDay": "Cycle day",
+    "daysUntilPeriod": "{days} days until next period",
+    "nextPeriod": "Next period",
+    "phases": {
+      "menstrual": "Menstrual",
+      "follicular": "Follicular",
+      "ovulation": "Ovulation",
+      "luteal": "Luteal"
+    },
+    "flow": "Flow",
+    "symptoms": "Symptoms",
+    "mood": "Mood",
+    "energy": "Energy",
+    "notes": "Notes",
+    "flows": {
+      "none": "None",
+      "light": "Light",
+      "medium": "Medium",
+      "heavy": "Heavy",
+      "spotting": "Spotting"
+    },
+    "moods": {
+      "great": "Great",
+      "good": "Good",
+      "neutral": "Neutral",
+      "low": "Low",
+      "bad": "Bad"
+    },
+    "symptomsList": {
+      "cramps": "Cramps",
+      "headache": "Headache",
+      "bloating": "Bloating",
+      "fatigue": "Fatigue",
+      "breast_tenderness": "Breast tenderness",
+      "acne": "Acne",
+      "insomnia": "Insomnia",
+      "cravings": "Cravings",
+      "nausea": "Nausea",
+      "back_pain": "Back pain",
+      "mood_swings": "Mood swings"
+    },
+    "trainingTip": "Training tip",
+    "trainingTips": {
+      "menstrual": "Reduce intensity. Light cardio, yoga, stretching",
+      "follicular": "Great time to push! Increase weights and intensity",
+      "ovulation": "Peak performance. Go for PRs",
+      "luteal": "Moderate intensity. Focus on technique"
+    },
+    "logDay": "Log day",
+    "settings": "Cycle settings",
+    "avgCycleLength": "Average cycle length (days)",
+    "avgPeriodLength": "Average period length (days)",
+    "lastPeriodStart": "Last period start"
   }
 }

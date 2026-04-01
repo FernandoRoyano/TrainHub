@@ -52,6 +52,7 @@ export function ClientForm({ mode, client }: ClientFormProps) {
       email: client?.email ?? "",
       phone: client?.phone ?? "",
       status: (client?.status as ClientFormData["status"]) ?? "active",
+      gender: (client?.gender as ClientFormData["gender"]) ?? undefined,
       tags: client?.tags ?? [],
       notes: client?.notes ?? "",
       profile_data: {
@@ -166,6 +167,29 @@ export function ClientForm({ mode, client }: ClientFormProps) {
                             <SelectItem value="inactive">{tc("inactive")}</SelectItem>
                             <SelectItem value="paused">{tc("paused")}</SelectItem>
                             <SelectItem value="pending">{tc("pending")}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("gender")}</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="-" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="male">{t("genderMale")}</SelectItem>
+                            <SelectItem value="female">{t("genderFemale")}</SelectItem>
+                            <SelectItem value="other">{t("genderOther")}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

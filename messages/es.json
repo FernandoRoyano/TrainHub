@@ -91,7 +91,9 @@
     "coaching": "Coaching",
     "serviceTiers": "Seguimiento",
     "coachingPlans": "Planes",
-    "myPlan": "Mi Plan"
+    "myPlan": "Mi Plan",
+    "myFasting": "Ayuno",
+    "myCycle": "Mi Ciclo"
   },
   "dashboard": {
     "title": "Panel de control",
@@ -136,6 +138,10 @@
     "name": "Nombre",
     "phone": "Teléfono",
     "status": "Estado",
+    "gender": "Género",
+    "genderMale": "Hombre",
+    "genderFemale": "Mujer",
+    "genderOther": "Otro",
     "tags": "Etiquetas",
     "notes": "Notas",
     "overview": "Resumen",
@@ -1461,5 +1467,90 @@
     "paymentUpdateError": "Error al actualizar el pago",
     "paymentDeleted": "Pago eliminado correctamente",
     "paymentDeleteError": "Error al eliminar el pago"
+  },
+  "fasting": {
+    "title": "Ayuno intermitente",
+    "protocol": "Protocolo",
+    "startFast": "Iniciar ayuno",
+    "endFast": "Finalizar ayuno",
+    "fastingNow": "Ayunando ahora",
+    "notFasting": "No estás ayunando",
+    "protocols": {
+      "16_8": "16:8",
+      "18_6": "18:6",
+      "20_4": "20:4",
+      "23_1": "OMAD",
+      "custom": "Personalizado"
+    },
+    "elapsed": "Transcurrido",
+    "remaining": "Restante",
+    "targetHours": "Horas objetivo",
+    "completed": "Completado",
+    "cancelled": "Cancelado",
+    "stats": {
+      "totalFasts": "Ayunos totales",
+      "avgDuration": "Duración media",
+      "streak": "Racha",
+      "completionRate": "Tasa de éxito"
+    },
+    "history": "Historial",
+    "noHistory": "Aún no tienes ayunos registrados"
+  },
+  "menstrual": {
+    "title": "Mi Ciclo",
+    "currentPhase": "Fase actual",
+    "cycleDay": "Día del ciclo",
+    "daysUntilPeriod": "{days} días hasta el próximo período",
+    "nextPeriod": "Próximo período",
+    "phases": {
+      "menstrual": "Menstrual",
+      "follicular": "Folicular",
+      "ovulation": "Ovulación",
+      "luteal": "Lútea"
+    },
+    "flow": "Flujo",
+    "symptoms": "Síntomas",
+    "mood": "Estado de ánimo",
+    "energy": "Energía",
+    "notes": "Notas",
+    "flows": {
+      "none": "Sin flujo",
+      "light": "Ligero",
+      "medium": "Moderado",
+      "heavy": "Abundante",
+      "spotting": "Manchado"
+    },
+    "moods": {
+      "great": "Genial",
+      "good": "Bien",
+      "neutral": "Normal",
+      "low": "Bajo",
+      "bad": "Mal"
+    },
+    "symptomsList": {
+      "cramps": "Calambres",
+      "headache": "Dolor de cabeza",
+      "bloating": "Hinchazón",
+      "fatigue": "Fatiga",
+      "breast_tenderness": "Sensibilidad mamaria",
+      "acne": "Acné",
+      "insomnia": "Insomnio",
+      "cravings": "Antojos",
+      "nausea": "Náuseas",
+      "back_pain": "Dolor lumbar",
+      "mood_swings": "Cambios de humor"
+    },
+    "trainingTip": "Consejo de entrenamiento",
+    "trainingTips": {
+      "menstrual": "Reduce la intensidad. Cardio suave, yoga y estiramientos",
+      "follicular": "Buen momento para exigirte. Aumenta pesos e intensidad",
+      "ovulation": "Rendimiento máximo. Ve a por tus récords",
+      "luteal": "Intensidad moderada. Céntrate en la técnica"
+    },
+    "logDay": "Registrar día",
+    "settings": "Configuración del ciclo",
+    "avgCycleLength": "Duración media del ciclo (días)",
+    "avgPeriodLength": "Duración media del período (días)",
+    "lastPeriodStart": "Inicio del último período"
   }
 }
