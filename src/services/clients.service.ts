@@ -411,22 +411,31 @@ export const clientsService = {
       (clientRoutine.routines as unknown as { days_per_week: number } | null)
         ?.days_per_week ?? 0;
 
-    // Get Monday of this week
+    // Get first day of current month
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     const monday = getMonday();
 
-    // Get workout_logs for this week
-    const { data: logs, error: logsError } = await supabase
+    // Get workout_logs for the entire month (for calendar)
+    const { data: monthLogs, error: monthError } = await supabase
       .from("workout_logs")
-      .select("completed_at")
+      .select("completed_at, date")
       .eq("client_routine_id", clientRoutine.id)
-      .gte("completed_at", monday);
+      .eq("completed", true)
+      .gte("date", monthStart.split("T")[0]);
 
-    if (logsError) throw logsError;
+    if (monthError) throw monthError;
 
-    const logDates = (logs ?? []).map((l) => new Date(l.completed_at));
+    const logDates = (monthLogs ?? []).map((l) => new Date(l.completed_at || l.date));
+
+    // Count this week only for completedDays
+    const weekLogs = (monthLogs ?? []).filter((l) => {
+      const d = l.completed_at || l.date;
+      return d >= monday;
+    });
 
     return {
-      completedDays: logDates.length,
+      completedDays: weekLogs.length,
       totalDays: daysPerWeek,
       logs: logDates,
     };

@@ -121,7 +121,7 @@ export function TrackingTab({ clientId }: TrackingTabProps) {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              {t("monthlyCalendar")}
+              {new Date().toLocaleDateString("es-ES", { month: "long", year: "numeric" }).replace(/^\w/, (c) => c.toUpperCase())}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -181,7 +181,9 @@ export function TrackingTab({ clientId }: TrackingTabProps) {
                   className="flex items-center justify-between rounded-lg border p-3"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium">{workout.date}</span>
+                    <span className="text-sm font-medium">
+                      {new Date(workout.date + "T00:00:00").toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" })}
+                    </span>
                     <span className="text-xs text-muted-foreground">
                       {workout.exercise_logs.length} {t("exercises")}
                     </span>
