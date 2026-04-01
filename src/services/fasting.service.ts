@@ -198,4 +198,14 @@ export const fastingService = {
 
     return { totalFasts, avgHours, completionRate, currentStreak };
   },
+
+  async deleteFast(logId: string): Promise<void> {
+    const { supabase, clientId } = await getAuthenticatedClient();
+    const { error } = await supabase
+      .from("fasting_logs")
+      .delete()
+      .eq("id", logId)
+      .eq("client_id", clientId);
+    if (error) throw error;
+  },
 };

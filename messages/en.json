@@ -1499,7 +1499,9 @@
       "completionRate": "Completion rate"
     },
     "history": "History",
-    "noHistory": "No fasts recorded yet"
+    "noHistory": "No fasts recorded yet",
+    "deleted": "Fasting log deleted",
+    "deleteError": "Error deleting fasting log"
   },
   "menstrual": {
     "title": "My Cycle",

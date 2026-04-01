@@ -72,6 +72,24 @@ export function useFastingHistory() {
   });
 }
 
+export function useDeleteFast() {
+  const queryClient = useQueryClient();
+  const t = useTranslations("fasting");
+
+  return useMutation({
+    mutationFn: (logId: string) => fastingService.deleteFast(logId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["active-fast"] });
+      queryClient.invalidateQueries({ queryKey: ["fasting-history"] });
+      queryClient.invalidateQueries({ queryKey: ["fasting-stats"] });
+      toast.success(t("deleted"));
+    },
+    onError: () => {
+      toast.error(t("deleteError"));
+    },
+  });
+}
+
 export function useFastingStats() {
   return useQuery({
     queryKey: ["fasting-stats"],

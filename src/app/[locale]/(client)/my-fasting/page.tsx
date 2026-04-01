@@ -9,6 +9,7 @@ import {
   useFastingStats,
   useStartFast,
   useEndFast,
+  useDeleteFast,
   useUpdateFastingSettings,
 } from "@/hooks/use-fasting";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Timer, Play, Square, Flame, TrendingUp, Target, Trophy } from "lucide-react";
+import { Timer, Play, Square, Flame, TrendingUp, Target, Trophy, Trash2 } from "lucide-react";
 
 const PROTOCOLS: Record<string, number> = {
   "16_8": 16,
@@ -98,6 +99,7 @@ export default function MyFastingPage() {
 
   const startFast = useStartFast();
   const endFast = useEndFast();
+  const deleteFast = useDeleteFast();
   const updateSettings = useUpdateFastingSettings();
 
   const [selectedProtocol, setSelectedProtocol] = useState<string | null>(null);
@@ -260,6 +262,15 @@ export default function MyFastingPage() {
                     <Badge variant={log.completed ? "default" : "secondary"}>
                       {log.completed ? t("completed") : t("cancelled")}
                     </Badge>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-destructive hover:text-destructive"
+                      onClick={() => deleteFast.mutate(log.id)}
+                      disabled={deleteFast.isPending}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
               ))}

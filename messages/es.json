@@ -1499,7 +1499,9 @@
       "completionRate": "Tasa de éxito"
     },
     "history": "Historial",
-    "noHistory": "Aún no tienes ayunos registrados"
+    "noHistory": "Aún no tienes ayunos registrados",
+    "deleted": "Registro de ayuno eliminado",
+    "deleteError": "Error al eliminar el registro"
   },
   "menstrual": {
     "title": "Mi Ciclo",
