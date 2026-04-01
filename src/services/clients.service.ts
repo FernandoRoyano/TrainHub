@@ -26,7 +26,7 @@ export interface Client {
   phone: string | null;
   status: string;
   profile_data: Record<string, unknown>;
-  gender: "male" | "female" | "other" | null;
+  gender: "male" | "female" | null;
   tags: string[];
   notes: string | null;
   created_at: string;
