@@ -400,42 +400,49 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
 
   const onSubmit = useCallback(
     (formData: RoutineFormData) => {
-      // Merge form data with builder state
+      // Merge form data with builder state — normalize order_index by array position
+      let globalExIdx = 0;
       const fullData: RoutineFormData = {
         ...formData,
-        days: days.map((day) => ({
-          day_number: day.day_number,
-          name: day.name,
-          notes: day.notes,
-          description: day.description,
-          groups: day.groups.map((g) => ({
-            group_type: g.group_type,
-            order_index: g.order_index,
-            rounds: g.rounds,
-            time_limit_seconds: g.time_limit_seconds,
-            rest_between_rounds: g.rest_between_rounds,
-            label: g.label,
-            notes: g.notes,
-            exercises: g.exercises.map((ex) => ({
+        days: days.map((day) => {
+          globalExIdx = 0;
+          return {
+            day_number: day.day_number,
+            name: day.name,
+            notes: day.notes,
+            description: day.description,
+            groups: day.groups.map((g, gi) => ({
+              group_type: g.group_type,
+              order_index: gi,
+              rounds: g.rounds,
+              time_limit_seconds: g.time_limit_seconds,
+              rest_between_rounds: g.rest_between_rounds,
+              label: g.label,
+              notes: g.notes,
+              exercises: g.exercises.map((ex) => {
+                const idx = globalExIdx++;
+                return {
+                  exercise_id: ex.exercise_id,
+                  order_index: idx,
+                  sets: ex.sets,
+                  reps: ex.reps,
+                  rest_seconds: ex.rest_seconds,
+                  notes: ex.notes,
+                  superset_group: ex.superset_group,
+                };
+              }),
+            })),
+            exercises: day.exercises.map((ex, i) => ({
               exercise_id: ex.exercise_id,
-              order_index: ex.order_index,
+              order_index: i,
               sets: ex.sets,
               reps: ex.reps,
               rest_seconds: ex.rest_seconds,
               notes: ex.notes,
               superset_group: ex.superset_group,
             })),
-          })),
-          exercises: day.exercises.map((ex) => ({
-            exercise_id: ex.exercise_id,
-            order_index: ex.order_index,
-            sets: ex.sets,
-            reps: ex.reps,
-            rest_seconds: ex.rest_seconds,
-            notes: ex.notes,
-            superset_group: ex.superset_group,
-          })),
-        })),
+          };
+        }),
       };
 
       if (mode === "create") {
