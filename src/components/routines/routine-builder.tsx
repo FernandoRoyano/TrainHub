@@ -841,15 +841,23 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                               amrap: <Zap className="h-3 w-3" />,
                             };
 
+                            const bgColor: Record<string, string> = {
+                              superset: "bg-purple-500/5",
+                              triset: "bg-indigo-500/5",
+                              circuit: "bg-orange-500/5",
+                              emom: "bg-rose-500/5",
+                              amrap: "bg-emerald-500/5",
+                            };
+
                             return (
                               <div
                                 key={group.id}
-                                className={`border-2 rounded-lg p-3 space-y-2 ${groupBorderColor[group.group_type] || "border-muted"}`}
+                                className={`border-2 rounded-xl p-4 space-y-3 ${groupBorderColor[group.group_type] || "border-muted"} ${bgColor[group.group_type] || ""}`}
                               >
                                 {/* Group header */}
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2">
-                                    <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${groupBadgeColor[group.group_type] || ""}`}>
+                                    <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full ${groupBadgeColor[group.group_type] || ""}`}>
                                       {groupIcon[group.group_type]}
                                       {groupLabel[group.group_type] || group.group_type}
                                     </span>
