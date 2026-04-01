@@ -211,7 +211,9 @@
     "statsTab": "Stats",
     "trackingTab": "Tracking",
     "historicoTab": "History",
-    "paymentsTab": "Payments"
+    "paymentsTab": "Payments",
+    "fastingTab": "Fasting",
+    "cycleTab": "Cycle"
   },
   "planTab": {
     "coachingPlan": "Coaching plan",

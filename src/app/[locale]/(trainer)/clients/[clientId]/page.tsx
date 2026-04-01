@@ -15,6 +15,8 @@ import { StatsTab } from "@/components/clients/stats-tab";
 import { TrackingTab } from "@/components/clients/tracking-tab";
 import { HistoryTab } from "@/components/clients/history-tab";
 import { PaymentsTab } from "@/components/clients/payments-tab";
+import { FastingTab } from "@/components/clients/fasting-tab";
+import { CycleTab } from "@/components/clients/cycle-tab";
 import { ResetPasswordDialog } from "@/components/clients/reset-password-dialog";
 import { ArrowLeft, Pencil, Trash2, Mail, Phone, Send, Link2, KeyRound } from "lucide-react";
 import Link from "next/link";
@@ -173,6 +175,10 @@ export default function ClientDetailPage() {
             <TabsTrigger value="tracking">{t("trackingTab")}</TabsTrigger>
             <TabsTrigger value="historico">{t("historicoTab")}</TabsTrigger>
             <TabsTrigger value="payments">{t("paymentsTab")}</TabsTrigger>
+            <TabsTrigger value="fasting">{t("fastingTab")}</TabsTrigger>
+            {client.gender === "female" && (
+              <TabsTrigger value="cycle">{t("cycleTab")}</TabsTrigger>
+            )}
           </TabsList>
         </div>
 
@@ -195,6 +201,16 @@ export default function ClientDetailPage() {
         <TabsContent value="payments">
           <PaymentsTab clientId={client.id} />
         </TabsContent>
+
+        <TabsContent value="fasting">
+          <FastingTab clientId={client.id} />
+        </TabsContent>
+
+        {client.gender === "female" && (
+          <TabsContent value="cycle">
+            <CycleTab clientId={client.id} />
+          </TabsContent>
+        )}
       </Tabs>
 
       <ConfirmDialog

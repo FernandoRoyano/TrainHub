@@ -211,7 +211,9 @@
     "statsTab": "Estadísticas",
     "trackingTab": "Seguimiento",
     "historicoTab": "Histórico",
-    "paymentsTab": "Cobros"
+    "paymentsTab": "Cobros",
+    "fastingTab": "Ayuno",
+    "cycleTab": "Ciclo"
   },
   "planTab": {
     "coachingPlan": "Plan de coaching",
