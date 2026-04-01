@@ -32,15 +32,16 @@ import { useState } from "react";
 const navItems = [
   { key: "dashboard", href: "/dashboard", icon: LayoutDashboard, badgeKey: null },
   { key: "clients", href: "/clients", icon: Users, badgeKey: "pendingClients" as const },
-  { key: "exercises", href: "/exercises", icon: Dumbbell, badgeKey: null },
-  { key: "blocks", href: "/blocks", icon: Puzzle, badgeKey: null },
-  { key: "routines", href: "/routines", icon: ClipboardList, badgeKey: null },
-  { key: "templates", href: "/templates", icon: LayoutTemplate, badgeKey: null },
-  { key: "questionnaires", href: "/questionnaires", icon: FileQuestion, badgeKey: null },
-  { key: "serviceTiers", href: "/service-tiers", icon: Shield, badgeKey: null },
-  { key: "coachingPlans", href: "/coaching-plans", icon: Briefcase, badgeKey: null },
-  { key: "nutrition", href: "/nutrition", icon: UtensilsCrossed, badgeKey: null },
   { key: "messages", href: "/messages", icon: MessageSquare, badgeKey: "unreadMessages" as const },
+  // Training
+  { key: "exercises", href: "/exercises", icon: Dumbbell, badgeKey: null, section: "training" as const },
+  { key: "routines", href: "/routines", icon: Dumbbell, badgeKey: null, section: "training" as const },
+  { key: "templates", href: "/templates", icon: Dumbbell, badgeKey: null, section: "training" as const },
+  // Coaching
+  { key: "questionnaires", href: "/questionnaires", icon: Briefcase, badgeKey: null, section: "coaching" as const },
+  { key: "coachingPlans", href: "/coaching-plans", icon: Briefcase, badgeKey: null, section: "coaching" as const },
+  // Other
+  { key: "nutrition", href: "/nutrition", icon: UtensilsCrossed, badgeKey: null },
   { key: "calendar", href: "/calendar", icon: CalendarDays, badgeKey: null },
   { key: "analytics", href: "/analytics", icon: BarChart3, badgeKey: null },
   { key: "settings", href: "/settings", icon: Settings, badgeKey: null },
