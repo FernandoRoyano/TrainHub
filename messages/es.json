@@ -662,6 +662,7 @@
     "duration": "Duración",
     "inProgress": "En curso",
     "exerciseFeedbackPlaceholder": "¿Cómo te ha ido? (sensaciones, dificultad...)",
+    "lastTime": "Anterior",
     "setsCompleted": "Series completadas",
     "weightUsed": "Peso (kg)",
     "logExercise": "Registrar",

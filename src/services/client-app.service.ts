@@ -164,12 +164,12 @@ export const clientAppService = {
     const { supabase, clientId } = await getAuthenticatedClient();
     const { data, error } = await supabase
       .from("workout_logs")
-      .select("*")
+      .select("*, exercise_logs(*)")
       .eq("client_routine_id", clientRoutineId)
       .eq("client_id", clientId)
       .order("date", { ascending: false });
     if (error) throw error;
-    return data as WorkoutLog[];
+    return data as (WorkoutLog & { exercise_logs?: ExerciseLog[] })[];
   },
 
   async getExerciseLogs(workoutLogId: string) {

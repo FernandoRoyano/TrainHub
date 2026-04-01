@@ -26,6 +26,7 @@ function ExerciseCard({
   setExerciseData,
   activeWorkoutId,
   todayLog,
+  lastExerciseLog,
   logExercise,
   handleLogExercise,
   startCountdown,
@@ -39,6 +40,7 @@ function ExerciseCard({
   setExerciseData: React.Dispatch<React.SetStateAction<Record<string, { sets: number; weight: string; reps: string; feedback: string }>>>;
   activeWorkoutId: string | null;
   todayLog: any;
+  lastExerciseLog: any;
   logExercise: any;
   handleLogExercise: (id: string, rest?: number, name?: string) => void;
   startCountdown: (seconds: number, name?: string) => void;
@@ -85,6 +87,12 @@ function ExerciseCard({
                 </Badge>
               ))}
             </div>
+            {lastExerciseLog && (
+              <p className="text-[10px] text-primary/70 mt-0.5">
+                {t("lastTime")}: {lastExerciseLog.sets_completed}x{lastExerciseLog.reps_completed || "?"} · {lastExerciseLog.weight_used ? `${lastExerciseLog.weight_used}kg` : "—"}
+                {lastExerciseLog.feedback && ` · "${lastExerciseLog.feedback}"`}
+              </p>
+            )}
             <div className="flex items-center gap-1 mt-1">
               <p className="text-xs text-muted-foreground">
                 {ex.sets}x{ex.reps} - {ex.rest_seconds}s
@@ -241,6 +249,11 @@ export default function MyRoutinePage() {
   const todayLog = logs?.find(
     (l) => l.date === today && l.routine_day_id === activeDay?.id
   );
+
+  // Last completed log for this day (not today) — to show previous weights
+  const lastLog = logs
+    ?.filter((l) => l.routine_day_id === activeDay?.id && l.completed && l.date !== today)
+    .sort((a, b) => b.date.localeCompare(a.date))[0] ?? null;
 
   const handleStartWorkout = () => {
     if (!client || !activeDay) return;
@@ -402,6 +415,7 @@ export default function MyRoutinePage() {
                         setExerciseData={setExerciseData}
                         activeWorkoutId={activeWorkoutId}
                         todayLog={todayLog}
+                        lastExerciseLog={lastLog?.exercise_logs?.find((el: any) => el.routine_exercise_id === ex.id) ?? null}
                         logExercise={logExercise}
                         handleLogExercise={handleLogExercise}
                         startCountdown={startCountdown}
@@ -436,6 +450,7 @@ export default function MyRoutinePage() {
                           setExerciseData={setExerciseData}
                           activeWorkoutId={activeWorkoutId}
                           todayLog={todayLog}
+                          lastExerciseLog={lastLog?.exercise_logs?.find((el: any) => el.routine_exercise_id === ex.id) ?? null}
                           logExercise={logExercise}
                           handleLogExercise={handleLogExercise}
                           startCountdown={startCountdown}
@@ -456,6 +471,7 @@ export default function MyRoutinePage() {
                     setExerciseData={setExerciseData}
                     activeWorkoutId={activeWorkoutId}
                     todayLog={todayLog}
+                    lastExerciseLog={lastLog?.exercise_logs?.find((el: any) => el.routine_exercise_id === ex.id) ?? null}
                     logExercise={logExercise}
                     handleLogExercise={handleLogExercise}
                     startCountdown={startCountdown}
