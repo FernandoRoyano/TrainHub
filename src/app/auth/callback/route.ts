@@ -80,6 +80,8 @@ export async function GET(request: Request) {
             .maybeSingle();
 
           if (tokenClient) {
+            const isPlaceholder = tokenClient.full_name === "Nuevo cliente";
+            const fullName = user.user_metadata?.full_name || tokenClient.full_name;
             await admin
               .from("clients")
               .update({
@@ -87,6 +89,7 @@ export async function GET(request: Request) {
                 status: "active",
                 invite_token: null,
                 email: user.email,
+                full_name: isPlaceholder ? fullName : tokenClient.full_name,
               })
               .eq("id", tokenClient.id);
 

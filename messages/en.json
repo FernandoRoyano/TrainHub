@@ -188,6 +188,8 @@
     "inviteLinkCopied": "Link copied to clipboard",
     "inviteLinkError": "Error generating link",
     "clientAlreadyRegistered": "This client already has a registered account",
+    "openInviteLink": "Registration link",
+    "openInviteCopied": "Registration link copied. Send it to the client.",
     "noNotes": "No notes",
     "lastActive": "Last active",
     "lastActiveToday": "Today",
@@ -867,7 +869,8 @@
     "checkEmail": "Check your email",
     "confirmEmail": "We sent you a confirmation email. Click the link to activate your account.",
     "accountCreated": "Account created successfully!",
-    "accountCreatedDesc": "You can now log in with your email and password."
+    "accountCreatedDesc": "You can now log in with your email and password.",
+    "prefilledByTrainer": "Data provided by your trainer"
   },
   "validation": {
     "invalidEmail": "Invalid email",

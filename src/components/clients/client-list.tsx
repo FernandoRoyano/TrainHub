@@ -33,8 +33,10 @@ import {
   AlertTriangle,
   UserX,
   UserCheck,
+  Link2,
 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { useDebounce } from "@/hooks/use-debounce";
 
 const statusColors: Record<string, string> = {
@@ -116,21 +118,42 @@ export function ClientList() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t("title")}</h1>
-        {sub?.canAddClient !== false ? (
-          <Button asChild>
-            <Link href="/clients/new">
-              <UserPlus className="mr-2 h-4 w-4" />
-              {t("addClient")}
-            </Link>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              try {
+                const res = await fetch("/api/generate-open-invite", { method: "POST" });
+                const data = await res.json();
+                if (data.link) {
+                  navigator.clipboard.writeText(data.link);
+                  toast.success(t("openInviteCopied"));
+                }
+              } catch {
+                toast.error(t("inviteLinkError"));
+              }
+            }}
+          >
+            <Link2 className="mr-1 h-3.5 w-3.5" />
+            {t("openInviteLink")}
           </Button>
-        ) : (
-          <Button asChild variant="outline">
-            <Link href="/settings">
-              <UserPlus className="mr-2 h-4 w-4" />
-              {t("addClient")}
-            </Link>
-          </Button>
-        )}
+          {sub?.canAddClient !== false ? (
+            <Button asChild>
+              <Link href="/clients/new">
+                <UserPlus className="mr-2 h-4 w-4" />
+                {t("addClient")}
+              </Link>
+            </Button>
+          ) : (
+            <Button asChild variant="outline">
+              <Link href="/settings">
+                <UserPlus className="mr-2 h-4 w-4" />
+                {t("addClient")}
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Subscription limit warning */}

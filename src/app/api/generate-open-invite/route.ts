@@ -1,0 +1,39 @@
+import { createClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
+
+export async function POST(request: Request) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  // Create a placeholder client with just the invite token (no name/email)
+  const token = crypto.randomUUID();
+  const { data: client, error } = await supabase
+    .from("clients")
+    .insert({
+      trainer_id: user.id,
+      full_name: "Nuevo cliente",
+      email: `pending-${token}@placeholder.local`,
+      status: "pending",
+      invite_token: token,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  const { origin } = new URL(request.url);
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || origin;
+
+  return NextResponse.json({
+    link: `${appUrl}/es/join/${token}`,
+    clientId: client.id,
+  });
+}

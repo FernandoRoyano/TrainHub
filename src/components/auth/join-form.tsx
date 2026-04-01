@@ -33,6 +33,7 @@ export function JoinForm({ token }: JoinFormProps) {
   const [isVerifying, setIsVerifying] = useState(true);
   const [isValid, setIsValid] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(createRegisterSchema(tv)),
@@ -51,7 +52,9 @@ export function JoinForm({ token }: JoinFormProps) {
         const data = await res.json();
         if (data.valid) {
           setIsValid(true);
-          form.setValue("fullName", data.clientName || "");
+          if (data.clientName) form.setValue("fullName", data.clientName);
+          if (data.clientEmail) form.setValue("email", data.clientEmail);
+          setHasProfile(data.hasProfile || false);
         }
       } catch {
         // Token invalid
@@ -123,7 +126,13 @@ export function JoinForm({ token }: JoinFormProps) {
             <FormItem>
               <FormLabel>{ta("fullName")}</FormLabel>
               <FormControl>
-                <Input placeholder={ta("namePlaceholder")} autoComplete="name" {...field} />
+                <Input
+                  placeholder={ta("namePlaceholder")}
+                  autoComplete="name"
+                  disabled={hasProfile && !!field.value}
+                  className={hasProfile && field.value ? "bg-muted" : ""}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -141,9 +150,14 @@ export function JoinForm({ token }: JoinFormProps) {
                   type="email"
                   placeholder={ta("emailPlaceholder")}
                   autoComplete="email"
+                  disabled={hasProfile && !!field.value}
+                  className={hasProfile && field.value ? "bg-muted" : ""}
                   {...field}
                 />
               </FormControl>
+              {hasProfile && field.value && (
+                <p className="text-[10px] text-muted-foreground">{t("prefilledByTrainer")}</p>
+              )}
               <FormMessage />
             </FormItem>
           )}

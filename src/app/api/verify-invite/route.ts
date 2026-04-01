@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const admin = createAdminClient();
   const { data: client } = await admin
     .from("clients")
-    .select("full_name, user_id")
+    .select("full_name, email, phone, user_id, trainer_id")
     .eq("invite_token", token)
     .maybeSingle();
 
@@ -21,5 +21,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ valid: false });
   }
 
-  return NextResponse.json({ valid: true, clientName: client.full_name });
+  const isPlaceholder = client.email?.startsWith("pending-") || client.full_name === "Nuevo cliente";
+  return NextResponse.json({
+    valid: true,
+    clientName: isPlaceholder ? "" : client.full_name,
+    clientEmail: isPlaceholder ? "" : client.email,
+    clientPhone: client.phone,
+    hasProfile: !isPlaceholder && !!(client.email && client.full_name),
+    isOpenInvite: isPlaceholder,
+    trainerId: client.trainer_id,
+  });
 }

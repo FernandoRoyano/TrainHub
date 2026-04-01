@@ -188,6 +188,8 @@
     "inviteLinkCopied": "Link copiado al portapapeles",
     "inviteLinkError": "Error al generar el link",
     "clientAlreadyRegistered": "Este cliente ya tiene cuenta registrada",
+    "openInviteLink": "Link de registro",
+    "openInviteCopied": "Link de registro copiado. Envíalo al cliente.",
     "noNotes": "Sin notas",
     "lastActive": "Última actividad",
     "lastActiveToday": "Hoy",
@@ -867,7 +869,8 @@
     "checkEmail": "Revisa tu correo electrónico",
     "confirmEmail": "Te enviamos un email de confirmación. Haz click en el link para activar tu cuenta.",
     "accountCreated": "¡Cuenta creada correctamente!",
-    "accountCreatedDesc": "Ya puedes iniciar sesión con tu email y contraseña."
+    "accountCreatedDesc": "Ya puedes iniciar sesión con tu email y contraseña.",
+    "prefilledByTrainer": "Datos proporcionados por tu entrenador"
   },
   "validation": {
     "invalidEmail": "Email no válido",
