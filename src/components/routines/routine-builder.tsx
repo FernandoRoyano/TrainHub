@@ -18,17 +18,20 @@ import { ExerciseSidebar } from "./exercise-sidebar";
 import { BlockPicker } from "@/components/blocks/block-picker";
 import {
   DndContext,
-  closestCenter,
+  closestCorners,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
   type DragEndEvent,
+  type DragOverEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
+  arrayMove,
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -98,6 +101,8 @@ function SortableExerciseItem({
   updateExercise,
   toggleSuperset,
   removeExercise,
+  groupId,
+  groupIndex,
 }: {
   ex: BuilderExercise;
   exIndex: number;
@@ -109,6 +114,8 @@ function SortableExerciseItem({
   updateExercise: (di: number, ei: number, data: Partial<BuilderExercise>) => void;
   toggleSuperset: (di: number, ei: number) => void;
   removeExercise: (di: number, ei: number) => void;
+  groupId: string;
+  groupIndex: number;
 }) {
   const {
     attributes,
@@ -117,7 +124,7 @@ function SortableExerciseItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: ex.id });
+  } = useSortable({ id: ex.id, data: { groupId, groupIndex } });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -279,6 +286,22 @@ function SortableExerciseItem({
   );
 }
 
+/* ── Droppable group wrapper ─────────────────────────────── */
+function DroppableGroupWrapper({
+  groupId,
+  children,
+}: {
+  groupId: string;
+  children: React.ReactNode;
+}) {
+  const { isOver, setNodeRef } = useDroppable({ id: `group-${groupId}` });
+  return (
+    <div ref={setNodeRef} className={`transition-all rounded-xl ${isOver ? "ring-2 ring-primary/50" : ""}`}>
+      {children}
+    </div>
+  );
+}
+
 /* ── Main builder ─────────────────────────────────────────── */
 export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilderProps) {
   const t = useTranslations("routines");
@@ -311,6 +334,8 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
     updateGroup,
     addExerciseToGroup,
     changeGroupType,
+    moveExerciseBetweenGroups,
+    reorderExerciseInGroup,
     reset,
   } = useRoutineBuilderStore();
 
@@ -375,18 +400,70 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
   const isLoading = createRoutine.isPending || updateRoutine.isPending;
   const activeDay = days[activeDayIndex];
 
+  const handleDragOver = useCallback(
+    (event: DragOverEvent) => {
+      const { active, over } = event;
+      if (!over || !activeDay) return;
+
+      const activeGroupId = (active.data.current as { groupId?: string })?.groupId;
+      if (!activeGroupId) return;
+
+      // Determine the target group: either from another exercise's data or from a droppable group container
+      const overId = String(over.id);
+      let overGroupId: string | undefined;
+      let overIndex: number | undefined;
+
+      if (overId.startsWith("group-")) {
+        // Dropped over a group container
+        overGroupId = overId.replace("group-", "");
+        // Append at end
+        const targetGroup = activeDay.groups.find((g) => g.id === overGroupId);
+        overIndex = targetGroup ? targetGroup.exercises.length : 0;
+      } else {
+        // Dropped over another exercise
+        overGroupId = (over.data.current as { groupId?: string })?.groupId;
+        if (overGroupId) {
+          const targetGroup = activeDay.groups.find((g) => g.id === overGroupId);
+          overIndex = targetGroup ? targetGroup.exercises.findIndex((e) => e.id === overId) : 0;
+          if (overIndex === -1) overIndex = 0;
+        }
+      }
+
+      if (!overGroupId || activeGroupId === overGroupId) return;
+
+      // Cross-container move
+      moveExerciseBetweenGroups(
+        activeDayIndex,
+        String(active.id),
+        activeGroupId,
+        overGroupId,
+        overIndex ?? 0
+      );
+    },
+    [activeDay, activeDayIndex, moveExerciseBetweenGroups]
+  );
+
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
       if (!over || active.id === over.id || !activeDay) return;
 
-      const oldIndex = activeDay.exercises.findIndex((e) => e.id === active.id);
-      const newIndex = activeDay.exercises.findIndex((e) => e.id === over.id);
-      if (oldIndex !== -1 && newIndex !== -1) {
-        reorderExercise(activeDayIndex, oldIndex, newIndex);
+      // Same-group reordering only (cross-container already handled in onDragOver)
+      const activeGroupId = (active.data.current as { groupId?: string })?.groupId;
+      const overGroupId = (over.data.current as { groupId?: string })?.groupId;
+
+      if (!activeGroupId || !overGroupId || activeGroupId !== overGroupId) return;
+
+      const group = activeDay.groups.find((g) => g.id === activeGroupId);
+      if (!group) return;
+
+      const oldIndex = group.exercises.findIndex((e) => e.id === active.id);
+      const newIndex = group.exercises.findIndex((e) => e.id === over.id);
+      if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+        reorderExerciseInGroup(activeDayIndex, activeGroupId, oldIndex, newIndex);
       }
     },
-    [activeDay, activeDayIndex, reorderExercise]
+    [activeDay, activeDayIndex, reorderExerciseInGroup]
   );
 
   const handleBlockSelect = useCallback(
@@ -774,35 +851,43 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                   ) : (
                     <DndContext
                       sensors={sensors}
-                      collisionDetection={closestCenter}
+                      collisionDetection={closestCorners}
+                      onDragOver={handleDragOver}
                       onDragEnd={handleDragEnd}
                     >
-                      <SortableContext
-                        items={activeDay.exercises.map((e) => e.id)}
-                        strategy={verticalListSortingStrategy}
-                      >
                         <div className="space-y-3">
                           {activeDay.groups.map((group, groupIndex) => {
                             if (group.group_type === "solo") {
-                              // Solo: render exercises directly (no group wrapper)
-                              return group.exercises.map((ex) => {
-                                const flatIndex = activeDay.exercises.findIndex((e) => e.id === ex.id);
-                                return (
-                                  <SortableExerciseItem
-                                    key={ex.id}
-                                    ex={ex}
-                                    exIndex={flatIndex}
-                                    activeDayIndex={activeDayIndex}
-                                    prevInSameSuperset={false}
-                                    locale={locale}
-                                    t={t}
-                                    te={te}
-                                    updateExercise={updateExercise}
-                                    toggleSuperset={toggleSuperset}
-                                    removeExercise={removeExercise}
-                                  />
-                                );
-                              });
+                              // Solo: render exercises in a droppable + sortable context
+                              return (
+                                <DroppableGroupWrapper key={group.id} groupId={group.id}>
+                                  <SortableContext
+                                    items={group.exercises.map((e) => e.id)}
+                                    strategy={verticalListSortingStrategy}
+                                  >
+                                    {group.exercises.map((ex) => {
+                                      const flatIndex = activeDay.exercises.findIndex((e) => e.id === ex.id);
+                                      return (
+                                        <SortableExerciseItem
+                                          key={ex.id}
+                                          ex={ex}
+                                          exIndex={flatIndex}
+                                          activeDayIndex={activeDayIndex}
+                                          prevInSameSuperset={false}
+                                          locale={locale}
+                                          t={t}
+                                          te={te}
+                                          updateExercise={updateExercise}
+                                          toggleSuperset={toggleSuperset}
+                                          removeExercise={removeExercise}
+                                          groupId={group.id}
+                                          groupIndex={groupIndex}
+                                        />
+                                      );
+                                    })}
+                                  </SortableContext>
+                                </DroppableGroupWrapper>
+                              );
                             }
 
                             // Non-solo group rendering
@@ -850,8 +935,8 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                             };
 
                             return (
+                              <DroppableGroupWrapper key={group.id} groupId={group.id}>
                               <div
-                                key={group.id}
                                 className={`border-2 rounded-xl p-4 space-y-3 ${groupBorderColor[group.group_type] || "border-muted"} ${bgColor[group.group_type] || ""}`}
                               >
                                 {/* Group header */}
@@ -965,6 +1050,10 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                                 )}
 
                                 {/* Group exercises */}
+                                <SortableContext
+                                  items={group.exercises.map((e) => e.id)}
+                                  strategy={verticalListSortingStrategy}
+                                >
                                 <div className="space-y-2">
                                   {group.exercises.map((ex) => {
                                     const flatIndex = activeDay.exercises.findIndex((e) => e.id === ex.id);
@@ -981,10 +1070,13 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                                         updateExercise={updateExercise}
                                         toggleSuperset={toggleSuperset}
                                         removeExercise={removeExercise}
+                                        groupId={group.id}
+                                        groupIndex={groupIndex}
                                       />
                                     );
                                   })}
                                 </div>
+                                </SortableContext>
 
                                 {/* Add exercise to group button */}
                                 <Button
@@ -1001,10 +1093,10 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                                   {t("addExercise")}
                                 </Button>
                               </div>
+                              </DroppableGroupWrapper>
                             );
                           })}
                         </div>
-                      </SortableContext>
                     </DndContext>
                   )}
 

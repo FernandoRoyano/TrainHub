@@ -76,6 +76,10 @@ interface RoutineBuilderState {
   addExerciseToGroup: (dayIndex: number, groupIndex: number, exercise: Exercise) => void;
   changeGroupType: (dayIndex: number, groupIndex: number, newType: GroupType) => void;
 
+  // Cross-container drag & drop
+  moveExerciseBetweenGroups: (dayIndex: number, exerciseId: string, fromGroupId: string, toGroupId: string, newIndex: number) => void;
+  reorderExerciseInGroup: (dayIndex: number, groupId: string, oldIndex: number, newIndex: number) => void;
+
   // Reset
   reset: () => void;
 }
@@ -571,6 +575,95 @@ export const useRoutineBuilderStore = create<RoutineBuilderState>(
 
       const newExercises = groupsToExercises(newGroups);
 
+      const newDays = [...days];
+      newDays[dayIndex] = { ...day, groups: newGroups, exercises: newExercises };
+      set({ days: newDays });
+    },
+
+    // --- Cross-container drag & drop ---
+
+    moveExerciseBetweenGroups: (dayIndex, exerciseId, fromGroupId, toGroupId, newIndex) => {
+      const { days } = get();
+      const day = days[dayIndex];
+      if (!day) return;
+
+      const fromGroupIdx = day.groups.findIndex((g) => g.id === fromGroupId);
+      const toGroupIdx = day.groups.findIndex((g) => g.id === toGroupId);
+      if (fromGroupIdx === -1 || toGroupIdx === -1) return;
+
+      const fromGroup = day.groups[fromGroupIdx];
+      const exerciseIdx = fromGroup.exercises.findIndex((e) => e.id === exerciseId);
+      if (exerciseIdx === -1) return;
+
+      const exercise = fromGroup.exercises[exerciseIdx];
+
+      // Remove from source group
+      const updatedFromExercises = fromGroup.exercises.filter((e) => e.id !== exerciseId);
+
+      // Insert into target group
+      const toGroup = day.groups[toGroupIdx];
+      const updatedToExercises = [...toGroup.exercises];
+      const clampedIndex = Math.min(newIndex, updatedToExercises.length);
+      updatedToExercises.splice(clampedIndex, 0, { ...exercise, order_index: clampedIndex });
+
+      // Build new groups array
+      let newGroups = day.groups.map((g, i) => {
+        if (i === fromGroupIdx) {
+          return {
+            ...g,
+            exercises: updatedFromExercises.map((e, j) => ({ ...e, order_index: j })),
+          };
+        }
+        if (i === toGroupIdx) {
+          return {
+            ...g,
+            exercises: updatedToExercises.map((e, j) => ({ ...e, order_index: j })),
+          };
+        }
+        return g;
+      });
+
+      // If source group is now empty, remove it
+      newGroups = newGroups.filter((g) => g.exercises.length > 0);
+
+      // If source group was a superset type and now has only 1 exercise, downgrade to solo
+      newGroups = newGroups.map((g) => {
+        if ((g.group_type === 'superset' || g.group_type === 'triset') && g.exercises.length === 1) {
+          return { ...g, group_type: 'solo' as GroupType };
+        }
+        return g;
+      });
+
+      // Reindex group order
+      newGroups = newGroups.map((g, i) => ({ ...g, order_index: i }));
+
+      const newExercises = groupsToExercises(newGroups);
+      const newDays = [...days];
+      newDays[dayIndex] = { ...day, groups: newGroups, exercises: newExercises };
+      set({ days: newDays });
+    },
+
+    reorderExerciseInGroup: (dayIndex, groupId, oldIndex, newIndex) => {
+      const { days } = get();
+      const day = days[dayIndex];
+      if (!day) return;
+
+      const groupIdx = day.groups.findIndex((g) => g.id === groupId);
+      if (groupIdx === -1) return;
+
+      const group = day.groups[groupIdx];
+      if (oldIndex < 0 || oldIndex >= group.exercises.length) return;
+      if (newIndex < 0 || newIndex >= group.exercises.length) return;
+
+      const newExercisesInGroup = [...group.exercises];
+      const [moved] = newExercisesInGroup.splice(oldIndex, 1);
+      newExercisesInGroup.splice(newIndex, 0, moved);
+      const reindexed = newExercisesInGroup.map((e, i) => ({ ...e, order_index: i }));
+
+      const newGroups = [...day.groups];
+      newGroups[groupIdx] = { ...group, exercises: reindexed };
+
+      const newExercises = groupsToExercises(newGroups);
       const newDays = [...days];
       newDays[dayIndex] = { ...day, groups: newGroups, exercises: newExercises };
       set({ days: newDays });
