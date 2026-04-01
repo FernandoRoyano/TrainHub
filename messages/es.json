@@ -192,6 +192,8 @@
     "sendMessage": "Enviar mensaje",
     "assignRoutine": "Asignar rutina",
     "viewDetails": "Ver detalle",
+    "deactivate": "Dar de baja",
+    "reactivate": "Reactivar",
     "clientLimit": "{count}/{max} clientes usados",
     "upgradeNeeded": "Mejora tu plan",
     "checkins": "Check-ins",

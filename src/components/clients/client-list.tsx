@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useClients, useDeleteClient, useClientsActivity } from "@/hooks/use-clients";
+import { useClients, useDeleteClient, useUpdateClient, useClientsActivity } from "@/hooks/use-clients";
 import { useSubscription } from "@/hooks/use-subscription";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,8 @@ import {
   ClipboardList,
   Eye,
   AlertTriangle,
+  UserX,
+  UserCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -97,6 +99,7 @@ export function ClientList() {
     status,
   });
   const deleteClient = useDeleteClient();
+  const updateClient = useUpdateClient();
   const { data: sub } = useSubscription();
 
   const clients = data?.data ?? [];
@@ -267,6 +270,27 @@ export function ClientList() {
                           <Pencil className="mr-2 h-4 w-4" />
                           {tc("edit")}
                         </DropdownMenuItem>
+                        {client.status === "active" ? (
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateClient.mutate({ id: client.id, data: { full_name: client.full_name, email: client.email || "", status: "inactive", tags: client.tags, phone: client.phone || "" } });
+                            }}
+                          >
+                            <UserX className="mr-2 h-4 w-4" />
+                            {t("deactivate")}
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateClient.mutate({ id: client.id, data: { full_name: client.full_name, email: client.email || "", status: "active", tags: client.tags, phone: client.phone || "" } });
+                            }}
+                          >
+                            <UserCheck className="mr-2 h-4 w-4" />
+                            {t("reactivate")}
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem
                           className="text-destructive"
                           onClick={(e) => {
