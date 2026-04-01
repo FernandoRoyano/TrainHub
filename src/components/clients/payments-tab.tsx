@@ -85,6 +85,14 @@ export function PaymentsTab({ clientId }: PaymentsTabProps) {
     null
   );
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [copiedPayment, setCopiedPayment] = useState(false);
+
+  function copyPaymentInfo() {
+    const text = `💳 Datos de pago WellnessReal\n\n📱 Bizum: 657 814 740\n💰 Concepto: Entrenamiento personal\n\nGracias por confiar en WellnessReal 💪`;
+    navigator.clipboard.writeText(text);
+    setCopiedPayment(true);
+    setTimeout(() => setCopiedPayment(false), 2000);
+  }
 
   const isLoading = tierLoading || paymentsLoading || summaryLoading;
 
@@ -164,6 +172,37 @@ export function PaymentsTab({ clientId }: PaymentsTabProps) {
           </CardContent>
         </Card>
       )}
+
+      {/* Payment Info Card */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Smartphone className="h-4 w-4" />
+            {t("paymentMethods")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex items-center gap-3 flex-1 rounded-lg border p-3">
+              <div className="rounded-full bg-primary/10 p-2">
+                <Smartphone className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Bizum</p>
+                <p className="text-xs text-muted-foreground">657 814 740</p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0"
+              onClick={copyPaymentInfo}
+            >
+              {copiedPayment ? "✓ Copiado" : t("copyPaymentInfo")}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

@@ -1417,6 +1417,8 @@
   },
   "payments": {
     "title": "Historial de pagos",
+    "paymentMethods": "Métodos de pago",
+    "copyPaymentInfo": "Copiar datos de pago",
     "registerPayment": "Registrar pago",
     "editPayment": "Editar pago",
     "totalPaid": "Total pagado",
