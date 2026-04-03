@@ -201,6 +201,7 @@ export default function MyRoutinePage() {
   const startCountdown = useRestTimerStore((s) => s.startCountdown);
 
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+  const [simpleView, setSimpleView] = useState(false);
   const [activeWorkoutId, setActiveWorkoutId] = useState<string | null>(null);
   const [workoutStartedAt, setWorkoutStartedAt] = useState<string | null>(null);
   const [exerciseData, setExerciseData] = useState<
@@ -289,8 +290,19 @@ export default function MyRoutinePage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">{t("myRoutine")}</h1>
-      <p className="text-muted-foreground">{routine.routine?.name}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">{t("myRoutine")}</h1>
+          <p className="text-muted-foreground text-sm">{routine.routine?.name}</p>
+        </div>
+        <Button
+          variant={simpleView ? "default" : "outline"}
+          size="sm"
+          onClick={() => setSimpleView(!simpleView)}
+        >
+          {simpleView ? t("fullView") : t("simpleView")}
+        </Button>
+      </div>
 
       {/* Day selector */}
       <div className="flex gap-2 overflow-x-auto pb-2">
@@ -373,6 +385,98 @@ export default function MyRoutinePage() {
             </div>
           )}
 
+          {/* Simple table view */}
+          {simpleView ? (
+            <div className="border rounded-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-muted/50 text-xs text-muted-foreground">
+                    <th className="text-left p-2 font-medium">{t("exercise")}</th>
+                    <th className="text-center p-2 font-medium w-14">{t("setsShort")}</th>
+                    <th className="text-center p-2 font-medium w-14">{t("repsShort")}</th>
+                    <th className="text-center p-2 font-medium w-16">{t("weightShort")}</th>
+                    {(activeWorkoutId || (todayLog && !todayLog.completed)) && (
+                      <th className="text-center p-2 font-medium w-10">✓</th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeDay.exercises.map((ex) => {
+                    const exData = exerciseData[ex.id] ?? { sets: ex.sets, weight: "", reps: ex.reps ?? "", feedback: "" };
+                    const name = (locale === "es" ? (ex.exercise as any)?.name_es : null) ?? (ex.exercise as any)?.name ?? "?";
+                    const lastExLog = lastLog?.exercise_logs?.find((el: any) => el.routine_exercise_id === ex.id);
+                    const isWorkoutActive = !!(activeWorkoutId || (todayLog && !todayLog.completed));
+
+                    return (
+                      <tr key={ex.id} className="border-t border-border/30 hover:bg-muted/20">
+                        <td className="p-2">
+                          <p className="font-medium text-xs leading-tight">{name}</p>
+                          <p className="text-[10px] text-muted-foreground">{ex.sets}x{ex.reps}{ex.rest_seconds > 0 ? ` · ${ex.rest_seconds}s` : ""}</p>
+                          {lastExLog && (
+                            <p className="text-[10px] text-primary/70">{t("lastTime")}: {lastExLog.weight_used ? `${lastExLog.weight_used}kg` : "—"}</p>
+                          )}
+                        </td>
+                        <td className="p-1 text-center">
+                          {isWorkoutActive ? (
+                            <Input
+                              type="number"
+                              min={0}
+                              max={20}
+                              value={exData.sets}
+                              onChange={(e) => setExerciseData((prev) => ({ ...prev, [ex.id]: { ...exData, sets: parseInt(e.target.value) || 0 } }))}
+                              className="h-7 w-full text-xs text-center"
+                            />
+                          ) : (
+                            <span className="text-xs">{ex.sets}</span>
+                          )}
+                        </td>
+                        <td className="p-1 text-center">
+                          {isWorkoutActive ? (
+                            <Input
+                              type="text"
+                              value={exData.reps}
+                              onChange={(e) => setExerciseData((prev) => ({ ...prev, [ex.id]: { ...exData, reps: e.target.value } }))}
+                              className="h-7 w-full text-xs text-center"
+                              placeholder={ex.reps ?? ""}
+                            />
+                          ) : (
+                            <span className="text-xs">{ex.reps}</span>
+                          )}
+                        </td>
+                        <td className="p-1 text-center">
+                          {isWorkoutActive ? (
+                            <Input
+                              type="number"
+                              step="0.5"
+                              value={exData.weight}
+                              onChange={(e) => setExerciseData((prev) => ({ ...prev, [ex.id]: { ...exData, weight: e.target.value } }))}
+                              className="h-7 w-full text-xs text-center"
+                              placeholder="kg"
+                            />
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        {isWorkoutActive && (
+                          <td className="p-1 text-center">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7"
+                              disabled={logExercise.isPending}
+                              onClick={() => handleLogExercise(ex.id, ex.rest_seconds, (ex.exercise as any)?.name)}
+                            >
+                              {logExercise.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                            </Button>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
           <div className="space-y-2">
             {activeDay.groups && activeDay.groups.length > 0
               ? activeDay.groups.map((group: ExerciseGroup) => {
@@ -468,6 +572,7 @@ export default function MyRoutinePage() {
                   />
                 ))}
           </div>
+          )}
         </div>
       )}
 
