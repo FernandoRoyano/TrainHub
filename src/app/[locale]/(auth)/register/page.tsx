@@ -10,6 +10,7 @@ export default function RegisterPage() {
     <Card>
       <CardHeader>
         <CardTitle className="text-center">{t("register")}</CardTitle>
+        <p className="text-center text-xs text-muted-foreground mt-1">{t("trainerRegistration")}</p>
       </CardHeader>
       <CardContent className="space-y-4">
         <RegisterForm />

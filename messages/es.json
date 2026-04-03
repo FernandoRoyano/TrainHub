@@ -37,6 +37,7 @@
   "auth": {
     "login": "Iniciar sesión",
     "register": "Registrarse",
+    "trainerRegistration": "Registro exclusivo para entrenadores. Si eres cliente, usa el link que te envió tu entrenador.",
     "logout": "Cerrar sesión",
     "email": "Correo electrónico",
     "password": "Contraseña",

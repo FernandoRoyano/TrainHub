@@ -37,6 +37,7 @@
   "auth": {
     "login": "Log in",
     "register": "Sign up",
+    "trainerRegistration": "Registration for trainers only. If you are a client, use the link your trainer sent you.",
     "logout": "Log out",
     "email": "Email",
     "password": "Password",
