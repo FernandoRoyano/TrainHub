@@ -305,22 +305,22 @@ export default function MyRoutinePage() {
       </div>
 
       {/* Day selector */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
+      <div className="flex flex-wrap gap-2">
         {days.map((day, i) => (
           <Button
             key={day.id}
             variant={i === selectedDayIndex ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedDayIndex(i)}
-            className="shrink-0"
+            className="text-xs"
           >
             {tr("day", { number: day.day_number })}
-            {day.name && (
-              <span className="ml-1 text-xs opacity-70">- {day.name}</span>
-            )}
           </Button>
         ))}
       </div>
+      {activeDay?.name && (
+        <p className="text-sm font-medium text-muted-foreground -mt-1">{activeDay.name}</p>
+      )}
 
       {activeDay?.description && (
         <div className="rounded-lg border bg-muted/50 px-4 py-3">
