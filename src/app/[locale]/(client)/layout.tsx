@@ -118,7 +118,7 @@ function ClientNavBar() {
 
       {/* Bottom nav bar */}
       <nav className="fixed bottom-0 left-0 right-0 border-t border-border/50 bg-card/95 backdrop-blur-xl z-50 safe-area-bottom">
-        <div className="flex justify-around py-1.5 px-1">
+        <div className="flex justify-around py-2 md:py-3 px-1 max-w-2xl mx-auto">
           {mainNavItems.map((item) => {
             const isActive = pathname.includes(item.href);
             const enabled = !item.featureKey || isFeatureEnabled(features, item.featureKey);
@@ -129,13 +129,13 @@ function ClientNavBar() {
                 href={item.href}
                 onClick={!enabled ? handleDisabledClick : undefined}
                 className={cn(
-                  "flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-all",
+                  "flex flex-col items-center gap-1 py-1 px-3 md:px-5 rounded-lg transition-all",
                   isActive ? "text-primary" : "text-muted-foreground",
                   !enabled && "opacity-40"
                 )}
               >
-                <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
-                <span className="text-[9px] font-medium leading-tight">{t(item.labelKey)}</span>
+                <item.icon className={cn("h-5 w-5 md:h-6 md:w-6", isActive && "text-primary")} />
+                <span className="text-[9px] md:text-xs font-medium leading-tight">{t(item.labelKey)}</span>
               </Link>
             );
           })}
@@ -144,12 +144,12 @@ function ClientNavBar() {
           <button
             onClick={() => setMoreOpen(!moreOpen)}
             className={cn(
-              "flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-all",
+              "flex flex-col items-center gap-1 py-1 px-3 md:px-5 rounded-lg transition-all",
               moreOpen || isMoreActive ? "text-primary" : "text-muted-foreground"
             )}
           >
-            <MoreHorizontal className="h-5 w-5" />
-            <span className="text-[9px] font-medium leading-tight">{t("more")}</span>
+            <MoreHorizontal className="h-5 w-5 md:h-6 md:w-6" />
+            <span className="text-[9px] md:text-xs font-medium leading-tight">{t("more")}</span>
           </button>
         </div>
       </nav>
@@ -166,11 +166,11 @@ export default function ClientLayout({
     <ClientFeaturesProvider>
       <div className="flex flex-col min-h-screen">
         <NavigationProgress />
-        <header className="sticky top-0 z-40 flex items-center justify-end h-12 px-4 gap-2">
+        <header className="sticky top-0 z-40 flex items-center justify-end h-12 md:h-14 px-4 md:px-8 gap-2">
           <NotificationBell />
           <ThemeToggle />
         </header>
-        <main className="flex-1 p-4 pb-24">{children}</main>
+        <main className="flex-1 p-4 md:px-8 md:py-6 pb-24 max-w-4xl mx-auto w-full">{children}</main>
         <ClientNavBar />
       </div>
     </ClientFeaturesProvider>

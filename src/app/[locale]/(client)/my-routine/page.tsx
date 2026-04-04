@@ -55,7 +55,7 @@ function ExerciseCard({
     <Card key={ex.id}>
       <CardContent className="p-3 space-y-2">
         {/* Row 1: Image + Name + Info */}
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3 md:gap-4">
           <button
             type="button"
             onClick={() => ex.exercise && setSelectedExercise(ex.exercise as Exercise)}
@@ -64,7 +64,7 @@ function ExerciseCard({
             <ExerciseAnimation
               thumbnailUrl={ex.exercise?.thumbnail_url}
               alt={ex.exercise?.name}
-              className="w-12 h-12 rounded-md object-cover hover:opacity-80 transition-opacity"
+              className="w-14 h-14 md:w-20 md:h-20 rounded-md md:rounded-lg object-cover hover:opacity-80 transition-opacity"
             />
           </button>
           <div className="flex-1 min-w-0">
@@ -73,12 +73,12 @@ function ExerciseCard({
               onClick={() => ex.exercise && setSelectedExercise(ex.exercise as Exercise)}
               className="text-left"
             >
-              <p className="font-medium text-sm hover:text-primary transition-colors leading-tight">
+              <p className="font-medium text-sm md:text-base hover:text-primary transition-colors leading-tight">
                 {(locale === "es" ? ex.exercise?.name_es : null) ?? ex.exercise?.name ?? "Exercise"}
               </p>
             </button>
             <div className="flex items-center gap-2 mt-1">
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs md:text-sm text-muted-foreground">
                 {ex.sets}x{ex.reps}
                 {ex.rest_seconds > 0 && ` · ${ex.rest_seconds}s`}
               </p>
@@ -93,7 +93,7 @@ function ExerciseCard({
               )}
             </div>
             {lastExerciseLog && (
-              <p className="text-[10px] text-primary/70 mt-0.5 truncate">
+              <p className="text-[10px] md:text-xs text-primary/70 mt-0.5 truncate">
                 {t("lastTime")}: {lastExerciseLog.sets_completed}x{lastExerciseLog.reps_completed || "?"} · {lastExerciseLog.weight_used ? `${lastExerciseLog.weight_used}kg` : "—"}
               </p>
             )}
@@ -102,9 +102,9 @@ function ExerciseCard({
 
         {/* Row 2: Inputs (only during active workout) */}
         {(activeWorkoutId || (todayLog && !todayLog.completed)) && (
-          <div className="flex items-end gap-2">
+          <div className="flex items-end gap-2 md:gap-3">
             <div className="flex-1">
-              <label className="text-[10px] text-muted-foreground block mb-0.5">{t("setsCompleted")}</label>
+              <label className="text-[10px] md:text-xs text-muted-foreground block mb-0.5">{t("setsCompleted")}</label>
               <Input
                 type="number"
                 min={0}
@@ -116,7 +116,7 @@ function ExerciseCard({
                     [ex.id]: { ...exData, sets: parseInt(e.target.value) || 0 },
                   }))
                 }
-                className="h-8 text-xs text-center"
+                className="h-8 md:h-10 text-xs md:text-sm text-center"
               />
             </div>
             <div className="flex-1">
@@ -130,7 +130,7 @@ function ExerciseCard({
                     [ex.id]: { ...exData, reps: e.target.value },
                   }))
                 }
-                className="h-8 text-xs text-center"
+                className="h-8 md:h-10 text-xs md:text-sm text-center"
                 placeholder={ex.reps ?? ""}
               />
             </div>
@@ -146,7 +146,7 @@ function ExerciseCard({
                     [ex.id]: { ...exData, weight: e.target.value },
                   }))
                 }
-                className="h-8 text-xs text-center"
+                className="h-8 md:h-10 text-xs md:text-sm text-center"
                 placeholder="kg"
               />
             </div>
