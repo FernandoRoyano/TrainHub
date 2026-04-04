@@ -25,6 +25,7 @@ export function RegisterForm() {
   const tv = useTranslations("validation");
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(createRegisterSchema(tv)),
@@ -37,6 +38,8 @@ export function RegisterForm() {
   });
 
   async function onSubmit(data: RegisterFormData) {
+    // Honeypot: if filled, it's a bot
+    if (honeypot) return;
     setIsLoading(true);
     try {
       await authService.signUp(data.email, data.password, data.fullName);
@@ -63,6 +66,16 @@ export function RegisterForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Honeypot - hidden from humans, bots fill it */}
+        <div className="absolute opacity-0 h-0 w-0 overflow-hidden" aria-hidden="true" tabIndex={-1}>
+          <input
+            type="text"
+            name="website"
+            autoComplete="off"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+          />
+        </div>
         <FormField
           control={form.control}
           name="fullName"

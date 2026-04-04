@@ -887,6 +887,7 @@
     "maxChars": "Máximo {max} caracteres",
     "passwordMismatch": "Las contraseñas no coinciden",
     "onlyAlphanumeric": "Solo letras, números y guiones bajos",
+    "invalidName": "El nombre solo puede contener letras y espacios",
     "minAmount": "El importe mínimo es 0,01",
     "required": "Este campo es obligatorio"
   },

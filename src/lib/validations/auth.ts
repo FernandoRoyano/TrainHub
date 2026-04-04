@@ -13,7 +13,10 @@ export function createLoginSchema(t: T) {
 export function createRegisterSchema(t: T) {
   return z
     .object({
-      fullName: z.string().min(2, t("minChars", { min: 2 })),
+      fullName: z.string()
+        .min(3, t("minChars", { min: 3 }))
+        .max(80, t("maxChars", { max: 80 }))
+        .regex(/^[a-zA-ZÀ-ÿñÑ\s'-]+$/, t("invalidName")),
       email: z.string().email(t("invalidEmail")),
       password: z.string().min(6, t("minChars", { min: 6 })),
       confirmPassword: z.string().min(6, t("minChars", { min: 6 })),
