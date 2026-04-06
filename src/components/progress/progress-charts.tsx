@@ -47,24 +47,26 @@ export function ProgressCharts({ workouts }: ProgressChartsProps) {
 
   // Volume per workout (total sets * weight)
   const volumeData = useMemo(() => {
-    return workouts.map((w) => {
-      const logs =
-        selectedExercise === "all"
-          ? w.exercise_logs
-          : w.exercise_logs.filter((el) => el.routine_exercise_id === selectedExercise);
+    return workouts
+      .filter((w) => w.exercise_logs.length > 0)
+      .map((w) => {
+        const logs =
+          selectedExercise === "all"
+            ? w.exercise_logs
+            : w.exercise_logs.filter((el) => el.routine_exercise_id === selectedExercise);
 
-      const totalVolume = logs.reduce((acc, el) => {
-        return acc + el.sets_completed * (el.weight_used ?? 0);
-      }, 0);
+        const totalVolume = logs.reduce((acc, el) => {
+          return acc + el.sets_completed * (el.weight_used ?? 0);
+        }, 0);
 
-      const totalSets = logs.reduce((acc, el) => acc + el.sets_completed, 0);
+        const totalSets = logs.reduce((acc, el) => acc + el.sets_completed, 0);
 
-      return {
-        date: w.date,
-        volume: Math.round(totalVolume),
-        sets: totalSets,
-      };
-    });
+        return {
+          date: w.date,
+          volume: Math.round(totalVolume),
+          sets: totalSets,
+        };
+      });
   }, [workouts, selectedExercise]);
 
   // Weight progression per exercise

@@ -16,7 +16,9 @@ export function WeekComparison({ workouts }: WeekComparisonProps) {
   const comparison = useMemo(() => {
     const now = new Date();
     const startOfThisWeek = new Date(now);
-    startOfThisWeek.setDate(now.getDate() - now.getDay());
+    const dayOfWeek = now.getDay();
+    // Monday-based week (Mon=1, Sun=0→treat as 7)
+    startOfThisWeek.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
     startOfThisWeek.setHours(0, 0, 0, 0);
 
     const startOfLastWeek = new Date(startOfThisWeek);
