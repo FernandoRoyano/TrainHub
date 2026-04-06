@@ -1,14 +1,17 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
-import { Heart, Calendar, Dumbbell } from "lucide-react";
+import { Heart, Calendar, Dumbbell, Settings2 } from "lucide-react";
+import { useCycleTrainingConfig, useCyclePhaseStats } from "@/hooks/use-cycle-training";
+import { PhaseConfigDialog } from "@/components/cycle-training/phase-config-dialog";
 
 interface CycleTabProps {
   clientId: string;
@@ -37,6 +40,10 @@ const phaseTips: Record<string, string> = {
 
 export function CycleTab({ clientId }: CycleTabProps) {
   const t = useTranslations("menstrual");
+  const tc = useTranslations("cycleTraining");
+  const [configOpen, setConfigOpen] = useState(false);
+  const { data: trainingConfig } = useCycleTrainingConfig(clientId);
+  const { data: phaseStats } = useCyclePhaseStats(clientId);
 
   const { data: settings, isLoading: loadingSettings } = useQuery({
     queryKey: ["client-menstrual-settings", clientId],
@@ -123,7 +130,7 @@ export function CycleTab({ clientId }: CycleTabProps) {
 
   return (
     <div className="space-y-4">
-      {/* Current Phase */}
+      {/* Current Phase + Config Button */}
       {currentPhase ? (
         <Card>
           <CardContent className="pt-6">
@@ -137,17 +144,81 @@ export function CycleTab({ clientId }: CycleTabProps) {
                   Día {currentPhase.cycleDay} · {currentPhase.daysUntilNext} días hasta siguiente período
                 </p>
               </div>
+              <Button variant="ghost" size="icon" onClick={() => setConfigOpen(true)} title={tc("configurePhases")}>
+                <Settings2 className="h-4 w-4" />
+              </Button>
             </div>
             <div className="mt-3 p-2 rounded-lg bg-muted/50 flex items-start gap-2">
               <Dumbbell className="h-4 w-4 text-primary mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground">{phaseTips[currentPhase.phase]}</p>
             </div>
+
+            {/* Training config adjustments for current phase */}
+            {trainingConfig?.enabled && (() => {
+              const p = currentPhase.phase;
+              const intensity = p === "menstrual" ? trainingConfig.menstrual_intensity
+                : p === "follicular" ? trainingConfig.follicular_intensity
+                : p === "ovulation" ? trainingConfig.ovulation_intensity
+                : trainingConfig.luteal_intensity;
+              const volume = p === "menstrual" ? trainingConfig.menstrual_volume
+                : p === "follicular" ? trainingConfig.follicular_volume
+                : p === "ovulation" ? trainingConfig.ovulation_volume
+                : trainingConfig.luteal_volume;
+              return (
+                <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                  <Badge variant="outline" className="text-[10px]">
+                    {intensity > 0 ? "+" : ""}{intensity}% {tc("intensity")}
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px]">
+                    {volume > 0 ? "+" : ""}{volume}% {tc("volume")}
+                  </Badge>
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
       ) : (
         <Card>
           <CardContent className="pt-6 text-center">
             <EmptyState icon={Heart} title={t("title")} description="La clienta no ha configurado el seguimiento de ciclo." />
+            <Button variant="outline" size="sm" className="mt-3" onClick={() => setConfigOpen(true)}>
+              <Settings2 className="mr-1.5 h-3.5 w-3.5" />
+              {tc("configurePhases")}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Phase Performance Stats */}
+      {phaseStats && Object.values(phaseStats).some((s) => s.count > 0) && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Dumbbell className="h-4 w-4" />
+              Rendimiento por fase
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {(["menstrual", "follicular", "ovulation", "luteal"] as const).map((phase) => {
+                const stat = phaseStats[phase];
+                if (!stat || stat.count === 0) return (
+                  <div key={phase} className="p-2 rounded border text-center">
+                    <span className={`inline-block h-2 w-2 rounded-full ${phaseColors[phase]} mb-1`} />
+                    <p className="text-[10px] font-medium">{phaseLabels[phase]}</p>
+                    <p className="text-[9px] text-muted-foreground">Sin datos</p>
+                  </div>
+                );
+                return (
+                  <div key={phase} className="p-2 rounded border text-center space-y-0.5">
+                    <span className={`inline-block h-2 w-2 rounded-full ${phaseColors[phase]}`} />
+                    <p className="text-[10px] font-medium">{phaseLabels[phase]}</p>
+                    <p className="text-lg font-bold">{stat.avgPerformance.toFixed(1)}</p>
+                    <p className="text-[9px] text-muted-foreground">RPE {stat.avgEffort.toFixed(1)} · {stat.count} sesiones</p>
+                  </div>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
       )}
@@ -225,6 +296,7 @@ export function CycleTab({ clientId }: CycleTabProps) {
           </CardContent>
         </Card>
       )}
+      <PhaseConfigDialog open={configOpen} onOpenChange={setConfigOpen} clientId={clientId} />
     </div>
   );
 }

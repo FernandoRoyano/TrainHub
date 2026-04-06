@@ -18,6 +18,7 @@ import { Dumbbell, Check, Play, Timer, Loader2, MessageSquare } from "lucide-rea
 import { RestTimer } from "@/components/workout/rest-timer";
 import { WorkoutTimer } from "@/components/workout/workout-timer";
 import { useRestTimerStore } from "@/stores/rest-timer-store";
+import { AdaptiveTrainingCard } from "@/components/cycle-training/adaptive-training-card";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function ExerciseCard({
@@ -359,6 +360,9 @@ export default function MyRoutinePage() {
           <p className="text-sm text-muted-foreground">{activeDay.description}</p>
         </div>
       )}
+
+      {/* Cycle-aware training suggestion (only for female clients) */}
+      {client?.gender === "female" && <AdaptiveTrainingCard />}
 
       {activeDay && (
         <div className="space-y-3">

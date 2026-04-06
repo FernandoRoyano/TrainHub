@@ -35,6 +35,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import Link from "next/link";
+import { TrainerPhaseGrid } from "@/components/cycle-training/trainer-phase-grid";
 
 const activityIcons = {
   client_added: UserCheck,
@@ -324,6 +325,9 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Cycle Phase Grid */}
+      <TrainerPhaseGrid />
 
       {/* Client Compliance + Clients at Risk */}
       <div className="grid gap-4 md:grid-cols-2">

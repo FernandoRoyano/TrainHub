@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dialog";
 import { Heart, ChevronLeft, ChevronRight, Settings, Dumbbell } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CyclePrivacySettings } from "@/components/cycle-training/cycle-privacy-settings";
 
 const PHASE_COLORS: Record<CyclePhase, string> = {
   menstrual: "bg-red-500",
@@ -444,6 +445,9 @@ export default function MyCyclePage() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Privacy settings */}
+      <CyclePrivacySettings />
     </div>
   );
 }

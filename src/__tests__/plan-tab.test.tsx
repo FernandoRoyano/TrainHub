@@ -36,7 +36,7 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-// Mock lucide-react icons
+// Mock lucide-react icons (includes icons from plan-tab + assign-plan-wizard-dialog)
 vi.mock("lucide-react", () => ({
   ClipboardList: () => <span data-testid="icon-clipboard" />,
   Dumbbell: () => <span data-testid="icon-dumbbell" />,
@@ -46,6 +46,13 @@ vi.mock("lucide-react", () => ({
   Calendar: () => <span data-testid="icon-calendar" />,
   Save: () => <span data-testid="icon-save" />,
   ExternalLink: () => <span data-testid="icon-externallink" />,
+  Check: () => <span data-testid="icon-check" />,
+  Loader2: () => <span data-testid="icon-loader" />,
+  ArrowLeft: () => <span data-testid="icon-arrowleft" />,
+  MessageCircle: () => <span data-testid="icon-messagecircle" />,
+  BarChart3: () => <span data-testid="icon-barchart" />,
+  Ruler: () => <span data-testid="icon-ruler" />,
+  ClipboardCheck: () => <span data-testid="icon-clipboardcheck" />,
 }));
 
 import { PlanTab } from "@/components/clients/plan-tab";

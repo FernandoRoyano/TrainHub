@@ -13,7 +13,6 @@ import {
   BarChart3,
   Ruler,
   User,
-  X,
   Timer,
   Heart,
 } from "lucide-react";
@@ -75,16 +74,10 @@ function ClientNavBar() {
       {moreOpen && (
         <div className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm" onClick={() => setMoreOpen(false)}>
           <div
-            className="absolute bottom-20 left-0 right-0 bg-card border-t border-border/50 rounded-t-2xl shadow-lg p-4 safe-area-bottom"
+            className="absolute bottom-16 md:bottom-20 left-0 right-0 bg-card border-t border-border/50 shadow-lg px-1 py-2"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold">{t("more")}</span>
-              <button onClick={() => setMoreOpen(false)} className="p-1 rounded-full hover:bg-accent">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="flex justify-around max-w-2xl mx-auto">
               {filteredMoreNavItems.map((item) => {
                 const isActive = pathname.includes(item.href);
                 const enabled = !item.featureKey || isFeatureEnabled(features, item.featureKey);
@@ -101,13 +94,13 @@ function ClientNavBar() {
                       setMoreOpen(false);
                     }}
                     className={cn(
-                      "flex flex-col items-center gap-2 p-3 rounded-xl transition-all",
-                      isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent",
+                      "flex flex-col items-center gap-1 py-1 px-3 md:px-5 rounded-lg transition-all",
+                      isActive ? "text-primary" : "text-muted-foreground",
                       !enabled && "opacity-40"
                     )}
                   >
-                    <item.icon className="h-6 w-6" />
-                    <span className="text-xs font-medium">{t(item.labelKey)}</span>
+                    <item.icon className={cn("h-5 w-5 md:h-6 md:w-6", isActive && "text-primary")} />
+                    <span className="text-[9px] md:text-xs font-medium leading-tight">{t(item.labelKey)}</span>
                   </Link>
                 );
               })}
@@ -117,7 +110,7 @@ function ClientNavBar() {
       )}
 
       {/* Bottom nav bar */}
-      <nav className="fixed bottom-0 left-0 right-0 border-t border-border/50 bg-card/95 backdrop-blur-xl z-50 safe-area-bottom">
+      <nav className="shrink-0 border-t border-border/50 bg-card/95 backdrop-blur-xl z-50">
         <div className="flex justify-around py-2 md:py-3 px-1 max-w-2xl mx-auto">
           {mainNavItems.map((item) => {
             const isActive = pathname.includes(item.href);
@@ -164,13 +157,15 @@ export default function ClientLayout({
 }) {
   return (
     <ClientFeaturesProvider>
-      <div className="flex flex-col min-h-screen">
+      <div className="h-dvh flex flex-col overflow-hidden">
         <NavigationProgress />
-        <header className="sticky top-0 z-40 flex items-center justify-end h-12 md:h-14 px-4 md:px-8 gap-2">
+        <header className="shrink-0 z-40 flex items-center justify-end h-12 md:h-14 px-4 md:px-8 gap-2">
           <NotificationBell />
           <ThemeToggle />
         </header>
-        <main className="flex-1 p-4 md:px-8 md:py-6 pb-24 max-w-4xl mx-auto w-full">{children}</main>
+        <main className="flex-1 min-h-0 overflow-y-auto px-4 pt-4 pb-8 md:px-8 md:pt-6 md:pb-10">
+          <div className="max-w-4xl mx-auto w-full">{children}</div>
+        </main>
         <ClientNavBar />
       </div>
     </ClientFeaturesProvider>
