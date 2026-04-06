@@ -27,6 +27,7 @@ function ExerciseCard({
   activeWorkoutId,
   todayLog,
   lastExerciseLog,
+  isLogged,
   logExercise,
   handleLogExercise,
   startCountdown,
@@ -36,11 +37,12 @@ function ExerciseCard({
   te,
 }: {
   ex: any;
-  exerciseData: Record<string, { sets: number; weight: string; reps: string; feedback: string }>;
-  setExerciseData: React.Dispatch<React.SetStateAction<Record<string, { sets: number; weight: string; reps: string; feedback: string }>>>;
+  exerciseData: Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string }[] }>;
+  setExerciseData: React.Dispatch<React.SetStateAction<Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string }[] }>>>;
   activeWorkoutId: string | null;
   todayLog: any;
   lastExerciseLog: any;
+  isLogged: boolean;
   logExercise: any;
   handleLogExercise: (id: string, rest?: number, name?: string) => void;
   startCountdown: (seconds: number, name?: string) => void;
@@ -49,10 +51,19 @@ function ExerciseCard({
   t: any;
   te: any;
 }) {
-  const exData = exerciseData[ex.id] ?? { sets: ex.sets, weight: "", reps: ex.reps ?? "", feedback: "" };
+  const totalSets = ex.sets || 3;
+  const exData = exerciseData[ex.id] ?? {
+    sets: totalSets,
+    weight: "",
+    reps: ex.reps ?? "",
+    feedback: "",
+    setDetails: Array.from({ length: totalSets }, () => ({ reps: "", weight: "" })),
+  };
+  // Ensure setDetails exists and has correct length
+  const setDetails: { reps: string; weight: string }[] = exData.setDetails ?? Array.from({ length: totalSets }, () => ({ reps: "", weight: "" }));
 
   return (
-    <Card key={ex.id}>
+    <Card key={ex.id} className={isLogged ? "border-emerald-500/50 bg-emerald-500/5" : ""}>
       <CardContent className="p-3 space-y-2">
         {/* Row 1: Image + Name + Info */}
         <div className="flex items-start gap-3 md:gap-4">
@@ -100,64 +111,57 @@ function ExerciseCard({
           </div>
         </div>
 
-        {/* Row 2: Inputs (only during active workout) */}
+        {/* Row 2: Per-set inputs (only during active workout) */}
         {(activeWorkoutId || (todayLog && !todayLog.completed)) && (
-          <div className="flex items-end gap-2 md:gap-3">
-            <div className="flex-1">
-              <label className="text-[10px] md:text-xs text-muted-foreground block mb-0.5">{t("setsCompleted")}</label>
-              <Input
-                type="number"
-                min={0}
-                max={20}
-                value={exData.sets}
-                onChange={(e) =>
-                  setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string; feedback: string }>) => ({
-                    ...prev,
-                    [ex.id]: { ...exData, sets: parseInt(e.target.value) || 0 },
-                  }))
-                }
-                className="h-8 md:h-10 text-xs md:text-sm text-center"
-              />
+          <div className="space-y-1">
+            <div className="flex gap-2 text-[10px] text-muted-foreground px-1">
+              <span className="w-7 text-center">#</span>
+              <span className="flex-1 text-center">Reps</span>
+              <span className="flex-1 text-center">Peso (kg)</span>
             </div>
-            <div className="flex-1">
-              <label className="text-[10px] text-muted-foreground block mb-0.5">Reps</label>
-              <Input
-                type="text"
-                value={exData.reps}
-                onChange={(e) =>
-                  setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string; feedback: string }>) => ({
-                    ...prev,
-                    [ex.id]: { ...exData, reps: e.target.value },
-                  }))
-                }
-                className="h-8 md:h-10 text-xs md:text-sm text-center"
-                placeholder={ex.reps ?? ""}
-              />
-            </div>
-            <div className="flex-1">
-              <label className="text-[10px] text-muted-foreground block mb-0.5">Peso (kg)</label>
-              <Input
-                type="number"
-                step="0.5"
-                value={exData.weight}
-                onChange={(e) =>
-                  setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string; feedback: string }>) => ({
-                    ...prev,
-                    [ex.id]: { ...exData, weight: e.target.value },
-                  }))
-                }
-                className="h-8 md:h-10 text-xs md:text-sm text-center"
-                placeholder="kg"
-              />
-            </div>
+            {setDetails.map((set, si) => (
+              <div key={si} className="flex items-center gap-2">
+                <span className="w-7 text-center text-xs font-mono text-muted-foreground">{si + 1}</span>
+                <Input
+                  type="text"
+                  value={set.reps}
+                  onChange={(e) => {
+                    const nd = [...setDetails];
+                    nd[si] = { ...nd[si], reps: e.target.value };
+                    setExerciseData((prev) => ({
+                      ...prev,
+                      [ex.id]: { ...exData, setDetails: nd, sets: totalSets, reps: nd.map((s) => s.reps).filter(Boolean).join("/") || exData.reps },
+                    }));
+                  }}
+                  className="h-8 text-xs text-center flex-1"
+                  placeholder={ex.reps ?? ""}
+                />
+                <Input
+                  type="number"
+                  step="0.5"
+                  value={set.weight}
+                  onChange={(e) => {
+                    const nd = [...setDetails];
+                    nd[si] = { ...nd[si], weight: e.target.value };
+                    setExerciseData((prev) => ({
+                      ...prev,
+                      [ex.id]: { ...exData, setDetails: nd, sets: totalSets, weight: nd.filter((s) => s.weight).pop()?.weight || exData.weight },
+                    }));
+                  }}
+                  className="h-8 text-xs text-center flex-1"
+                  placeholder="kg"
+                />
+              </div>
+            ))}
             <Button
-              size="icon"
+              size="sm"
               variant="default"
-              className="h-8 w-8 shrink-0"
+              className="w-full mt-1"
               disabled={logExercise.isPending}
-              onClick={() => handleLogExercise(ex.id, ex.rest_seconds, ex.exercise?.name)}
+              onClick={() => handleLogExercise(ex.id, ex.rest_seconds, (ex.exercise as any)?.name)}
             >
-              {logExercise.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+              {logExercise.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Check className="h-3 w-3 mr-1" />}
+              {t("logExercise")}
             </Button>
           </div>
         )}
@@ -169,7 +173,7 @@ function ExerciseCard({
             <Input
               value={exData.feedback}
               onChange={(e) =>
-                setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string; feedback: string }>) => ({
+                setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string }[] }>) => ({
                   ...prev,
                   [ex.id]: { ...exData, feedback: e.target.value },
                 }))
@@ -205,9 +209,10 @@ export default function MyRoutinePage() {
   const [activeWorkoutId, setActiveWorkoutId] = useState<string | null>(null);
   const [workoutStartedAt, setWorkoutStartedAt] = useState<string | null>(null);
   const [exerciseData, setExerciseData] = useState<
-    Record<string, { sets: number; weight: string; reps: string; feedback: string }>
+    Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string }[] }>
   >({});
   const [workoutNotes, setWorkoutNotes] = useState("");
+  const [loggedExercises, setLoggedExercises] = useState<Set<string>>(new Set());
 
   if (isLoading) {
     return (
@@ -267,19 +272,28 @@ export default function MyRoutinePage() {
     const workoutId = activeWorkoutId ?? todayLog?.id;
     if (!workoutId) return;
     const data = exerciseData[routineExerciseId];
+    const details = data?.setDetails?.filter((s) => s.reps || s.weight) ?? [];
+    const repsStr = details.length > 0
+      ? details.map((s) => `${s.reps || "?"}@${s.weight || "?"}kg`).join(" / ")
+      : data?.reps || undefined;
+    const avgWeight = details.length > 0
+      ? details.reduce((sum, s) => sum + (parseFloat(s.weight) || 0), 0) / details.filter((s) => s.weight).length
+      : data?.weight ? parseFloat(data.weight) : undefined;
+
     logExercise.mutate(
       {
         workoutLogId: workoutId,
         routineExerciseId,
         data: {
-          sets_completed: data?.sets ?? 0,
-          weight_used: data?.weight ? parseFloat(data.weight) : undefined,
-          reps_completed: data?.reps || undefined,
+          sets_completed: details.length > 0 ? details.length : (data?.sets ?? 0),
+          weight_used: avgWeight || undefined,
+          reps_completed: repsStr,
           feedback: data?.feedback || undefined,
         },
       },
       {
         onSuccess: () => {
+          setLoggedExercises((prev) => new Set(prev).add(routineExerciseId));
           if (restSeconds && restSeconds > 0) {
             startCountdown(restSeconds, exerciseName);
           }
@@ -506,6 +520,7 @@ export default function MyRoutinePage() {
                         activeWorkoutId={activeWorkoutId}
                         todayLog={todayLog}
                         lastExerciseLog={lastLog?.exercise_logs?.find((el: any) => el.routine_exercise_id === ex.id) ?? null}
+                        isLogged={loggedExercises.has(ex.id)}
                         logExercise={logExercise}
                         handleLogExercise={handleLogExercise}
                         startCountdown={startCountdown}
@@ -541,6 +556,7 @@ export default function MyRoutinePage() {
                           activeWorkoutId={activeWorkoutId}
                           todayLog={todayLog}
                           lastExerciseLog={lastLog?.exercise_logs?.find((el: any) => el.routine_exercise_id === ex.id) ?? null}
+                          isLogged={loggedExercises.has(ex.id)}
                           logExercise={logExercise}
                           handleLogExercise={handleLogExercise}
                           startCountdown={startCountdown}
@@ -562,6 +578,7 @@ export default function MyRoutinePage() {
                     activeWorkoutId={activeWorkoutId}
                     todayLog={todayLog}
                     lastExerciseLog={lastLog?.exercise_logs?.find((el: any) => el.routine_exercise_id === ex.id) ?? null}
+                    isLogged={loggedExercises.has(ex.id)}
                     logExercise={logExercise}
                     handleLogExercise={handleLogExercise}
                     startCountdown={startCountdown}
