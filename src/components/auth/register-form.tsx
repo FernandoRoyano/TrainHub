@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
@@ -20,17 +20,27 @@ import {
 } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: string | HTMLElement, options: Record<string, unknown>) => string;
+      reset: (widgetId: string) => void;
+      remove: (widgetId: string) => void;
+    };
+  }
+}
+
 export function RegisterForm() {
   const t = useTranslations("auth");
   const tv = useTranslations("validation");
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [honeypot, setHoneypot] = useState("");
-  const [loadTime] = useState(Date.now());
-  const [accessCode, setAccessCode] = useState("");
-  const [codeVerified, setCodeVerified] = useState(false);
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
 
-  const VALID_CODE = "TRAINHUB2026";
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(createRegisterSchema(tv)),
@@ -42,13 +52,67 @@ export function RegisterForm() {
     },
   });
 
+  const renderTurnstile = useCallback(() => {
+    if (!turnstileRef.current || !window.turnstile || !siteKey) return;
+    if (widgetIdRef.current) {
+      window.turnstile.remove(widgetIdRef.current);
+    }
+    widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+      sitekey: siteKey,
+      callback: (token: string) => setTurnstileToken(token),
+      "expired-callback": () => setTurnstileToken(null),
+      "error-callback": () => setTurnstileToken(null),
+      theme: "auto",
+    });
+  }, [siteKey]);
+
+  useEffect(() => {
+    // Load Turnstile script
+    if (document.getElementById("turnstile-script")) {
+      renderTurnstile();
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "turnstile-script";
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad";
+    script.async = true;
+    (window as unknown as Record<string, unknown>).onTurnstileLoad = renderTurnstile;
+    document.head.appendChild(script);
+
+    return () => {
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(widgetIdRef.current);
+      }
+    };
+  }, [renderTurnstile]);
+
   async function onSubmit(data: RegisterFormData) {
-    // Honeypot: if filled, it's a bot
     if (honeypot) return;
-    // Time check: if submitted in less than 3 seconds, it's a bot
-    if (Date.now() - loadTime < 3000) return;
+
+    if (!turnstileToken) {
+      toast.error(t("captchaRequired"));
+      return;
+    }
+
+    // Verify token server-side
     setIsLoading(true);
     try {
+      const verifyRes = await fetch("/api/verify-turnstile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: turnstileToken }),
+      });
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success) {
+        toast.error(t("captchaFailed"));
+        setTurnstileToken(null);
+        if (widgetIdRef.current && window.turnstile) {
+          window.turnstile.reset(widgetIdRef.current);
+        }
+        setIsLoading(false);
+        return;
+      }
+
       await authService.signUp(data.email, data.password, data.fullName);
       setSuccess(true);
       toast.success(t("registerSuccess"));
@@ -70,40 +134,10 @@ export function RegisterForm() {
     );
   }
 
-  if (!codeVerified) {
-    return (
-      <div className="space-y-4">
-        <p className="text-sm text-muted-foreground text-center">
-          {t("enterAccessCode")}
-        </p>
-        <div className="flex gap-2">
-          <Input
-            type="text"
-            value={accessCode}
-            onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-            placeholder={t("accessCodePlaceholder")}
-            className="text-center tracking-widest font-mono"
-          />
-          <Button
-            onClick={() => {
-              if (accessCode === VALID_CODE) {
-                setCodeVerified(true);
-              } else {
-                toast.error(t("invalidAccessCode"));
-              }
-            }}
-          >
-            {t("verify")}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Honeypot - hidden from humans, bots fill it */}
+        {/* Honeypot */}
         <div className="absolute opacity-0 h-0 w-0 overflow-hidden" aria-hidden="true" tabIndex={-1}>
           <input
             type="text"
@@ -113,6 +147,7 @@ export function RegisterForm() {
             onChange={(e) => setHoneypot(e.target.value)}
           />
         </div>
+
         <FormField
           control={form.control}
           name="fullName"
@@ -182,7 +217,10 @@ export function RegisterForm() {
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        {/* Turnstile widget */}
+        <div ref={turnstileRef} className="flex justify-center" />
+
+        <Button type="submit" className="w-full" disabled={isLoading || !turnstileToken}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {t("register")}
         </Button>
