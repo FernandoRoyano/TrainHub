@@ -680,6 +680,7 @@
     "lastTime": "Last time",
     "setsCompleted": "Sets completed",
     "weightUsed": "Weight (kg)",
+    "setNotePlaceholder": "Feeling, effort... (optional)",
     "simpleView": "Simple view",
     "fullView": "Full view",
     "exercise": "Exercise",

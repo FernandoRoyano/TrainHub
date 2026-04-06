@@ -37,8 +37,8 @@ function ExerciseCard({
   te,
 }: {
   ex: any;
-  exerciseData: Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string }[] }>;
-  setExerciseData: React.Dispatch<React.SetStateAction<Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string }[] }>>>;
+  exerciseData: Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string; note: string }[] }>;
+  setExerciseData: React.Dispatch<React.SetStateAction<Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string; note: string }[] }>>>;
   activeWorkoutId: string | null;
   todayLog: any;
   lastExerciseLog: any;
@@ -57,10 +57,10 @@ function ExerciseCard({
     weight: "",
     reps: ex.reps ?? "",
     feedback: "",
-    setDetails: Array.from({ length: totalSets }, () => ({ reps: "", weight: "" })),
+    setDetails: Array.from({ length: totalSets }, () => ({ reps: "", weight: "", note: "" })),
   };
   // Ensure setDetails exists and has correct length
-  const setDetails: { reps: string; weight: string }[] = exData.setDetails ?? Array.from({ length: totalSets }, () => ({ reps: "", weight: "" }));
+  const setDetails: { reps: string; weight: string; note: string }[] = exData.setDetails ?? Array.from({ length: totalSets }, () => ({ reps: "", weight: "", note: "" }));
 
   return (
     <Card key={ex.id} className={isLogged ? "border-emerald-500/50 bg-emerald-500/5" : ""}>
@@ -120,37 +120,55 @@ function ExerciseCard({
               <span className="flex-1 text-center">Peso (kg)</span>
             </div>
             {setDetails.map((set, si) => (
-              <div key={si} className="flex items-center gap-2">
-                <span className="w-7 text-center text-xs font-mono text-muted-foreground">{si + 1}</span>
-                <Input
-                  type="text"
-                  value={set.reps}
-                  onChange={(e) => {
-                    const nd = [...setDetails];
-                    nd[si] = { ...nd[si], reps: e.target.value };
-                    setExerciseData((prev) => ({
-                      ...prev,
-                      [ex.id]: { ...exData, setDetails: nd, sets: totalSets, reps: nd.map((s) => s.reps).filter(Boolean).join("/") || exData.reps },
-                    }));
-                  }}
-                  className="h-8 text-xs text-center flex-1"
-                  placeholder={ex.reps ?? ""}
-                />
-                <Input
-                  type="number"
-                  step="0.5"
-                  value={set.weight}
-                  onChange={(e) => {
-                    const nd = [...setDetails];
-                    nd[si] = { ...nd[si], weight: e.target.value };
-                    setExerciseData((prev) => ({
-                      ...prev,
-                      [ex.id]: { ...exData, setDetails: nd, sets: totalSets, weight: nd.filter((s) => s.weight).pop()?.weight || exData.weight },
-                    }));
-                  }}
-                  className="h-8 text-xs text-center flex-1"
-                  placeholder="kg"
-                />
+              <div key={si} className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-7 text-center text-xs font-mono text-muted-foreground">{si + 1}</span>
+                  <Input
+                    type="text"
+                    value={set.reps}
+                    onChange={(e) => {
+                      const nd = [...setDetails];
+                      nd[si] = { ...nd[si], reps: e.target.value };
+                      setExerciseData((prev) => ({
+                        ...prev,
+                        [ex.id]: { ...exData, setDetails: nd, sets: totalSets, reps: nd.map((s) => s.reps).filter(Boolean).join("/") || exData.reps },
+                      }));
+                    }}
+                    className="h-8 text-xs text-center flex-1"
+                    placeholder={ex.reps ?? ""}
+                  />
+                  <Input
+                    type="number"
+                    step="0.5"
+                    value={set.weight}
+                    onChange={(e) => {
+                      const nd = [...setDetails];
+                      nd[si] = { ...nd[si], weight: e.target.value };
+                      setExerciseData((prev) => ({
+                        ...prev,
+                        [ex.id]: { ...exData, setDetails: nd, sets: totalSets, weight: nd.filter((s) => s.weight).pop()?.weight || exData.weight },
+                      }));
+                    }}
+                    className="h-8 text-xs text-center flex-1"
+                    placeholder="kg"
+                  />
+                </div>
+                <div className="pl-9">
+                  <Input
+                    type="text"
+                    value={set.note}
+                    onChange={(e) => {
+                      const nd = [...setDetails];
+                      nd[si] = { ...nd[si], note: e.target.value };
+                      setExerciseData((prev) => ({
+                        ...prev,
+                        [ex.id]: { ...exData, setDetails: nd },
+                      }));
+                    }}
+                    className="h-7 text-[10px] text-muted-foreground"
+                    placeholder={t("setNotePlaceholder")}
+                  />
+                </div>
               </div>
             ))}
             <Button
@@ -173,7 +191,7 @@ function ExerciseCard({
             <Input
               value={exData.feedback}
               onChange={(e) =>
-                setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string }[] }>) => ({
+                setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string; note: string }[] }>) => ({
                   ...prev,
                   [ex.id]: { ...exData, feedback: e.target.value },
                 }))
@@ -209,7 +227,7 @@ export default function MyRoutinePage() {
   const [activeWorkoutId, setActiveWorkoutId] = useState<string | null>(null);
   const [workoutStartedAt, setWorkoutStartedAt] = useState<string | null>(null);
   const [exerciseData, setExerciseData] = useState<
-    Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string }[] }>
+    Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string; note: string }[] }>
   >({});
   const [workoutNotes, setWorkoutNotes] = useState("");
   const [loggedExercises, setLoggedExercises] = useState<Set<string>>(new Set());
@@ -274,7 +292,7 @@ export default function MyRoutinePage() {
     const data = exerciseData[routineExerciseId];
     const details = data?.setDetails?.filter((s) => s.reps || s.weight) ?? [];
     const repsStr = details.length > 0
-      ? details.map((s) => `${s.reps || "?"}@${s.weight || "?"}kg`).join(" / ")
+      ? details.map((s) => `${s.reps || "?"}@${s.weight || "?"}kg${s.note ? ` (${s.note})` : ""}`).join(" / ")
       : data?.reps || undefined;
     const avgWeight = details.length > 0
       ? details.reduce((sum, s) => sum + (parseFloat(s.weight) || 0), 0) / details.filter((s) => s.weight).length

@@ -680,6 +680,7 @@
     "lastTime": "Anterior",
     "setsCompleted": "Series completadas",
     "weightUsed": "Peso (kg)",
+    "setNotePlaceholder": "Sensación, esfuerzo... (opcional)",
     "simpleView": "Vista simple",
     "fullView": "Vista completa",
     "exercise": "Ejercicio",
