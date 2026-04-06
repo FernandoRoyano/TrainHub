@@ -26,6 +26,11 @@ export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [honeypot, setHoneypot] = useState("");
+  const [loadTime] = useState(Date.now());
+  const [accessCode, setAccessCode] = useState("");
+  const [codeVerified, setCodeVerified] = useState(false);
+
+  const VALID_CODE = "TRAINHUB2026";
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(createRegisterSchema(tv)),
@@ -40,6 +45,8 @@ export function RegisterForm() {
   async function onSubmit(data: RegisterFormData) {
     // Honeypot: if filled, it's a bot
     if (honeypot) return;
+    // Time check: if submitted in less than 3 seconds, it's a bot
+    if (Date.now() - loadTime < 3000) return;
     setIsLoading(true);
     try {
       await authService.signUp(data.email, data.password, data.fullName);
@@ -59,6 +66,36 @@ export function RegisterForm() {
       <div className="text-center space-y-2 py-4">
         <h3 className="text-lg font-semibold">{t("checkEmail")}</h3>
         <p className="text-sm text-muted-foreground">{t("confirmEmailSent")}</p>
+      </div>
+    );
+  }
+
+  if (!codeVerified) {
+    return (
+      <div className="space-y-4">
+        <p className="text-sm text-muted-foreground text-center">
+          {t("enterAccessCode")}
+        </p>
+        <div className="flex gap-2">
+          <Input
+            type="text"
+            value={accessCode}
+            onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+            placeholder={t("accessCodePlaceholder")}
+            className="text-center tracking-widest font-mono"
+          />
+          <Button
+            onClick={() => {
+              if (accessCode === VALID_CODE) {
+                setCodeVerified(true);
+              } else {
+                toast.error(t("invalidAccessCode"));
+              }
+            }}
+          >
+            {t("verify")}
+          </Button>
+        </div>
       </div>
     );
   }
