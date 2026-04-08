@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { translateFoodName } from "@/lib/food-translations";
+import { translateFoodName, translateSearchToEnglish } from "@/lib/food-translations";
 
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 const BASE_URL = "https://api.spoonacular.com";
@@ -26,16 +26,19 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const query = request.nextUrl.searchParams.get("q");
-  if (!query || query.trim().length < 2) {
+  const rawQuery = request.nextUrl.searchParams.get("q");
+  if (!rawQuery || rawQuery.trim().length < 2) {
     return NextResponse.json({ foods: [] });
   }
+
+  // Translate Spanish search terms to English for the API
+  const query = translateSearchToEnglish(rawQuery.trim());
 
   try {
     // Search ingredients (foods) with nutrition data
     const params = new URLSearchParams({
       apiKey: SPOONACULAR_API_KEY,
-      query: query.trim(),
+      query,
       number: "20",
       metaInformation: "true",
     });

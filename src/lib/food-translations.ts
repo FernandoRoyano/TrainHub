@@ -304,6 +304,12 @@ const TRANSLATIONS: Record<string, string> = {
   "cornstarch": "Maicena",
 };
 
+// Reverse map: Spanish → English (built once, cached)
+const REVERSE: Record<string, string> = {};
+for (const [en, es] of Object.entries(TRANSLATIONS)) {
+  REVERSE[es.toLowerCase()] = en;
+}
+
 export function translateFoodName(englishName: string): string | null {
   const lower = englishName.toLowerCase().trim();
   if (TRANSLATIONS[lower]) return TRANSLATIONS[lower];
@@ -314,4 +320,19 @@ export function translateFoodName(englishName: string): string | null {
   }
 
   return null;
+}
+
+export function translateSearchToEnglish(spanishQuery: string): string {
+  const lower = spanishQuery.toLowerCase().trim();
+
+  // Exact match
+  if (REVERSE[lower]) return REVERSE[lower];
+
+  // Partial match (e.g. "pechuga" matches "Pechuga de pollo" → "chicken breast")
+  for (const [es, en] of Object.entries(REVERSE)) {
+    if (es.includes(lower) && lower.length >= 3) return en;
+  }
+
+  // No match — return original (might be English already)
+  return spanishQuery;
 }
