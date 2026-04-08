@@ -162,7 +162,7 @@ export default function DashboardPage() {
           return (
             <Card
               key={kpi.label}
-              className={`glass-elevated shadow-xl transition-all duration-300 ${kpi.glow}`}
+              className={`glass-elevated shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-default ${kpi.glow}`}
             >
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
@@ -170,12 +170,12 @@ export default function DashboardPage() {
                     <p className="text-sm font-medium text-muted-foreground truncate">
                       {kpi.label}
                     </p>
-                    <p className={`text-3xl font-bold mt-1 ${kpi.urgent ? "text-rose-400" : ""}`}>
+                    <p className={`text-3xl font-bold mt-1 tabular-nums ${kpi.urgent ? "text-rose-400 animate-pulse" : ""}`}>
                       {kpi.value}
                     </p>
                   </div>
                   <div
-                    className={`h-12 w-12 rounded-xl ${kpi.bg} flex items-center justify-center shrink-0`}
+                    className={`h-12 w-12 rounded-xl ${kpi.bg} flex items-center justify-center shrink-0 transition-transform group-hover:scale-110`}
                   >
                     <Icon className={`h-6 w-6 ${kpi.color}`} />
                   </div>
@@ -396,7 +396,7 @@ export default function DashboardPage() {
                   <Link
                     key={client.clientId}
                     href={`/clients/${client.clientId}`}
-                    className="flex items-center justify-between gap-2 text-sm rounded-lg border p-3 hover:bg-accent/50 transition-colors"
+                    className="flex items-center justify-between gap-2 text-sm rounded-lg border p-3 hover:bg-accent/50 hover:border-border transition-all active:scale-[0.98]"
                   >
                     <span className="font-medium truncate">{client.name}</span>
                     <Badge variant="outline" className="text-rose-400 border-rose-500/20 shrink-0">

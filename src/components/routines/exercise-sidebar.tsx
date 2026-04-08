@@ -211,7 +211,7 @@ export function ExerciseSidebar({ onSelect }: ExerciseSidebarProps) {
                       <Badge
                         key={mg}
                         variant="outline"
-                        className="text-[9px] px-1 py-0"
+                        className="text-[11px] px-1.5 py-0"
                       >
                         {t(`muscle_${mg}` as Parameters<typeof t>[0])}
                       </Badge>

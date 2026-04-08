@@ -105,7 +105,7 @@ export function MessageThread({ conversationId }: MessageThreadProps) {
                 <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                 <p
                   className={cn(
-                    "text-[10px] mt-1",
+                    "text-xs mt-1",
                     isMe ? "text-primary-foreground/60" : "text-muted-foreground"
                   )}
                 >

@@ -94,7 +94,7 @@ export function WorkoutCalendar({ logs }: WorkoutCalendarProps) {
         {/* Weekday headers */}
         <div className="grid grid-cols-7 gap-1.5 mb-1.5">
           {WEEKDAYS_ES.map((d) => (
-            <div key={d} className="text-center text-[10px] text-muted-foreground font-medium py-1">
+            <div key={d} className="text-center text-xs text-muted-foreground font-medium py-1">
               {d}
             </div>
           ))}
@@ -131,7 +131,7 @@ export function WorkoutCalendar({ logs }: WorkoutCalendarProps) {
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-4 mt-3 text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <span className="h-3 w-3 rounded bg-emerald-500/30 border border-emerald-500/50" />
             Completado

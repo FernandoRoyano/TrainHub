@@ -72,9 +72,9 @@ function ClientNavBar() {
     <>
       {/* More menu overlay */}
       {moreOpen && (
-        <div className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm" onClick={() => setMoreOpen(false)}>
+        <div className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setMoreOpen(false)}>
           <div
-            className="absolute bottom-16 md:bottom-20 left-0 right-0 bg-card border-t border-border/50 shadow-lg px-1 py-2"
+            className="absolute bottom-16 md:bottom-20 left-0 right-0 bg-card border-t border-border/50 shadow-xl px-1 py-2.5 animate-in slide-in-from-bottom-4 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-around max-w-2xl mx-auto">
@@ -94,13 +94,13 @@ function ClientNavBar() {
                       setMoreOpen(false);
                     }}
                     className={cn(
-                      "flex flex-col items-center gap-1 py-1 px-3 md:px-5 rounded-lg transition-all",
-                      isActive ? "text-primary" : "text-muted-foreground",
-                      !enabled && "opacity-40"
+                      "flex flex-col items-center gap-1 py-1.5 px-3 md:px-5 rounded-lg transition-all active:scale-95",
+                      isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-accent",
+                      !enabled && "opacity-40 cursor-not-allowed"
                     )}
                   >
                     <item.icon className={cn("h-5 w-5 md:h-6 md:w-6", isActive && "text-primary")} />
-                    <span className="text-[9px] md:text-xs font-medium leading-tight">{t(item.labelKey)}</span>
+                    <span className="text-[11px] md:text-xs font-medium leading-tight">{t(item.labelKey)}</span>
                   </Link>
                 );
               })}
@@ -122,13 +122,13 @@ function ClientNavBar() {
                 href={item.href}
                 onClick={!enabled ? handleDisabledClick : undefined}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-1 px-3 md:px-5 rounded-lg transition-all",
-                  isActive ? "text-primary" : "text-muted-foreground",
-                  !enabled && "opacity-40"
+                  "flex flex-col items-center gap-1 py-1.5 px-3 md:px-5 rounded-lg transition-all active:scale-95",
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  !enabled && "opacity-40 cursor-not-allowed"
                 )}
               >
-                <item.icon className={cn("h-5 w-5 md:h-6 md:w-6", isActive && "text-primary")} />
-                <span className="text-[9px] md:text-xs font-medium leading-tight">{t(item.labelKey)}</span>
+                <item.icon className={cn("h-5 w-5 md:h-6 md:w-6 transition-colors", isActive && "text-primary")} />
+                <span className="text-[11px] md:text-xs font-medium leading-tight">{t(item.labelKey)}</span>
               </Link>
             );
           })}
@@ -137,12 +137,12 @@ function ClientNavBar() {
           <button
             onClick={() => setMoreOpen(!moreOpen)}
             className={cn(
-              "flex flex-col items-center gap-1 py-1 px-3 md:px-5 rounded-lg transition-all",
-              moreOpen || isMoreActive ? "text-primary" : "text-muted-foreground"
+              "flex flex-col items-center gap-1 py-1.5 px-3 md:px-5 rounded-lg transition-all active:scale-95",
+              moreOpen || isMoreActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <MoreHorizontal className="h-5 w-5 md:h-6 md:w-6" />
-            <span className="text-[9px] md:text-xs font-medium leading-tight">{t("more")}</span>
+            <MoreHorizontal className={cn("h-5 w-5 md:h-6 md:w-6 transition-transform", moreOpen && "rotate-90")} />
+            <span className="text-[11px] md:text-xs font-medium leading-tight">{t("more")}</span>
           </button>
         </div>
       </nav>

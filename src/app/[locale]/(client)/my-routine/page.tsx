@@ -19,6 +19,7 @@ import { RestTimer } from "@/components/workout/rest-timer";
 import { WorkoutTimer } from "@/components/workout/workout-timer";
 import { useRestTimerStore } from "@/stores/rest-timer-store";
 import { useWorkoutSessionStore } from "@/stores/workout-session-store";
+import { cn } from "@/lib/utils";
 import { AdaptiveTrainingCard } from "@/components/cycle-training/adaptive-training-card";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -65,8 +66,8 @@ function ExerciseCard({
   const setDetails: { reps: string; weight: string; note: string }[] = exData.setDetails ?? Array.from({ length: totalSets }, () => ({ reps: "", weight: "", note: "" }));
 
   return (
-    <Card key={ex.id} className={isLogged ? "border-emerald-500/50 bg-emerald-500/5" : ""}>
-      <CardContent className="p-3 space-y-2">
+    <Card key={ex.id} className={cn("transition-all duration-300", isLogged ? "border-emerald-500/50 bg-emerald-500/5" : "")}>
+      <CardContent className="p-3 md:p-4 space-y-3">
         {/* Row 1: Image + Name + Info */}
         <div className="flex items-start gap-3 md:gap-4">
           <button
@@ -106,7 +107,7 @@ function ExerciseCard({
               )}
             </div>
             {lastExerciseLog && (
-              <p className="text-[10px] md:text-xs text-primary/70 mt-0.5 truncate">
+              <p className="text-xs md:text-xs text-primary/70 mt-0.5 truncate">
                 {t("lastTime")}: {lastExerciseLog.sets_completed}x{lastExerciseLog.reps_completed || "?"} · {lastExerciseLog.weight_used ? `${lastExerciseLog.weight_used}kg` : "—"}
               </p>
             )}
@@ -115,16 +116,16 @@ function ExerciseCard({
 
         {/* Row 2: Per-set inputs (only during active workout) */}
         {(activeWorkoutId || (todayLog && !todayLog.completed)) && (
-          <div className="space-y-1">
-            <div className="flex gap-2 text-[10px] text-muted-foreground px-1">
-              <span className="w-7 text-center">#</span>
+          <div className="space-y-2">
+            <div className="flex gap-2 text-xs text-muted-foreground px-1 font-medium">
+              <span className="w-8 text-center">#</span>
               <span className="flex-1 text-center">Reps</span>
               <span className="flex-1 text-center">Peso (kg)</span>
             </div>
             {setDetails.map((set, si) => (
-              <div key={si} className="space-y-1">
+              <div key={si} className="space-y-1 rounded-lg bg-muted/30 p-1.5">
                 <div className="flex items-center gap-2">
-                  <span className="w-7 text-center text-xs font-mono text-muted-foreground">{si + 1}</span>
+                  <span className="w-8 text-center text-xs font-bold text-muted-foreground bg-muted rounded-md py-1">{si + 1}</span>
                   <Input
                     type="text"
                     value={set.reps}
@@ -155,7 +156,7 @@ function ExerciseCard({
                     placeholder="kg"
                   />
                 </div>
-                <div className="pl-9">
+                <div className="pl-10">
                   <Input
                     type="text"
                     value={set.note}
@@ -167,7 +168,7 @@ function ExerciseCard({
                         [ex.id]: { ...exData, setDetails: nd },
                       }));
                     }}
-                    className="h-7 text-[10px] text-muted-foreground"
+                    className="h-8 text-xs text-muted-foreground"
                     placeholder={t("setNotePlaceholder")}
                   />
                 </div>
@@ -176,11 +177,11 @@ function ExerciseCard({
             <Button
               size="sm"
               variant="default"
-              className="w-full mt-1"
+              className="w-full mt-2 h-9 active:scale-[0.98] transition-all"
               disabled={logExercise.isPending}
               onClick={() => handleLogExercise(ex.id, ex.rest_seconds, (ex.exercise as any)?.name)}
             >
-              {logExercise.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Check className="h-3 w-3 mr-1" />}
+              {logExercise.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Check className="h-4 w-4 mr-1.5" />}
               {t("logExercise")}
             </Button>
           </div>
@@ -466,9 +467,9 @@ export default function MyRoutinePage() {
                       <tr key={ex.id} className="border-t border-border/30 hover:bg-muted/20">
                         <td className="p-2">
                           <p className="font-medium text-xs leading-tight">{name}</p>
-                          <p className="text-[10px] text-muted-foreground">{ex.sets}x{ex.reps}{ex.rest_seconds > 0 ? ` · ${ex.rest_seconds}s` : ""}</p>
+                          <p className="text-xs text-muted-foreground">{ex.sets}x{ex.reps}{ex.rest_seconds > 0 ? ` · ${ex.rest_seconds}s` : ""}</p>
                           {lastExLog && (
-                            <p className="text-[10px] text-primary/70">{t("lastTime")}: {lastExLog.weight_used ? `${lastExLog.weight_used}kg` : "—"}</p>
+                            <p className="text-xs text-primary/70">{t("lastTime")}: {lastExLog.weight_used ? `${lastExLog.weight_used}kg` : "—"}</p>
                           )}
                         </td>
                         <td className="p-1 text-center">
@@ -479,7 +480,7 @@ export default function MyRoutinePage() {
                               max={20}
                               value={exData.sets}
                               onChange={(e) => setExerciseData((prev) => ({ ...prev, [ex.id]: { ...exData, sets: parseInt(e.target.value) || 0 } }))}
-                              className="h-7 w-full text-xs text-center"
+                              className="h-8 w-full text-xs text-center"
                             />
                           ) : (
                             <span className="text-xs">{ex.sets}</span>
@@ -491,7 +492,7 @@ export default function MyRoutinePage() {
                               type="text"
                               value={exData.reps}
                               onChange={(e) => setExerciseData((prev) => ({ ...prev, [ex.id]: { ...exData, reps: e.target.value } }))}
-                              className="h-7 w-full text-xs text-center"
+                              className="h-8 w-full text-xs text-center"
                               placeholder={ex.reps ?? ""}
                             />
                           ) : (
@@ -505,7 +506,7 @@ export default function MyRoutinePage() {
                               step="0.5"
                               value={exData.weight}
                               onChange={(e) => setExerciseData((prev) => ({ ...prev, [ex.id]: { ...exData, weight: e.target.value } }))}
-                              className="h-7 w-full text-xs text-center"
+                              className="h-8 w-full text-xs text-center"
                               placeholder="kg"
                             />
                           ) : (
@@ -580,12 +581,12 @@ export default function MyRoutinePage() {
                           {groupLabel}
                         </Badge>
                         {group.rest_between_rounds != null && group.rest_between_rounds > 0 && (
-                          <span className="text-[10px] text-muted-foreground">
+                          <span className="text-xs text-muted-foreground">
                             ({group.rest_between_rounds}s rest)
                           </span>
                         )}
                         {group.notes && (
-                          <span className="text-[10px] text-muted-foreground italic">{group.notes}</span>
+                          <span className="text-xs text-muted-foreground italic">{group.notes}</span>
                         )}
                       </div>
                       {exercises.map((ex) => (

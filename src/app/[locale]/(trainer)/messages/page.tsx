@@ -107,7 +107,7 @@ export default function MessagesPage() {
           <div className="h-full border rounded-lg overflow-hidden">
             <button
               onClick={() => setSelectedId(null)}
-              className="w-full flex items-center gap-2 p-3 text-sm text-muted-foreground hover:bg-accent border-b"
+              className="w-full flex items-center gap-2 p-3 text-sm font-medium text-muted-foreground hover:bg-accent border-b transition-colors active:bg-accent"
             >
               ← {t("backToConversations")}
             </button>
@@ -130,7 +130,7 @@ export default function MessagesPage() {
                 <button
                   key={conv.id}
                   onClick={() => setSelectedId(conv.id)}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent"
+                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent active:scale-[0.98] transition-all"
                 >
                   <Avatar className="h-10 w-10">
                     <AvatarFallback className="text-xs">{initials}</AvatarFallback>
@@ -146,7 +146,7 @@ export default function MessagesPage() {
                     )}
                   </div>
                   {(conv.unread_count ?? 0) > 0 && (
-                    <Badge className="h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+                    <Badge className="h-5 min-w-5 px-1 flex items-center justify-center text-xs">
                       {conv.unread_count}
                     </Badge>
                   )}
@@ -174,8 +174,8 @@ export default function MessagesPage() {
                 key={conv.id}
                 onClick={() => setSelectedId(conv.id)}
                 className={cn(
-                  "w-full flex items-center gap-3 p-3 text-left hover:bg-accent transition-colors border-b last:border-0",
-                  selectedId === conv.id && "bg-accent"
+                  "w-full flex items-center gap-3 p-3 text-left hover:bg-accent transition-all border-b last:border-0",
+                  selectedId === conv.id && "bg-accent border-l-2 border-l-primary"
                 )}
               >
                 <Avatar className="h-10 w-10 shrink-0">
@@ -187,7 +187,7 @@ export default function MessagesPage() {
                       {client?.full_name ?? "Client"}
                     </p>
                     {(conv.unread_count ?? 0) > 0 && (
-                      <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+                      <Badge className="ml-2 h-5 min-w-5 px-1 flex items-center justify-center text-xs">
                         {conv.unread_count}
                       </Badge>
                     )}

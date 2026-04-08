@@ -286,7 +286,7 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
                 <button
                   key={food.id}
                   type="button"
-                  className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors text-left"
+                  className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-accent active:scale-[0.98] transition-all text-left"
                   onClick={() => handleSelect(food)}
                 >
                   {/* Food image */}
@@ -294,11 +294,11 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
                     <img
                       src={food.image_url}
                       alt={displayName}
-                      className="h-10 w-10 rounded-md object-cover shrink-0 bg-muted"
+                      className="h-12 w-12 rounded-lg object-cover shrink-0 bg-muted shadow-sm"
                     />
                   ) : (
-                    <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center shrink-0">
-                      <Database className="h-4 w-4 text-muted-foreground/40" />
+                    <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                      <Database className="h-5 w-5 text-muted-foreground/40" />
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
