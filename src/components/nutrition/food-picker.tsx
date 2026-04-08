@@ -39,6 +39,7 @@ interface UsdaFood {
 interface SpoonFood {
   spoonId: number;
   name: string;
+  name_es: string | null;
   image_url: string | null;
   category: string;
   calories_per_100g: number;
@@ -106,7 +107,7 @@ function spoonToFood(spoon: SpoonFood): Food {
   return {
     id: `spoon-${spoon.spoonId}`,
     name: spoon.name,
-    name_es: null,
+    name_es: spoon.name_es,
     slug: null,
     category: spoon.category,
     calories_per_100g: spoon.calories_per_100g,

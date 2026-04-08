@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { translateFoodName } from "@/lib/food-translations";
 
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 const BASE_URL = "https://api.spoonacular.com";
@@ -66,6 +67,7 @@ export async function GET(request: NextRequest) {
             return {
               spoonId: ing.id,
               name: ing.name,
+              name_es: translateFoodName(ing.name),
               image_url: ing.image ? `${IMG_BASE}/${ing.image}` : null,
               category: "other",
               calories_per_100g: 0,
@@ -80,6 +82,7 @@ export async function GET(request: NextRequest) {
           return {
             spoonId: ing.id,
             name: ing.name,
+            name_es: translateFoodName(ing.name),
             image_url: ing.image ? `${IMG_BASE}/${ing.image}` : null,
             category: mapCategory(nutData.aisle),
             calories_per_100g: extractNutrient(nutrients, "Calories"),
