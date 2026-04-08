@@ -15,6 +15,7 @@ export interface BuilderFood {
   fat_per_100g: number;
   order_index: number;
   notes: string;
+  image_url?: string | null;
 }
 
 export interface BuilderMeal {

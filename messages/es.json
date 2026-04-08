@@ -609,7 +609,10 @@
     "usdaSearchPlaceholder": "Buscar en USDA (en inglés)...",
     "usdaHint": "Escribe al menos 2 caracteres para buscar en la base de datos USDA (300,000+ alimentos)",
     "searchingUsda": "Buscando en USDA...",
-    "noUsdaResults": "No se encontraron resultados en USDA"
+    "noUsdaResults": "No se encontraron resultados en USDA",
+    "withPhotos": "Con fotos",
+    "spoonacularHint": "Escribe al menos 2 caracteres para buscar alimentos con foto",
+    "searchingSpoonacular": "Buscando alimentos con foto..."
   },
   "messages": {
     "title": "Mensajes",

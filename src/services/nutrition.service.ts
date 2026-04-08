@@ -14,6 +14,7 @@ export interface MealFood {
   fat: number;
   order_index: number;
   notes: string | null;
+  image_url?: string | null;
 }
 
 export interface MealPlanMeal {
@@ -196,6 +197,7 @@ export const nutritionService = {
         fat: number;
         order_index: number;
         notes: string | null;
+        image_url: string | null;
       }> = [];
 
       // Match inserted meals by order_index
@@ -217,6 +219,7 @@ export const nutritionService = {
             fat: food.fat,
             order_index: food.order_index,
             notes: food.notes || null,
+            image_url: (food as { image_url?: string }).image_url || null,
           });
         }
       }
@@ -290,6 +293,7 @@ export const nutritionService = {
         fat: number;
         order_index: number;
         notes: string | null;
+        image_url: string | null;
       }> = [];
 
       for (const meal of data.meals) {
@@ -310,6 +314,7 @@ export const nutritionService = {
             fat: food.fat,
             order_index: food.order_index,
             notes: food.notes || null,
+            image_url: (food as { image_url?: string }).image_url || null,
           });
         }
       }
@@ -364,6 +369,7 @@ export const nutritionService = {
           fat: food.fat,
           order_index: food.order_index,
           notes: food.notes ?? "",
+          image_url: food.image_url ?? null,
         })),
       })),
     };

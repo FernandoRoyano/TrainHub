@@ -521,6 +521,7 @@ export function NutritionBuilder({ mode, mealPlan }: NutritionBuilderProps) {
                         protein_per_100g: food.protein_per_100g,
                         carbs_per_100g: food.carbs_per_100g,
                         fat_per_100g: food.fat_per_100g,
+                        image_url: food.image_url ?? null,
                       });
                     }}
                   />

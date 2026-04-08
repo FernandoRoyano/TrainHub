@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Database, Globe, Loader2 } from "lucide-react";
+import { Search, Database, Globe, Loader2, Camera } from "lucide-react";
 
 interface FoodPickerProps {
   open: boolean;
@@ -29,6 +29,17 @@ interface UsdaFood {
   fdcId: number;
   name: string;
   brandName: string | null;
+  category: string;
+  calories_per_100g: number;
+  protein_per_100g: number;
+  carbs_per_100g: number;
+  fat_per_100g: number;
+}
+
+interface SpoonFood {
+  spoonId: number;
+  name: string;
+  image_url: string | null;
   category: string;
   calories_per_100g: number;
   protein_per_100g: number;
@@ -76,7 +87,43 @@ function usdaToFood(usda: UsdaFood): Food {
   };
 }
 
-type Tab = "local" | "usda";
+function useSpoonacularSearch(query: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["spoonacular-search", query],
+    queryFn: async (): Promise<SpoonFood[]> => {
+      if (!query || query.length < 2) return [];
+      const res = await fetch(`/api/spoonacular/search?q=${encodeURIComponent(query)}`);
+      if (!res.ok) throw new Error("Spoonacular search failed");
+      const data = await res.json();
+      return data.foods ?? [];
+    },
+    enabled: enabled && query.length >= 2,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+function spoonToFood(spoon: SpoonFood): Food {
+  return {
+    id: `spoon-${spoon.spoonId}`,
+    name: spoon.name,
+    name_es: null,
+    slug: null,
+    category: spoon.category,
+    calories_per_100g: spoon.calories_per_100g,
+    protein_per_100g: spoon.protein_per_100g,
+    carbs_per_100g: spoon.carbs_per_100g,
+    fat_per_100g: spoon.fat_per_100g,
+    source: "spoonacular",
+    source_id: String(spoon.spoonId),
+    is_public: true,
+    trainer_id: null,
+    created_at: "",
+    updated_at: "",
+    image_url: spoon.image_url,
+  };
+}
+
+type Tab = "local" | "usda" | "spoonacular";
 
 export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
   const t = useTranslations("nutrition");
@@ -98,10 +145,17 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
     tab === "usda"
   );
 
+  const { data: spoonFoods, isLoading: isLoadingSpoon } = useSpoonacularSearch(
+    debouncedSearch,
+    tab === "spoonacular"
+  );
+
   const localFoods = data?.data ?? [];
-  const isLoading = tab === "local" ? isLoadingLocal : isLoadingUsda;
+  const isLoading = tab === "local" ? isLoadingLocal : tab === "usda" ? isLoadingUsda : isLoadingSpoon;
   const foods: Food[] =
-    tab === "local" ? localFoods : (usdaFoods ?? []).map(usdaToFood);
+    tab === "local" ? localFoods
+    : tab === "usda" ? (usdaFoods ?? []).map(usdaToFood)
+    : (spoonFoods ?? []).map(spoonToFood);
 
   function handleSelect(food: Food) {
     onSelect(food);
@@ -136,6 +190,15 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
           >
             <Globe className="h-3.5 w-3.5" />
             USDA
+          </Button>
+          <Button
+            variant={tab === "spoonacular" ? "default" : "ghost"}
+            size="sm"
+            className="flex-1 h-8 text-xs gap-1.5"
+            onClick={() => setTab("spoonacular")}
+          >
+            <Camera className="h-3.5 w-3.5" />
+            {t("withPhotos")}
           </Button>
         </div>
 
@@ -181,20 +244,20 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
           </div>
         )}
 
-        {/* USDA hint */}
-        {tab === "usda" && debouncedSearch.length < 2 && (
+        {/* Search hint for external APIs */}
+        {(tab === "usda" || tab === "spoonacular") && debouncedSearch.length < 2 && (
           <p className="text-xs text-muted-foreground text-center py-2">
-            {t("usdaHint")}
+            {tab === "usda" ? t("usdaHint") : t("spoonacularHint")}
           </p>
         )}
 
         <div className="flex-1 overflow-y-auto space-y-1 min-h-0 max-h-[400px]">
           {isLoading ? (
             <div className="space-y-2">
-              {tab === "usda" && (
+              {(tab === "usda" || tab === "spoonacular") && (
                 <div className="flex items-center justify-center gap-2 py-2 text-xs text-muted-foreground">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  {t("searchingUsda")}
+                  {tab === "usda" ? t("searchingUsda") : t("searchingSpoonacular")}
                 </div>
               )}
               {Array.from({ length: 5 }).map((_, i) => (
@@ -208,7 +271,7 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
             </div>
           ) : foods.length === 0 ? (
             <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
-              {tab === "usda" && debouncedSearch.length >= 2
+              {(tab === "usda" || tab === "spoonacular") && debouncedSearch.length >= 2
                 ? t("noUsdaResults")
                 : tc("noResults")}
             </div>
@@ -216,6 +279,7 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
             foods.map((food) => {
               const displayName = getFoodDisplayName(food, locale);
               const isUsda = food.source === "usda";
+              const isSpoon = food.source === "spoonacular";
 
               return (
                 <button
@@ -224,8 +288,20 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
                   className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors text-left"
                   onClick={() => handleSelect(food)}
                 >
+                  {/* Food image */}
+                  {food.image_url ? (
+                    <img
+                      src={food.image_url}
+                      alt={displayName}
+                      className="h-10 w-10 rounded-md object-cover shrink-0 bg-muted"
+                    />
+                  ) : (
+                    <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center shrink-0">
+                      <Database className="h-4 w-4 text-muted-foreground/40" />
+                    </div>
+                  )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">
+                    <p className="text-sm font-medium truncate capitalize">
                       {displayName}
                     </p>
                     <div className="flex flex-wrap gap-1 mt-0.5">
@@ -235,6 +311,13 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
                           className="text-[10px] px-1 py-0 bg-green-500/10 text-green-400 border-green-500/20"
                         >
                           USDA
+                        </Badge>
+                      ) : isSpoon ? (
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] px-1 py-0 bg-purple-500/10 text-purple-400 border-purple-500/20"
+                        >
+                          Spoonacular
                         </Badge>
                       ) : (
                         <Badge

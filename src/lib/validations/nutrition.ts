@@ -13,6 +13,7 @@ export const mealFoodSchema = z.object({
   fat: z.number().min(0).default(0),
   order_index: z.number().int().min(0),
   notes: z.string().optional().or(z.literal("")),
+  image_url: z.string().optional().or(z.literal("")).nullable(),
 });
 
 export const mealPlanMealSchema = z.object({

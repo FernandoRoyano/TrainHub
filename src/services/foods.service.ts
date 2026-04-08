@@ -14,6 +14,7 @@ export interface Food {
   source_id: string | null;
   is_public: boolean;
   trainer_id: string | null;
+  image_url?: string | null;
   created_at: string;
   updated_at: string;
 }
