@@ -18,6 +18,7 @@ import { Dumbbell, Check, Play, Timer, Loader2, MessageSquare } from "lucide-rea
 import { RestTimer } from "@/components/workout/rest-timer";
 import { WorkoutTimer } from "@/components/workout/workout-timer";
 import { useRestTimerStore } from "@/stores/rest-timer-store";
+import { useWorkoutSessionStore } from "@/stores/workout-session-store";
 import { AdaptiveTrainingCard } from "@/components/cycle-training/adaptive-training-card";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -223,15 +224,36 @@ export default function MyRoutinePage() {
 
   const startCountdown = useRestTimerStore((s) => s.startCountdown);
 
-  const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+  // Persisted workout session (survives navigation)
+  const activeWorkoutId = useWorkoutSessionStore((s) => s.activeWorkoutId);
+  const workoutStartedAt = useWorkoutSessionStore((s) => s.workoutStartedAt);
+  const exerciseData = useWorkoutSessionStore((s) => s.exerciseData);
+  const workoutNotes = useWorkoutSessionStore((s) => s.workoutNotes);
+  const loggedExercises = useWorkoutSessionStore((s) => s.loggedExercises);
+  const selectedDayIndex = useWorkoutSessionStore((s) => s.selectedDayIndex);
+  const sessionStart = useWorkoutSessionStore((s) => s.startSession);
+  const sessionEnd = useWorkoutSessionStore((s) => s.endSession);
+  const storeSetExerciseData = useWorkoutSessionStore((s) => s.setExerciseData);
+  const storeSetWorkoutNotes = useWorkoutSessionStore((s) => s.setWorkoutNotes);
+  const storeMarkLogged = useWorkoutSessionStore((s) => s.markExerciseLogged);
+  const setSelectedDayIndex = useWorkoutSessionStore((s) => s.setSelectedDayIndex);
+
   const [simpleView, setSimpleView] = useState(false);
-  const [activeWorkoutId, setActiveWorkoutId] = useState<string | null>(null);
-  const [workoutStartedAt, setWorkoutStartedAt] = useState<string | null>(null);
-  const [exerciseData, setExerciseData] = useState<
-    Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string; note: string }[] }>
-  >({});
-  const [workoutNotes, setWorkoutNotes] = useState("");
-  const [loggedExercises, setLoggedExercises] = useState<Set<string>>(new Set());
+
+  // Helper to match old Set-based API
+  const setExerciseData: React.Dispatch<React.SetStateAction<typeof exerciseData>> = (action) => {
+    if (typeof action === "function") {
+      const next = action(exerciseData);
+      for (const [id, data] of Object.entries(next)) {
+        storeSetExerciseData(id, data);
+      }
+    } else {
+      for (const [id, data] of Object.entries(action)) {
+        storeSetExerciseData(id, data);
+      }
+    }
+  };
+  const setWorkoutNotes = storeSetWorkoutNotes;
 
   if (isLoading) {
     return (
@@ -276,8 +298,7 @@ export default function MyRoutinePage() {
       },
       {
         onSuccess: (log) => {
-          setActiveWorkoutId(log.id);
-          setWorkoutStartedAt(new Date().toISOString());
+          sessionStart(log.id);
         },
       }
     );
@@ -312,7 +333,7 @@ export default function MyRoutinePage() {
       },
       {
         onSuccess: () => {
-          setLoggedExercises((prev) => new Set(prev).add(routineExerciseId));
+          storeMarkLogged(routineExerciseId);
           if (restSeconds && restSeconds > 0) {
             startCountdown(restSeconds, exerciseName);
           }
@@ -408,9 +429,7 @@ export default function MyRoutinePage() {
                   const id = activeWorkoutId ?? todayLog?.id;
                   if (id) completeWorkout.mutate({ id, notes: workoutNotes || undefined }, {
                     onSuccess: () => {
-                      setActiveWorkoutId(null);
-                      setWorkoutStartedAt(null);
-                      setWorkoutNotes("");
+                      sessionEnd();
                     },
                   });
                 }}
@@ -542,7 +561,7 @@ export default function MyRoutinePage() {
                         activeWorkoutId={activeWorkoutId}
                         todayLog={todayLog}
                         lastExerciseLog={lastLog?.exercise_logs?.find((el: any) => el.routine_exercise_id === ex.id) ?? null}
-                        isLogged={loggedExercises.has(ex.id)}
+                        isLogged={loggedExercises.includes(ex.id)}
                         logExercise={logExercise}
                         handleLogExercise={handleLogExercise}
                         startCountdown={startCountdown}
@@ -578,7 +597,7 @@ export default function MyRoutinePage() {
                           activeWorkoutId={activeWorkoutId}
                           todayLog={todayLog}
                           lastExerciseLog={lastLog?.exercise_logs?.find((el: any) => el.routine_exercise_id === ex.id) ?? null}
-                          isLogged={loggedExercises.has(ex.id)}
+                          isLogged={loggedExercises.includes(ex.id)}
                           logExercise={logExercise}
                           handleLogExercise={handleLogExercise}
                           startCountdown={startCountdown}
@@ -600,7 +619,7 @@ export default function MyRoutinePage() {
                     activeWorkoutId={activeWorkoutId}
                     todayLog={todayLog}
                     lastExerciseLog={lastLog?.exercise_logs?.find((el: any) => el.routine_exercise_id === ex.id) ?? null}
-                    isLogged={loggedExercises.has(ex.id)}
+                    isLogged={loggedExercises.includes(ex.id)}
                     logExercise={logExercise}
                     handleLogExercise={handleLogExercise}
                     startCountdown={startCountdown}
