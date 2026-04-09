@@ -18,6 +18,12 @@ interface ExerciseDetailDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+function getYouTubeEmbedUrl(url: string): string | null {
+  const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (!match) return null;
+  return `https://www.youtube.com/embed/${match[1]}`;
+}
+
 export function ExerciseDetailDialog({
   exercise,
   open,
@@ -55,7 +61,17 @@ export function ExerciseDetailDialog({
 
         {/* Main media */}
         <div className="w-full rounded-lg overflow-hidden bg-muted flex items-center justify-center min-h-[200px]">
-          {exercise.video_url ? (
+          {exercise.video_url && getYouTubeEmbedUrl(exercise.video_url) ? (
+            <div className="aspect-video w-full">
+              <iframe
+                src={getYouTubeEmbedUrl(exercise.video_url)!}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title={name}
+              />
+            </div>
+          ) : exercise.video_url ? (
             <video
               src={exercise.video_url}
               controls

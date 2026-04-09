@@ -41,12 +41,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, ArrowLeft, Upload, X } from "lucide-react";
+import { Loader2, ArrowLeft, Upload, X, Youtube } from "lucide-react";
 import Link from "next/link";
+import { VideoSearchDialog } from "./video-search-dialog";
 
 interface ExerciseFormProps {
   mode: "create" | "edit";
   exercise?: Exercise;
+}
+
+function getYouTubeId(url: string): string {
+  const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return match?.[1] ?? "";
 }
 
 export function ExerciseForm({ mode, exercise }: ExerciseFormProps) {
@@ -65,6 +71,7 @@ export function ExerciseForm({ mode, exercise }: ExerciseFormProps) {
     exercise?.thumbnail_url ?? null
   );
   const [isUploading, setIsUploading] = useState(false);
+  const [videoSearchOpen, setVideoSearchOpen] = useState(false);
 
   const videoInputRef = useRef<HTMLInputElement>(null);
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
@@ -566,11 +573,22 @@ export function ExerciseForm({ mode, exercise }: ExerciseFormProps) {
 
               {videoPreview ? (
                 <div className="relative rounded-lg overflow-hidden bg-black">
-                  <video
-                    src={videoPreview}
-                    controls
-                    className="w-full max-h-64 object-contain"
-                  />
+                  {videoPreview.includes("youtube.com") || videoPreview.includes("youtu.be") ? (
+                    <div className="aspect-video w-full">
+                      <iframe
+                        src={`https://www.youtube.com/embed/${getYouTubeId(videoPreview)}`}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : (
+                    <video
+                      src={videoPreview}
+                      controls
+                      className="w-full max-h-64 object-contain"
+                    />
+                  )}
                   <Button
                     type="button"
                     variant="destructive"
@@ -586,23 +604,55 @@ export function ExerciseForm({ mode, exercise }: ExerciseFormProps) {
                   </Button>
                 </div>
               ) : (
-                <div
-                  className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
-                  onClick={() => videoInputRef.current?.click()}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={handleDrop("video")}
-                >
-                  <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    {t("dragOrClick")}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {t("maxFileSize", { size: "50" })}
-                  </p>
-                </div>
+                <>
+                  {/* YouTube search button */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setVideoSearchOpen(true)}
+                  >
+                    <Youtube className="mr-2 h-4 w-4 text-red-500" />
+                    {t("searchYouTube")}
+                  </Button>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-card px-2 text-muted-foreground">{tc("or")}</span>
+                    </div>
+                  </div>
+
+                  <div
+                    className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                    onClick={() => videoInputRef.current?.click()}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={handleDrop("video")}
+                  >
+                    <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground">
+                      {t("dragOrClick")}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t("maxFileSize", { size: "50" })}
+                    </p>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
+
+          <VideoSearchDialog
+            open={videoSearchOpen}
+            onOpenChange={setVideoSearchOpen}
+            defaultQuery={form.watch("name") || ""}
+            onSelect={(url) => {
+              form.setValue("video_url", url);
+              setVideoPreview(url);
+            }}
+          />
 
           {/* Thumbnail Upload */}
           <Card>
