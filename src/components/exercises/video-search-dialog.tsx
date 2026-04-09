@@ -12,15 +12,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Play, Loader2, Youtube, Globe } from "lucide-react";
-
-// Curated trusted fitness channels
-const FAVORITE_CHANNELS: { id: string; name: string; handle: string }[] = [
-  { id: "UCVvPWaVaIEyabfjCgNP-q-A", name: "Ritual Gym Global", handle: "@RitualGymGlobal" },
-  // Add more here as you discover them
-];
+import { Search, Play, Loader2, Youtube, X } from "lucide-react";
 
 interface VideoSearchDialogProps {
   open: boolean;
@@ -39,20 +32,24 @@ interface YouTubeVideo {
   publishedAt: string;
 }
 
-function useYouTubeSearch(query: string, channelId: string | null, enabled: boolean) {
+function useYouTubeSearch(query: string, channel: string, enabled: boolean) {
   return useQuery({
-    queryKey: ["youtube-search", query, channelId],
+    queryKey: ["youtube-search", query, channel],
     queryFn: async (): Promise<YouTubeVideo[]> => {
       if (!query || query.length < 2) return [];
       const params = new URLSearchParams({ q: query });
-      if (channelId) params.set("channelId", channelId);
+      if (channel.trim()) params.set("channel", channel.trim());
       const res = await fetch(`/api/youtube/search?${params}`);
       if (!res.ok) throw new Error("YouTube search failed");
       const data = await res.json();
+      if (data.error === "channel_not_found") {
+        throw new Error("channel_not_found");
+      }
       return data.videos ?? [];
     },
     enabled: enabled && query.length >= 2,
     staleTime: 60 * 60 * 1000, // 1 hour
+    retry: false,
   });
 }
 
@@ -64,14 +61,17 @@ export function VideoSearchDialog({
 }: VideoSearchDialogProps) {
   const t = useTranslations("exercises");
   const [search, setSearch] = useState(defaultQuery);
-  const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
+  const [channelFilter, setChannelFilter] = useState("");
   const debouncedSearch = useDebounce(search, 400);
+  const debouncedChannel = useDebounce(channelFilter, 400);
 
   const { data: videos, isLoading, error } = useYouTubeSearch(
     debouncedSearch,
-    selectedChannel,
+    debouncedChannel,
     open
   );
+
+  const channelNotFound = error instanceof Error && error.message === "channel_not_found";
 
   function handleSelect(video: YouTubeVideo) {
     onSelect(video.url);
@@ -90,42 +90,45 @@ export function VideoSearchDialog({
           <DialogDescription>{t("searchVideoDesc")}</DialogDescription>
         </DialogHeader>
 
-        {/* Channel filter */}
-        <div className="flex gap-1.5 flex-wrap">
-          <Button
-            type="button"
-            variant={selectedChannel === null ? "default" : "outline"}
-            size="sm"
-            className="h-7 text-xs gap-1"
-            onClick={() => setSelectedChannel(null)}
-          >
-            <Globe className="h-3 w-3" />
-            {t("allChannels")}
-          </Button>
-          {FAVORITE_CHANNELS.map((ch) => (
-            <Button
-              key={ch.id}
-              type="button"
-              variant={selectedChannel === ch.id ? "default" : "outline"}
-              size="sm"
-              className="h-7 text-xs gap-1"
-              onClick={() => setSelectedChannel(ch.id)}
-            >
-              <Youtube className="h-3 w-3 text-red-500" />
-              {ch.name}
-            </Button>
-          ))}
-        </div>
+        <div className="space-y-2">
+          {/* Search input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={t("searchVideoPlaceholder")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 h-10"
+              autoFocus
+            />
+          </div>
 
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={t("searchVideoPlaceholder")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-10"
-            autoFocus
-          />
+          {/* Channel filter input */}
+          <div className="relative">
+            <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500" />
+            <Input
+              placeholder={t("channelPlaceholder")}
+              value={channelFilter}
+              onChange={(e) => setChannelFilter(e.target.value)}
+              className="pl-9 pr-9 h-10"
+            />
+            {channelFilter && (
+              <button
+                type="button"
+                onClick={() => setChannelFilter("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-muted"
+                aria-label="Limpiar"
+              >
+                <X className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+          {channelFilter && !channelNotFound && (
+            <p className="text-xs text-muted-foreground">{t("channelHint")}</p>
+          )}
+          {channelNotFound && (
+            <p className="text-xs text-destructive">{t("channelNotFound")}</p>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto min-h-0">
@@ -143,7 +146,7 @@ export function VideoSearchDialog({
             </div>
           )}
 
-          {error && (
+          {error && !channelNotFound && (
             <div className="text-center py-8 text-sm text-destructive">
               {t("videoSearchError")}
             </div>

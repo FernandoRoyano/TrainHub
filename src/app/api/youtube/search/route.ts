@@ -27,17 +27,48 @@ export async function GET(request: NextRequest) {
   }
 
   const query = request.nextUrl.searchParams.get("q");
-  const channelId = request.nextUrl.searchParams.get("channelId");
+  const channelHandleOrId = request.nextUrl.searchParams.get("channel");
   if (!query || query.trim().length < 2) {
     return NextResponse.json({ videos: [] });
   }
 
   try {
+    // If user provided a channel, resolve handle → channelId
+    let resolvedChannelId: string | null = null;
+    if (channelHandleOrId && channelHandleOrId.trim().length > 0) {
+      const trimmed = channelHandleOrId.trim();
+      // If it looks like a channel ID already (starts with UC), use it directly
+      if (trimmed.startsWith("UC") && trimmed.length === 24) {
+        resolvedChannelId = trimmed;
+      } else {
+        // Resolve handle (with or without @)
+        const handle = trimmed.startsWith("@") ? trimmed : `@${trimmed}`;
+        const handleParams = new URLSearchParams({
+          key: YOUTUBE_API_KEY,
+          part: "id",
+          forHandle: handle,
+        });
+        const handleRes = await fetch(`${BASE_URL}/channels?${handleParams}`, {
+          next: { revalidate: 86400 * 7 }, // cache 7 days
+        });
+        if (handleRes.ok) {
+          const handleData = await handleRes.json();
+          resolvedChannelId = handleData.items?.[0]?.id ?? null;
+        }
+        if (!resolvedChannelId) {
+          return NextResponse.json(
+            { error: "channel_not_found", videos: [] },
+            { status: 200 }
+          );
+        }
+      }
+    }
+
     const searchParams: Record<string, string> = {
       key: YOUTUBE_API_KEY,
       part: "snippet",
       // If filtering by channel, don't add "ejercicio fitness" — channel is already curated
-      q: channelId ? query.trim() : `${query.trim()} ejercicio fitness`,
+      q: resolvedChannelId ? query.trim() : `${query.trim()} ejercicio fitness`,
       type: "video",
       maxResults: "12",
       videoEmbeddable: "true",
@@ -45,8 +76,8 @@ export async function GET(request: NextRequest) {
       safeSearch: "strict",
     };
 
-    if (channelId) {
-      searchParams.channelId = channelId;
+    if (resolvedChannelId) {
+      searchParams.channelId = resolvedChannelId;
     }
 
     const params = new URLSearchParams(searchParams);
