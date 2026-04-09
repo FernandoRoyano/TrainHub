@@ -66,7 +66,20 @@ function ExerciseCard({
   const setDetails: { reps: string; weight: string; note: string }[] = exData.setDetails ?? Array.from({ length: totalSets }, () => ({ reps: "", weight: "", note: "" }));
 
   return (
-    <Card key={ex.id} className={cn("transition-all duration-300", isLogged ? "border-emerald-500/50 bg-emerald-500/5" : "")}>
+    <Card
+      key={ex.id}
+      className={cn(
+        "transition-all duration-300 relative",
+        isLogged
+          ? "border-2 border-emerald-500 bg-emerald-500/10 opacity-70"
+          : "border border-border"
+      )}
+    >
+      {isLogged && (
+        <div className="absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg">
+          <Check className="h-4 w-4" strokeWidth={3} />
+        </div>
+      )}
       <CardContent className="p-3 md:p-4 space-y-3">
         {/* Row 1: Image + Name + Info */}
         <div className="flex items-start gap-3 md:gap-4">
@@ -127,7 +140,9 @@ function ExerciseCard({
                 <div className="flex items-center gap-2">
                   <span className="w-8 text-center text-xs font-bold text-muted-foreground bg-muted rounded-md py-1">{si + 1}</span>
                   <Input
-                    type="text"
+                    type="number"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     value={set.reps}
                     onChange={(e) => {
                       const nd = [...setDetails];
@@ -137,11 +152,12 @@ function ExerciseCard({
                         [ex.id]: { ...exData, setDetails: nd, sets: totalSets, reps: nd.map((s) => s.reps).filter(Boolean).join("/") || exData.reps },
                       }));
                     }}
-                    className="h-8 text-xs text-center flex-1"
+                    className="h-11 text-base text-center flex-1 font-semibold"
                     placeholder={ex.reps ?? ""}
                   />
                   <Input
                     type="number"
+                    inputMode="decimal"
                     step="0.5"
                     value={set.weight}
                     onChange={(e) => {
@@ -152,7 +168,7 @@ function ExerciseCard({
                         [ex.id]: { ...exData, setDetails: nd, sets: totalSets, weight: nd.filter((s) => s.weight).pop()?.weight || exData.weight },
                       }));
                     }}
-                    className="h-8 text-xs text-center flex-1"
+                    className="h-11 text-base text-center flex-1 font-semibold"
                     placeholder="kg"
                   />
                 </div>
