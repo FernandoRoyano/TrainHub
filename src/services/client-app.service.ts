@@ -209,7 +209,7 @@ export const clientAppService = {
     return data as WorkoutLog;
   },
 
-  async completeWorkout(workoutLogId: string, notes?: string) {
+  async completeWorkout(workoutLogId: string, notes?: string, customDate?: string) {
     const { supabase, clientId } = await getAuthenticatedClient();
 
     // Get started_at to calculate duration
@@ -232,6 +232,10 @@ export const clientAppService = {
       duration_minutes: durationMinutes,
     };
     if (notes !== undefined) updateData.notes = notes || null;
+    // Allow user to backdate the workout (default: keep original date)
+    if (customDate) {
+      updateData.date = customDate;
+    }
     const { error } = await supabase
       .from("workout_logs")
       .update(updateData)

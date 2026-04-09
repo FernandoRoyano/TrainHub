@@ -240,6 +240,8 @@ export default function MyRoutinePage() {
   const setSelectedDayIndex = useWorkoutSessionStore((s) => s.setSelectedDayIndex);
 
   const [simpleView, setSimpleView] = useState(false);
+  const today = new Date().toISOString().split("T")[0];
+  const [completionDate, setCompletionDate] = useState<string>(today);
 
   // Helper to match old Set-based API
   const setExerciseData: React.Dispatch<React.SetStateAction<typeof exerciseData>> = (action) => {
@@ -279,7 +281,6 @@ export default function MyRoutinePage() {
   const days = routine.routine?.days ?? [];
   const activeDay = days[selectedDayIndex];
 
-  const today = new Date().toISOString().split("T")[0];
   const todayLog = logs?.find(
     (l) => l.date === today && l.routine_day_id === activeDay?.id
   );
@@ -422,15 +423,26 @@ export default function MyRoutinePage() {
                 className="text-sm resize-none"
                 rows={2}
               />
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">{t("workoutDate")}</label>
+                <Input
+                  type="date"
+                  value={completionDate}
+                  onChange={(e) => setCompletionDate(e.target.value)}
+                  max={today}
+                  className="text-sm h-9"
+                />
+              </div>
               <Button
                 variant="secondary"
                 className="w-full"
                 disabled={completeWorkout.isPending}
                 onClick={() => {
                   const id = activeWorkoutId ?? todayLog?.id;
-                  if (id) completeWorkout.mutate({ id, notes: workoutNotes || undefined }, {
+                  if (id) completeWorkout.mutate({ id, notes: workoutNotes || undefined, customDate: completionDate }, {
                     onSuccess: () => {
                       sessionEnd();
+                      setCompletionDate(today);
                     },
                   });
                 }}

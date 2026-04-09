@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import { QueryProvider } from "@/components/shared/query-provider";
 import { ThemeProvider } from "@/components/shared/theme-provider";
+import { TextScaleInit } from "@/components/shared/text-scale-init";
 import { Toaster } from "@/components/ui/sonner";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
 
@@ -36,6 +37,7 @@ export default async function LocaleLayout({
         <ThemeProvider>
           <NextIntlClientProvider messages={messages}>
             <QueryProvider>
+              <TextScaleInit />
               {children}
               <Toaster />
               <InstallPrompt />

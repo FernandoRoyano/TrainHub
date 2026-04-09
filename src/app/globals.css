@@ -68,11 +68,16 @@
 }
 
 @layer base {
+  :root {
+    --text-scale: 1;
+  }
+
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
+    font-size: calc(16px * var(--text-scale));
   }
 
   /* Smooth transitions for interactive elements */

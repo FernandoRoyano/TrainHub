@@ -57,8 +57,8 @@ export function useCompleteWorkout() {
   const queryClient = useQueryClient();
   const t = useTranslations("clientApp");
   return useMutation({
-    mutationFn: ({ id, notes }: { id: string; notes?: string }) =>
-      clientAppService.completeWorkout(id, notes),
+    mutationFn: ({ id, notes, customDate }: { id: string; notes?: string; customDate?: string }) =>
+      clientAppService.completeWorkout(id, notes, customDate),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["workout-logs"] });
       toast.success(t("workoutCompletedToast"));

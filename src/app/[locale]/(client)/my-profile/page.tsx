@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut, Globe, Loader2, Pencil, Check, X } from "lucide-react";
 import { LocaleSwitcher } from "@/components/shared/locale-switcher";
+import { TextSizeSelector } from "@/components/shared/text-size-selector";
 
 export default function MyProfilePage() {
   const t = useTranslations("clientApp");
@@ -146,6 +147,8 @@ export default function MyProfilePage() {
           <LocaleSwitcher />
         </CardContent>
       </Card>
+
+      <TextSizeSelector />
 
       <Button
         variant="outline"
