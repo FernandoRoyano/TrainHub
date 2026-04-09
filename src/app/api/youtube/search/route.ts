@@ -27,21 +27,29 @@ export async function GET(request: NextRequest) {
   }
 
   const query = request.nextUrl.searchParams.get("q");
+  const channelId = request.nextUrl.searchParams.get("channelId");
   if (!query || query.trim().length < 2) {
     return NextResponse.json({ videos: [] });
   }
 
   try {
-    const params = new URLSearchParams({
+    const searchParams: Record<string, string> = {
       key: YOUTUBE_API_KEY,
       part: "snippet",
-      q: `${query.trim()} ejercicio fitness`,
+      // If filtering by channel, don't add "ejercicio fitness" — channel is already curated
+      q: channelId ? query.trim() : `${query.trim()} ejercicio fitness`,
       type: "video",
       maxResults: "12",
       videoEmbeddable: "true",
       relevanceLanguage: "es",
       safeSearch: "strict",
-    });
+    };
+
+    if (channelId) {
+      searchParams.channelId = channelId;
+    }
+
+    const params = new URLSearchParams(searchParams);
 
     const res = await fetch(`${BASE_URL}/search?${params}`, {
       next: { revalidate: 86400 }, // cache 24h

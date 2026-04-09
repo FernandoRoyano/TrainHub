@@ -12,8 +12,15 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Play, Loader2, Youtube } from "lucide-react";
+import { Search, Play, Loader2, Youtube, Globe } from "lucide-react";
+
+// Curated trusted fitness channels
+const FAVORITE_CHANNELS: { id: string; name: string; handle: string }[] = [
+  { id: "UCVvPWaVaIEyabfjCgNP-q-A", name: "Ritual Gym Global", handle: "@RitualGymGlobal" },
+  // Add more here as you discover them
+];
 
 interface VideoSearchDialogProps {
   open: boolean;
@@ -32,12 +39,14 @@ interface YouTubeVideo {
   publishedAt: string;
 }
 
-function useYouTubeSearch(query: string, enabled: boolean) {
+function useYouTubeSearch(query: string, channelId: string | null, enabled: boolean) {
   return useQuery({
-    queryKey: ["youtube-search", query],
+    queryKey: ["youtube-search", query, channelId],
     queryFn: async (): Promise<YouTubeVideo[]> => {
       if (!query || query.length < 2) return [];
-      const res = await fetch(`/api/youtube/search?q=${encodeURIComponent(query)}`);
+      const params = new URLSearchParams({ q: query });
+      if (channelId) params.set("channelId", channelId);
+      const res = await fetch(`/api/youtube/search?${params}`);
       if (!res.ok) throw new Error("YouTube search failed");
       const data = await res.json();
       return data.videos ?? [];
@@ -55,10 +64,12 @@ export function VideoSearchDialog({
 }: VideoSearchDialogProps) {
   const t = useTranslations("exercises");
   const [search, setSearch] = useState(defaultQuery);
+  const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
   const debouncedSearch = useDebounce(search, 400);
 
   const { data: videos, isLoading, error } = useYouTubeSearch(
     debouncedSearch,
+    selectedChannel,
     open
   );
 
@@ -78,6 +89,33 @@ export function VideoSearchDialog({
           </DialogTitle>
           <DialogDescription>{t("searchVideoDesc")}</DialogDescription>
         </DialogHeader>
+
+        {/* Channel filter */}
+        <div className="flex gap-1.5 flex-wrap">
+          <Button
+            type="button"
+            variant={selectedChannel === null ? "default" : "outline"}
+            size="sm"
+            className="h-7 text-xs gap-1"
+            onClick={() => setSelectedChannel(null)}
+          >
+            <Globe className="h-3 w-3" />
+            {t("allChannels")}
+          </Button>
+          {FAVORITE_CHANNELS.map((ch) => (
+            <Button
+              key={ch.id}
+              type="button"
+              variant={selectedChannel === ch.id ? "default" : "outline"}
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={() => setSelectedChannel(ch.id)}
+            >
+              <Youtube className="h-3 w-3 text-red-500" />
+              {ch.name}
+            </Button>
+          ))}
+        </div>
 
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
