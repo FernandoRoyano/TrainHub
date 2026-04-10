@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import type { Exercise } from "@/services/exercises.service";
 import type { ExerciseGroup, RoutineExercise } from "@/services/routines.service";
@@ -259,6 +259,19 @@ export default function MyRoutinePage() {
   const today = new Date().toISOString().split("T")[0];
   const [completionDate, setCompletionDate] = useState<string>(today);
 
+  // Clear stale session: if no active workout and store has leftover data, clean up
+  useEffect(() => {
+    if (!isLoading && routine) {
+      const todayLogForCleanup = logs?.find(
+        (l) => l.date === today && l.routine_day_id === (routine.routine?.days ?? [])[selectedDayIndex]?.id
+      );
+      const hasActiveWorkout = activeWorkoutId || (todayLogForCleanup && !todayLogForCleanup.completed);
+      if (!hasActiveWorkout && loggedExercises.length > 0) {
+        sessionEnd();
+      }
+    }
+  }, [isLoading, routine, logs, today, selectedDayIndex]);
+
   // Helper to match old Set-based API
   const setExerciseData: React.Dispatch<React.SetStateAction<typeof exerciseData>> = (action) => {
     if (typeof action === "function") {
@@ -300,6 +313,13 @@ export default function MyRoutinePage() {
   const todayLog = logs?.find(
     (l) => l.date === today && l.routine_day_id === activeDay?.id
   );
+
+  // Build set of truly logged exercise IDs from server data + local store
+  const serverLoggedIds = new Set(
+    (todayLog as any)?.exercise_logs?.map((el: any) => el.routine_exercise_id) ?? []
+  );
+  const isExerciseLogged = (exId: string) =>
+    serverLoggedIds.has(exId) || loggedExercises.includes(exId);
 
   // Last completed log for this day (not today) — to show previous weights
   const lastLog = logs
@@ -590,7 +610,7 @@ export default function MyRoutinePage() {
                         activeWorkoutId={activeWorkoutId}
                         todayLog={todayLog}
                         lastExerciseLog={lastLog?.exercise_logs?.find((el: any) => el.routine_exercise_id === ex.id) ?? null}
-                        isLogged={loggedExercises.includes(ex.id)}
+                        isLogged={isExerciseLogged(ex.id)}
                         logExercise={logExercise}
                         handleLogExercise={handleLogExercise}
                         startCountdown={startCountdown}
@@ -626,7 +646,7 @@ export default function MyRoutinePage() {
                           activeWorkoutId={activeWorkoutId}
                           todayLog={todayLog}
                           lastExerciseLog={lastLog?.exercise_logs?.find((el: any) => el.routine_exercise_id === ex.id) ?? null}
-                          isLogged={loggedExercises.includes(ex.id)}
+                          isLogged={isExerciseLogged(ex.id)}
                           logExercise={logExercise}
                           handleLogExercise={handleLogExercise}
                           startCountdown={startCountdown}
@@ -648,7 +668,7 @@ export default function MyRoutinePage() {
                     activeWorkoutId={activeWorkoutId}
                     todayLog={todayLog}
                     lastExerciseLog={lastLog?.exercise_logs?.find((el: any) => el.routine_exercise_id === ex.id) ?? null}
-                    isLogged={loggedExercises.includes(ex.id)}
+                    isLogged={isExerciseLogged(ex.id)}
                     logExercise={logExercise}
                     handleLogExercise={handleLogExercise}
                     startCountdown={startCountdown}
