@@ -52,7 +52,7 @@ describe("POST /api/reset-client-password", () => {
   it("returns 401 when not authenticated", async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } });
 
-    const res = await POST(makeRequest({ clientId: "c1", newPassword: "abc123" }));
+    const res = await POST(makeRequest({ clientId: "c1", newPassword: "Abc12345" }));
     expect(res.status).toBe(401);
     const data = await res.json();
     expect(data.error).toBe("Not authenticated");
@@ -61,7 +61,7 @@ describe("POST /api/reset-client-password", () => {
   it("returns 400 when clientId is missing", async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: "trainer-1" } } });
 
-    const res = await POST(makeRequest({ newPassword: "abc123" }));
+    const res = await POST(makeRequest({ newPassword: "Abc12345" }));
     expect(res.status).toBe(400);
     const data = await res.json();
     expect(data.error).toBe("clientId and newPassword required");
@@ -74,20 +74,20 @@ describe("POST /api/reset-client-password", () => {
     expect(res.status).toBe(400);
   });
 
-  it("returns 400 when password is too short", async () => {
+  it("returns 400 when password is too weak", async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: "trainer-1" } } });
 
     const res = await POST(makeRequest({ clientId: "c1", newPassword: "abc" }));
     expect(res.status).toBe(400);
     const data = await res.json();
-    expect(data.error).toBe("Password must be at least 6 characters");
+    expect(data.error).toBe("Mínimo 8 caracteres, una mayúscula y un número");
   });
 
   it("returns 404 when client not found", async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: "trainer-1" } } });
     mockSingle.mockResolvedValue({ data: null, error: { message: "Not found" } });
 
-    const res = await POST(makeRequest({ clientId: "c1", newPassword: "abc123" }));
+    const res = await POST(makeRequest({ clientId: "c1", newPassword: "Abc12345" }));
     expect(res.status).toBe(404);
     const data = await res.json();
     expect(data.error).toBe("Client not found");
@@ -100,7 +100,7 @@ describe("POST /api/reset-client-password", () => {
       error: null,
     });
 
-    const res = await POST(makeRequest({ clientId: "c1", newPassword: "abc123" }));
+    const res = await POST(makeRequest({ clientId: "c1", newPassword: "Abc12345" }));
     expect(res.status).toBe(400);
     const data = await res.json();
     expect(data.error).toBe("Client has no linked account");
@@ -116,7 +116,7 @@ describe("POST /api/reset-client-password", () => {
       error: { message: "Admin API error" },
     });
 
-    const res = await POST(makeRequest({ clientId: "c1", newPassword: "newpass123" }));
+    const res = await POST(makeRequest({ clientId: "c1", newPassword: "Newpass12" }));
     expect(res.status).toBe(500);
     const data = await res.json();
     expect(data.error).toBe("Admin API error");
@@ -130,7 +130,7 @@ describe("POST /api/reset-client-password", () => {
     });
     mockUpdateUserById.mockResolvedValue({ error: null });
 
-    const res = await POST(makeRequest({ clientId: "c1", newPassword: "newpass123" }));
+    const res = await POST(makeRequest({ clientId: "c1", newPassword: "Newpass12" }));
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.success).toBe(true);
@@ -144,10 +144,10 @@ describe("POST /api/reset-client-password", () => {
     });
     mockUpdateUserById.mockResolvedValue({ error: null });
 
-    await POST(makeRequest({ clientId: "c1", newPassword: "secure123" }));
+    await POST(makeRequest({ clientId: "c1", newPassword: "Secure123" }));
 
     expect(mockUpdateUserById).toHaveBeenCalledWith("user-abc", {
-      password: "secure123",
+      password: "Secure123",
     });
   });
 });

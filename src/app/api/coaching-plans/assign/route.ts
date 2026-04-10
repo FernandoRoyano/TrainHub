@@ -50,6 +50,21 @@ export async function POST(request: Request) {
       );
     }
 
+    // Verify client belongs to this trainer
+    const { data: clientCheck, error: clientCheckError } = await admin
+      .from("clients")
+      .select("id")
+      .eq("id", client_id)
+      .eq("trainer_id", user.id)
+      .single();
+
+    if (clientCheckError || !clientCheck) {
+      return NextResponse.json(
+        { error: "Client not found or not authorized" },
+        { status: 403 }
+      );
+    }
+
     // 2. Deactivate any existing active client_coaching_plan for this client
     const { data: existingPlans } = await admin
       .from("client_coaching_plans")

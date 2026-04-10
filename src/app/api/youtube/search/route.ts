@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/simple-rate-limit";
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 const BASE_URL = "https://www.googleapis.com/youtube/v3";
@@ -19,6 +21,18 @@ interface YouTubeSearchItem {
 }
 
 export async function GET(request: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!checkRateLimit(user.id)) {
+    return NextResponse.json(
+      { error: "Demasiadas búsquedas. Espera un momento." },
+      { status: 429 }
+    );
+  }
+
   if (!YOUTUBE_API_KEY) {
     return NextResponse.json(
       { error: "YouTube API key not configured" },

@@ -8,21 +8,26 @@ const withPWA = withPWAInit({
   disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: true,
-  fallbacks: {
-    document: "/offline",
-  },
+  fallbacks: { document: "/offline" },
 });
 
-/** @type {import('next').NextConfig} */
+const securityHeaders = [
+  { key: "X-Frame-Options",           value: "SAMEORIGIN" },
+  { key: "X-Content-Type-Options",    value: "nosniff" },
+  { key: "Referrer-Policy",           value: "strict-origin-when-cross-origin" },
+  { key: "X-XSS-Protection",          value: "1; mode=block" },
+  { key: "Permissions-Policy",        value: "camera=(), microphone=(), geolocation=()" },
+  { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+];
+
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
+  eslint: { ignoreDuringBuilds: true },
+  async headers() {
+    return [{ source: "/(.*)", headers: securityHeaders }];
   },
   experimental: {
     turbo: {
-      resolveAlias: {
-        "next-intl/config": "./src/i18n/request.ts",
-      },
+      resolveAlias: { "next-intl/config": "./src/i18n/request.ts" },
     },
   },
 };

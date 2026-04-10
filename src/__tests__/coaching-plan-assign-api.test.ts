@@ -172,6 +172,9 @@ describe("POST /api/coaching-plans/assign", () => {
       if (table === "coaching_plans" && callIndex === 1) {
         return createChain({ data: plan, error: null });
       }
+      if (table === "clients") {
+        return createChain({ data: { id: "c1" }, error: null });
+      }
       if (table === "coaching_plan_questionnaires") {
         const chain = createChain();
         // Override eq to resolve with questionnaire links

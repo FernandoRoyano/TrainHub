@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/simple-rate-limit";
 import { translateFoodName, translateSearchToEnglish } from "@/lib/food-translations";
 
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
@@ -19,6 +21,18 @@ function extractNutrient(nutrients: { name: string; amount: number }[], name: st
 }
 
 export async function GET(request: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!checkRateLimit(user.id)) {
+    return NextResponse.json(
+      { error: "Demasiadas búsquedas. Espera un momento." },
+      { status: 429 }
+    );
+  }
+
   if (!SPOONACULAR_API_KEY) {
     return NextResponse.json(
       { error: "Spoonacular API key not configured" },

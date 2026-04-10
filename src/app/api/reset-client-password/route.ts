@@ -20,9 +20,10 @@ export async function POST(request: Request) {
     );
   }
 
-  if (newPassword.length < 6) {
+  const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+  if (!passwordRegex.test(newPassword)) {
     return NextResponse.json(
-      { error: "Password must be at least 6 characters" },
+      { error: "Mínimo 8 caracteres, una mayúscula y un número" },
       { status: 400 }
     );
   }

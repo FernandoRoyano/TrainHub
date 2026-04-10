@@ -33,7 +33,7 @@ describe("GET /api/verify-invite", () => {
 
   it("returns { valid: true, clientName } for valid unlinked token", async () => {
     mockMaybeSingle.mockResolvedValue({
-      data: { full_name: "Mary", email: "mary@example.com", phone: null, user_id: null, trainer_id: "t1" },
+      data: { full_name: "Mary", email: "mary@example.com", phone: null, user_id: null, trainer_id: "t1", invite_token_expires_at: null },
     });
 
     const req = new Request("http://localhost/api/verify-invite?token=abc-123");
@@ -43,7 +43,7 @@ describe("GET /api/verify-invite", () => {
     expect(data.valid).toBe(true);
     expect(data.clientName).toBe("Mary");
     expect(mockFrom).toHaveBeenCalledWith("clients");
-    expect(mockSelect).toHaveBeenCalledWith("full_name, email, phone, user_id, trainer_id");
+    expect(mockSelect).toHaveBeenCalledWith("full_name, email, phone, user_id, trainer_id, invite_token_expires_at");
   });
 
   it("returns { valid: false } when client already has user_id", async () => {

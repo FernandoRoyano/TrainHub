@@ -37,8 +37,9 @@ export function ResetPasswordDialog({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (password.length < 6) {
-      toast.error(t("passwordMinLength"));
+    const pwRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!pwRegex.test(password)) {
+      toast.error("Mínimo 8 caracteres, una mayúscula y un número");
       return;
     }
 
@@ -90,6 +91,9 @@ export function ResetPasswordDialog({
               placeholder="******"
               autoComplete="new-password"
             />
+            <p className="text-xs text-muted-foreground">
+              Mínimo 8 caracteres, una mayúscula y un número
+            </p>
           </div>
           <div className="space-y-2">
             <Label>{t("confirmNewPassword")}</Label>
