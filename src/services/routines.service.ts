@@ -160,7 +160,7 @@ export const routinesService = {
     // Assemble
     const assembledDays: RoutineDay[] = (days ?? []).map((day) => {
       const dayExercises = exercises.filter((e) => e.routine_day_id === day.id);
-      const dayGroups = groups
+      const dayGroups: ExerciseGroup[] = groups
         .filter((g) => g.routine_day_id === day.id)
         .map((g) => ({
           ...g,
@@ -168,6 +168,34 @@ export const routinesService = {
             .filter((e) => (e as RoutineExercise & { exercise_group_id?: string }).exercise_group_id === g.id)
             .sort((a, b) => a.order_index - b.order_index),
         }));
+
+      // Wrap orphan exercises (no exercise_group_id) in synthetic solo groups
+      // so they never disappear from the UI when other grouped exercises exist.
+      const orphanExercises = dayExercises
+        .filter((e) => !(e as RoutineExercise & { exercise_group_id?: string }).exercise_group_id)
+        .sort((a, b) => a.order_index - b.order_index);
+
+      if (orphanExercises.length > 0) {
+        const maxOrderIndex = dayGroups.reduce(
+          (max, g) => Math.max(max, g.order_index ?? 0),
+          -1
+        );
+        orphanExercises.forEach((ex, i) => {
+          dayGroups.push({
+            id: `synthetic-solo-${ex.id}`,
+            routine_day_id: day.id,
+            group_type: "solo",
+            order_index: maxOrderIndex + 1 + i,
+            rounds: null,
+            time_limit_seconds: null,
+            rest_between_rounds: null,
+            label: null,
+            notes: null,
+            exercises: [ex],
+          });
+        });
+        dayGroups.sort((a, b) => a.order_index - b.order_index);
+      }
 
       return {
         ...day,

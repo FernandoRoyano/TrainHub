@@ -48,22 +48,18 @@ export function TrackingTab({ clientId }: TrackingTabProps) {
     const lastDay = new Date(year, month + 1, 0);
     const startDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Monday-based
 
-    const logDates = new Set(
-      compliance.logs.map((d) => {
-        const date = new Date(d);
-        return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-      })
-    );
+    // compliance.logs are YYYY-MM-DD strings directly from the DB
+    const logDates = new Set(compliance.logs);
 
     const days: { day: number | null; hasWorkout: boolean; isToday: boolean }[] = [];
 
-    // Empty cells before first day
     for (let i = 0; i < startDayOfWeek; i++) {
       days.push({ day: null, hasWorkout: false, isToday: false });
     }
 
+    const monthStr = String(month + 1).padStart(2, "0");
     for (let d = 1; d <= lastDay.getDate(); d++) {
-      const key = `${year}-${month}-${d}`;
+      const key = `${year}-${monthStr}-${String(d).padStart(2, "0")}`;
       days.push({
         day: d,
         hasWorkout: logDates.has(key),

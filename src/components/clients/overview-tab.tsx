@@ -132,6 +132,7 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
     monday.setHours(0, 0, 0, 0);
 
     const days: { date: Date; label: string; isFuture: boolean; hasLog: boolean }[] = [];
+    const logSet = new Set(compliance?.logs ?? []);
 
     for (let i = 0; i < 7; i++) {
       const dayDate = new Date(monday);
@@ -142,14 +143,8 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
 
       const isFuture = dayDate.getTime() > todayStart.getTime();
 
-      const hasLog = (compliance?.logs ?? []).some((logDate) => {
-        const ld = new Date(logDate);
-        return (
-          ld.getFullYear() === dayDate.getFullYear() &&
-          ld.getMonth() === dayDate.getMonth() &&
-          ld.getDate() === dayDate.getDate()
-        );
-      });
+      const key = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, "0")}-${String(dayDate.getDate()).padStart(2, "0")}`;
+      const hasLog = logSet.has(key);
 
       days.push({
         date: dayDate,

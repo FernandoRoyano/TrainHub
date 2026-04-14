@@ -71,7 +71,7 @@ export interface ClientWorkoutHistoryItem {
 export interface ClientCompliance {
   completedDays: number;
   totalDays: number;
-  logs: Date[];
+  logs: string[];
 }
 
 export const clientsService = {
@@ -395,45 +395,48 @@ export const clientsService = {
   async getClientCompliance(clientId: string): Promise<ClientCompliance> {
     const supabase = createClient();
 
-    // Get active client_routine
-    const { data: clientRoutine, error: crError } = await supabase
+    // Get latest client_routine (active preferred, otherwise most recent)
+    // to know days_per_week; we still show logs even if no active routine.
+    const { data: clientRoutine } = await supabase
       .from("client_routines")
-      .select("id, routine_id, routines(days_per_week)")
+      .select("id, routine_id, status, routines(days_per_week)")
       .eq("client_id", clientId)
-      .eq("status", "active")
+      .order("status", { ascending: true }) // "active" < "completed" alphabetically
+      .order("created_at", { ascending: false })
       .limit(1)
-      .single();
-
-    if (crError || !clientRoutine) {
-      return { completedDays: 0, totalDays: 0, logs: [] };
-    }
+      .maybeSingle();
 
     const daysPerWeek =
-      (clientRoutine.routines as unknown as { days_per_week: number } | null)
+      (clientRoutine?.routines as unknown as { days_per_week: number } | null)
         ?.days_per_week ?? 0;
 
-    // Get first day of current month
+    // Get first day of current month as YYYY-MM-DD (local)
     const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    const monday = getMonday();
+    const year = now.getFullYear();
+    const monthIdx = now.getMonth();
+    const monthStart = `${year}-${String(monthIdx + 1).padStart(2, "0")}-01`;
+    const mondayDate = new Date(now);
+    const day = mondayDate.getDay();
+    const diff = mondayDate.getDate() - day + (day === 0 ? -6 : 1);
+    mondayDate.setDate(diff);
+    const mondayStr = `${mondayDate.getFullYear()}-${String(mondayDate.getMonth() + 1).padStart(2, "0")}-${String(mondayDate.getDate()).padStart(2, "0")}`;
 
-    // Get workout_logs for the entire month (for calendar)
+    // Fetch workout_logs by client_id so paused/reassigned clients still show data
     const { data: monthLogs, error: monthError } = await supabase
       .from("workout_logs")
-      .select("completed_at, date")
-      .eq("client_routine_id", clientRoutine.id)
+      .select("date")
+      .eq("client_id", clientId)
       .eq("completed", true)
-      .gte("date", monthStart.split("T")[0]);
+      .gte("date", monthStart);
 
     if (monthError) throw monthError;
 
-    const logDates = (monthLogs ?? []).map((l) => new Date(l.completed_at || l.date));
+    // Return raw YYYY-MM-DD strings — avoids all timezone pitfalls
+    const logDates: string[] = (monthLogs ?? [])
+      .map((l) => l.date as string)
+      .filter((d): d is string => !!d);
 
-    // Count this week only for completedDays
-    const weekLogs = (monthLogs ?? []).filter((l) => {
-      const d = l.completed_at || l.date;
-      return d >= monday;
-    });
+    const weekLogs = logDates.filter((d) => d >= mondayStr);
 
     return {
       completedDays: weekLogs.length,
