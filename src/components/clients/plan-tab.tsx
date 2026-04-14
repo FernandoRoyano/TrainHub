@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AssignPlanWizardDialog } from "./assign-plan-wizard-dialog";
+import { AssignRoutineToClientDialog } from "./assign-routine-to-client-dialog";
+import { AssignMealPlanToClientDialog } from "./assign-meal-plan-to-client-dialog";
 import Link from "next/link";
 import {
   ClipboardList,
@@ -53,7 +55,6 @@ export function PlanTab({ clientId }: PlanTabProps) {
   const t = useTranslations("planTab");
   const tc = useTranslations("common");
   const tMyPlan = useTranslations("myPlan");
-  const tWizard = useTranslations("assignPlanWizard");
   const { data: client } = useClient(clientId);
   const { data: coachingPlan, isLoading: loadingPlan } = useClientCoachingPlan(clientId);
   const { data: routines, isLoading: loadingRoutines } = useClientRoutines(clientId);
@@ -64,6 +65,8 @@ export function PlanTab({ clientId }: PlanTabProps) {
   const [notes, setNotes] = useState<string | null>(null);
   const [notesEdited, setNotesEdited] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [routineDialogOpen, setRoutineDialogOpen] = useState(false);
+  const [mealPlanDialogOpen, setMealPlanDialogOpen] = useState(false);
 
   const currentNotes = notes ?? client?.notes ?? "";
 
@@ -227,10 +230,15 @@ export function PlanTab({ clientId }: PlanTabProps) {
       {/* Current Routine */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Dumbbell className="h-4 w-4" />
-            {t("currentRoutine")}
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Dumbbell className="h-4 w-4" />
+              {t("currentRoutine")}
+            </CardTitle>
+            <Button size="sm" variant="outline" onClick={() => setRoutineDialogOpen(true)}>
+              {activeRoutine ? t("changeRoutine") : t("assignRoutine")}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {activeRoutine ? (
@@ -267,10 +275,15 @@ export function PlanTab({ clientId }: PlanTabProps) {
       {/* Current Diet */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <UtensilsCrossed className="h-4 w-4" />
-            {t("currentDiet")}
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <UtensilsCrossed className="h-4 w-4" />
+              {t("currentDiet")}
+            </CardTitle>
+            <Button size="sm" variant="outline" onClick={() => setMealPlanDialogOpen(true)}>
+              {activeMealPlan ? t("changeMealPlan") : t("assignMealPlan")}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {activeMealPlan ? (
@@ -340,6 +353,18 @@ export function PlanTab({ clientId }: PlanTabProps) {
         clientId={clientId}
         open={wizardOpen}
         onOpenChange={setWizardOpen}
+      />
+
+      <AssignRoutineToClientDialog
+        clientId={clientId}
+        open={routineDialogOpen}
+        onOpenChange={setRoutineDialogOpen}
+      />
+
+      <AssignMealPlanToClientDialog
+        clientId={clientId}
+        open={mealPlanDialogOpen}
+        onOpenChange={setMealPlanDialogOpen}
       />
     </div>
   );
