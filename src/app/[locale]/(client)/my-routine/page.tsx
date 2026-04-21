@@ -195,7 +195,7 @@ function ExerciseCard({
               variant="default"
               className="w-full mt-2 h-9 active:scale-[0.98] transition-all"
               disabled={logExercise.isPending}
-              onClick={() => handleLogExercise(ex.id, ex.rest_seconds, (ex.exercise as any)?.name)}
+              onClick={() => handleLogExercise(ex.id)}
             >
               {logExercise.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Check className="h-4 w-4 mr-1.5" />}
               {t("logExercise")}
@@ -342,11 +342,7 @@ export default function MyRoutinePage() {
     );
   };
 
-  const handleLogExercise = (
-    routineExerciseId: string,
-    restSeconds?: number,
-    exerciseName?: string
-  ) => {
+  const handleLogExercise = (routineExerciseId: string) => {
     const workoutId = activeWorkoutId ?? todayLog?.id;
     if (!workoutId) return;
     const data = exerciseData[routineExerciseId];
@@ -372,9 +368,6 @@ export default function MyRoutinePage() {
       {
         onSuccess: () => {
           storeMarkLogged(routineExerciseId);
-          if (restSeconds && restSeconds > 0) {
-            startCountdown(restSeconds, exerciseName);
-          }
         },
       }
     );
@@ -568,7 +561,7 @@ export default function MyRoutinePage() {
                               variant="ghost"
                               className="h-7 w-7"
                               disabled={logExercise.isPending}
-                              onClick={() => handleLogExercise(ex.id, ex.rest_seconds, (ex.exercise as any)?.name)}
+                              onClick={() => handleLogExercise(ex.id)}
                             >
                               {logExercise.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
                             </Button>

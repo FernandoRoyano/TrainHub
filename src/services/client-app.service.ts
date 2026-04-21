@@ -146,10 +146,14 @@ export const clientAppService = {
             .sort((a, b) => a.order_index - b.order_index),
         }));
 
-      // Wrap orphan exercises (no exercise_group_id) in synthetic solo groups
-      // so they never disappear from the UI when other grouped exercises exist.
+      // Wrap orphan exercises (missing exercise_group_id OR pointing to a
+      // non-existent group) in synthetic solo groups so nothing disappears.
+      const validGroupIds = new Set(dayGroups.map((g) => g.id));
       const orphanExercises = dayExercises
-        .filter((e) => !(e as RoutineExercise & { exercise_group_id?: string }).exercise_group_id)
+        .filter((e) => {
+          const gid = (e as RoutineExercise & { exercise_group_id?: string }).exercise_group_id;
+          return !gid || !validGroupIds.has(gid);
+        })
         .sort((a, b) => a.order_index - b.order_index);
 
       if (orphanExercises.length > 0) {
