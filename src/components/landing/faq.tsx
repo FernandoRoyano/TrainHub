@@ -20,38 +20,29 @@ export function FAQ() {
   return (
     <section id="faq" className="py-20 md:py-28">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
+        <div className="text-center mb-12 reveal-on-scroll">
           <p className="text-sm font-medium text-primary uppercase tracking-wider mb-3">
             FAQ
           </p>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className="text-fluid-4xl font-bold mb-4">
             {t("faqTitle")}
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-fluid-base">
             {t("faqSubtitle")}
           </p>
-        </motion.div>
+        </div>
 
         <div className="space-y-3">
           {faqs.map((faq, i) => (
-            <motion.div
+            <div
               key={i}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
-              className="rounded-xl border border-border/50 bg-card/50 overflow-hidden"
+              className="rounded-xl border border-border/50 bg-card/50 overflow-hidden hover:border-primary/30 transition-colors reveal-on-scroll"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
                 className="flex items-center justify-between w-full px-5 py-4 text-left"
               >
-                <span className="text-sm font-medium pr-4">
+                <span className="text-fluid-sm font-medium pr-4">
                   {faq.question}
                 </span>
                 <ChevronDown
@@ -69,13 +60,13 @@ export function FAQ() {
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <p className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">
+                    <p className="px-5 pb-4 text-fluid-sm text-muted-foreground leading-relaxed">
                       {faq.answer}
                     </p>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

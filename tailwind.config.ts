@@ -64,6 +64,19 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontSize: {
+        "fluid-xs":   "var(--text-fluid-xs)",
+        "fluid-sm":   "var(--text-fluid-sm)",
+        "fluid-base": "var(--text-fluid-base)",
+        "fluid-lg":   "var(--text-fluid-lg)",
+        "fluid-xl":   "var(--text-fluid-xl)",
+        "fluid-2xl":  "var(--text-fluid-2xl)",
+        "fluid-3xl":  "var(--text-fluid-3xl)",
+        "fluid-4xl":  "var(--text-fluid-4xl)",
+        "fluid-5xl":  "var(--text-fluid-5xl)",
+        "fluid-6xl":  "var(--text-fluid-6xl)",
+        "fluid-7xl":  "var(--text-fluid-7xl)",
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },

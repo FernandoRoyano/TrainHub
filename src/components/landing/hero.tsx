@@ -24,7 +24,8 @@ export function Hero() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[128px]" />
+      <div className="absolute inset-0 bg-grid-decor opacity-60 pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[128px] float-y" />
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-24 pb-16 text-center">
         <motion.div
@@ -33,18 +34,20 @@ export function Hero() {
           transition={{ duration: 0.6 }}
           className="space-y-6"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-sm text-primary">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-sm text-primary pulse-glow">
             <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
             {t("heroBadge")}
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
+          <h1 className="text-fluid-6xl lg:text-fluid-7xl font-bold tracking-tight leading-[1.05]">
             {t("heroTitle")}
             <br />
-            <span className="text-primary">{t("heroTitleHighlight")}</span>
+            <span className="bg-gradient-to-br from-primary via-primary to-primary/70 bg-clip-text text-transparent">
+              {t("heroTitleHighlight")}
+            </span>
           </h1>
 
-          <p className="max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground">
+          <p className="max-w-2xl mx-auto text-fluid-lg text-muted-foreground leading-relaxed">
             {t("heroSubtitle")}
           </p>
 

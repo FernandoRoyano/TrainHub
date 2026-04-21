@@ -1,43 +1,51 @@
-# CLAUDE.md — Fernando's Project Context
+# CLAUDE.md — Fernando's Dev Context
 
 ## Stack Principal
-- **Frontend:** Next.js 14+ (App Router), TypeScript, Tailwind CSS
+- **Frontend:** Next.js 14+ (App Router), TypeScript, Tailwind CSS v3+
 - **Backend/DB:** Supabase (PostgreSQL, Auth, Storage, Edge Functions)
 - **Deploy:** Vercel
 - **Payments:** Stripe
-- **AI:** Claude API (claude-sonnet-4-20250514 o superior)
+- **AI:** Claude API (`claude-opus-4-7`)
+- **Styling extras:** CSS custom properties, `@layer`, container queries, `clamp()`
 
 ## Reglas de comportamiento
 
 ### Velocidad
-- Lee SOLO los skills relevantes al task actual — no cargues todos
-- Si el task es claro, actúa directamente. No pidas confirmación para cambios pequeños
-- Propón soluciones en el mínimo de archivos posible
-- Prefiere editar sobre reescribir
+- Lee SOLO los skills relevantes al task — no cargues todos
+- Actúa directamente si el task es claro. Sin pedir confirmación en cambios pequeños
+- Mínimo de archivos posible. Prefiere editar sobre reescribir
+- Muestra solo diffs o fragmentos relevantes, no el archivo completo salvo que se pida
 
 ### Código
-- TypeScript estricto siempre. Sin `any` salvo justificación explícita
-- Nombres en inglés para variables/funciones, español para comentarios de negocio
+- TypeScript estricto. Sin `any` salvo justificación explícita
+- Variables/funciones en inglés, comentarios de negocio en español
 - Componentes funcionales con hooks, sin class components
-- Imports absolutos desde `@/` (alias configurado en tsconfig)
+- Imports absolutos desde `@/`
+- CSS moderno: `clamp()`, `container queries`, `CSS Grid subgrid`, custom properties
+- Sin librerías de UI externas (shadcn, MUI, etc.) salvo indicación — construir desde cero con Tailwind
 
 ### Respuestas
-- Sin introducciones largas. Ve directo al código o la acción
-- Si hay ambigüedad, toma la decisión más sensata y menciónala al final
-- Muestra solo el diff o los fragmentos relevantes, no el archivo completo salvo que se pida
+- Sin introducciones. Directo al código
+- Ambigüedad → toma la decisión más sensata y menciónala al final
+- Sin comentarios obvios en el código (`// render the button` — no)
 
 ## Skills disponibles
+
 | Archivo | Cuándo cargarlo |
 |---|---|
-| `skills/supabase.md` | Cualquier operación de DB, auth, storage, RLS |
-| `skills/nextjs.md` | Estructura de rutas, SSR/CSR, API routes, middleware |
-| `skills/ui-components.md` | Componentes Tailwind, layouts, design system |
-| `skills/claude-api.md` | Integración de IA en cualquier proyecto |
-| `skills/antea-salud.md` | Proyectos de Antea Salud — lógica de negocio |
-| `skills/trainhub.md` | Plataforma TrainHub — schema y features activas |
+| `skills/supabase.md` | DB, auth, storage, RLS, Edge Functions |
+| `skills/nextjs.md` | Rutas, SSR/CSR, API routes, middleware, performance |
+| `skills/design-system.md` | Tokens, tipografía, espaciado, animaciones, CSS moderno |
+| `skills/ui-components.md` | Componentes Tailwind reutilizables |
+| `skills/landing-pages.md` | Páginas de venta, heroes, CTAs, copywriting |
+| `skills/claude-api.md` | Integración IA, streaming, prompt caching |
+| `skills/debugging.md` | Errores Next.js + Supabase, metodología debug |
+| `skills/refactoring.md` | Cuándo y cómo refactorizar sin romper nada |
+| `skills/antea-salud.md` | Proyecto Antea Salud — contexto de negocio |
+| `skills/trainhub.md` | Plataforma TrainHub — schema y features |
 
 ## Proyectos activos
-- **TrainHub** — plataforma entrenamiento con módulo ciclo menstrual
-- **Antea Salud** — empresa actividad física personas mayores
-- **WellnessReal** — plataforma contenido fitness + TFG DAW deployado
+- **TrainHub** — plataforma entrenamiento, módulo ciclo menstrual
+- **Antea Salud** — actividad física personas mayores en residencias
+- **WellnessReal** — plataforma contenido fitness, deployada
 - **CodeConnect** — consultora web, proyectos cliente varios

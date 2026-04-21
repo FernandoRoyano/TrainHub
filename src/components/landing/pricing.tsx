@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Loader2 } from "lucide-react";
@@ -111,19 +110,14 @@ export function Pricing() {
   return (
     <section id="pricing" className="py-20 md:py-28">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
+        <div className="text-center mb-12 reveal-on-scroll">
           <p className="text-sm font-medium text-primary uppercase tracking-wider mb-3">
             {t("pricingLabel")}
           </p>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className="text-fluid-4xl font-bold mb-4">
             {t("pricingTitle")}
           </h2>
-          <p className="text-muted-foreground max-w-lg mx-auto">
+          <p className="text-muted-foreground text-fluid-base max-w-lg mx-auto">
             {t("pricingSubtitle")}
           </p>
 
@@ -163,71 +157,69 @@ export function Pricing() {
               </Badge>
             </span>
           </div>
-        </motion.div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-          {planConfigs.map((plan, i) => {
+          {planConfigs.map((plan) => {
             const isLoading = loadingTier === plan.tier;
             const isFree = plan.tier === "free";
 
             return (
-              <motion.div
+              <div
                 key={plan.nameKey}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
                 className={cn(
-                  "relative rounded-xl border p-6 md:p-8 flex flex-col",
+                  "relative rounded-xl p-6 md:p-8 flex flex-col reveal-on-scroll",
                   plan.popular
-                    ? "border-primary/50 bg-primary/5 scale-[1.02] shadow-lg shadow-primary/10"
-                    : "border-border/50 bg-card/50"
+                    ? "animated-border scale-[1.02] shadow-lg shadow-primary/20"
+                    : "border border-border/50 bg-card/50 hover:border-primary/30 transition-colors"
                 )}
               >
-                {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    {t("pricingRecommended")}
-                  </Badge>
-                )}
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold">{t(plan.nameKey)}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {t(plan.descKey)}
-                  </p>
-                </div>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold">
-                    {yearly ? plan.priceYearly : plan.priceMonthly}€
-                  </span>
-                  <span className="text-muted-foreground">
-                    /{t("pricingPerMonth")}
-                  </span>
-                </div>
-                <ul className="space-y-3 flex-1 mb-8">
-                  {plan.featureKeys.map((key) => (
-                    <li key={key} className="flex items-center gap-2 text-sm">
-                      <Check className="h-4 w-4 text-primary shrink-0" />
-                      {t(key)}
-                    </li>
-                  ))}
-                </ul>
+                <div className="relative z-[1] flex flex-col flex-1">
+                  {plan.popular && (
+                    <Badge className="absolute -top-11 left-1/2 -translate-x-1/2 shadow-lg">
+                      {t("pricingRecommended")}
+                    </Badge>
+                  )}
+                  <div className="mb-6">
+                    <h3 className="text-fluid-lg font-semibold">{t(plan.nameKey)}</h3>
+                    <p className="text-fluid-sm text-muted-foreground mt-1">
+                      {t(plan.descKey)}
+                    </p>
+                  </div>
+                  <div className="mb-6 flex items-end gap-1">
+                    <span className="text-fluid-5xl font-bold tabular-nums">
+                      {yearly ? plan.priceYearly : plan.priceMonthly}€
+                    </span>
+                    <span className="text-muted-foreground text-fluid-sm mb-2">
+                      /{t("pricingPerMonth")}
+                    </span>
+                  </div>
+                  <ul className="space-y-3 flex-1 mb-8">
+                    {plan.featureKeys.map((key) => (
+                      <li key={key} className="flex items-center gap-2 text-fluid-sm">
+                        <Check className="h-4 w-4 text-primary shrink-0" />
+                        {t(key)}
+                      </li>
+                    ))}
+                  </ul>
 
-                {isFree ? (
-                  <Button variant="outline" className="w-full" asChild>
-                    <Link href="/register">{t(plan.ctaKey)}</Link>
-                  </Button>
-                ) : (
-                  <Button
-                    variant={plan.popular ? "default" : "outline"}
-                    className="w-full"
-                    disabled={!!loadingTier}
-                    onClick={() => handleCheckout(plan.tier as "pro" | "elite")}
-                  >
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {t(plan.ctaKey)}
-                  </Button>
-                )}
-              </motion.div>
+                  {isFree ? (
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link href="/register">{t(plan.ctaKey)}</Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      variant={plan.popular ? "default" : "outline"}
+                      className="w-full"
+                      disabled={!!loadingTier}
+                      onClick={() => handleCheckout(plan.tier as "pro" | "elite")}
+                    >
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {t(plan.ctaKey)}
+                    </Button>
+                  )}
+                </div>
+              </div>
             );
           })}
         </div>
