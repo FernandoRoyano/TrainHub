@@ -6,7 +6,7 @@ import type { Exercise } from "@/services/exercises.service";
 import type { ExerciseGroup, RoutineExercise } from "@/services/routines.service";
 import { ExerciseDetailDialog } from "@/components/workout/exercise-detail-dialog";
 import { ExerciseAnimation } from "@/components/workout/exercise-animation";
-import { useMyRoutine, useMyClient, useWorkoutLogs, useStartWorkout, useCompleteWorkout, useLogExercise } from "@/hooks/use-client-app";
+import { useMyRoutine, useMyRoutineRealtime, useMyClient, useWorkoutLogs, useStartWorkout, useCompleteWorkout, useLogExercise } from "@/hooks/use-client-app";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -235,6 +235,7 @@ export default function MyRoutinePage() {
   const { data: routine, isLoading } = useMyRoutine();
   const { data: client } = useMyClient();
   const { data: logs } = useWorkoutLogs(routine?.id ?? "");
+  useMyRoutineRealtime(routine?.routine_id, routine?.id);
   const startWorkout = useStartWorkout();
   const completeWorkout = useCompleteWorkout();
   const logExercise = useLogExercise();

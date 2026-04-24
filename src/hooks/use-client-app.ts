@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 import { clientAppService } from "@/services/client-app.service";
 import { toast } from "sonner";
 
@@ -9,8 +10,26 @@ export function useMyRoutine() {
   return useQuery({
     queryKey: ["my-routine"],
     queryFn: () => clientAppService.getMyActiveRoutine(),
-    staleTime: 2 * 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
+}
+
+export function useMyRoutineRealtime(routineId: string | undefined, clientRoutineId: string | undefined) {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (!routineId || !clientRoutineId) return;
+    const unsubscribe = clientAppService.subscribeToRoutineChanges(
+      routineId,
+      clientRoutineId,
+      () => {
+        queryClient.invalidateQueries({ queryKey: ["my-routine"] });
+        queryClient.invalidateQueries({ queryKey: ["workout-logs", clientRoutineId] });
+      }
+    );
+    return unsubscribe;
+  }, [routineId, clientRoutineId, queryClient]);
 }
 
 export function useMyClient() {

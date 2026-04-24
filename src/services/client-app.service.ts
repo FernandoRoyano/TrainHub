@@ -192,6 +192,42 @@ export const clientAppService = {
     } as ClientRoutineView;
   },
 
+  subscribeToRoutineChanges(routineId: string, clientRoutineId: string, onChange: () => void) {
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`my-routine:${clientRoutineId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "routines", filter: `id=eq.${routineId}` },
+        () => onChange()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "routine_days", filter: `routine_id=eq.${routineId}` },
+        () => onChange()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "routine_exercises" },
+        () => onChange()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "exercise_groups" },
+        () => onChange()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "client_routines", filter: `id=eq.${clientRoutineId}` },
+        () => onChange()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  },
+
   async getWorkoutLogs(clientRoutineId: string) {
     const { supabase, clientId } = await getAuthenticatedClient();
     const { data, error } = await supabase
