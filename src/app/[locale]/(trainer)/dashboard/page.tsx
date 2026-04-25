@@ -1,7 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useDashboardStats } from "@/hooks/use-dashboard";
+import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -55,9 +56,18 @@ function timeAgo(timestamp: string): string {
   return `${days}d`;
 }
 
+function getGreetingKey(): "greetingMorning" | "greetingAfternoon" | "greetingEvening" {
+  const h = new Date().getHours();
+  if (h < 12) return "greetingMorning";
+  if (h < 20) return "greetingAfternoon";
+  return "greetingEvening";
+}
+
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
   const tCal = useTranslations("calendar");
+  const locale = useLocale();
+  const { profile } = useAuth();
   const { data: stats, isLoading } = useDashboardStats();
 
   if (isLoading) {
@@ -149,20 +159,52 @@ export default function DashboardPage() {
 
   const summary = stats?.weekSummary;
 
+  const greeting = t(getGreetingKey());
+  const trainerName = profile?.full_name?.split(" ")[0] ?? "";
+  const today = new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(new Date());
+
+  const accentBorder: Record<string, string> = {
+    "text-emerald-400": "border-t-emerald-400/40",
+    "text-cyan-400": "border-t-cyan-400/40",
+    "text-blue-400": "border-t-blue-400/40",
+    "text-rose-400": "border-t-rose-400/40",
+    "text-violet-400": "border-t-violet-400/40",
+    "text-amber-400": "border-t-amber-400/40",
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
+      <div className="relative overflow-hidden rounded-2xl px-6 py-8 animate-fade-in-up">
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 opacity-60"
+          style={{
+            background:
+              "radial-gradient(60% 80% at 0% 0%, hsl(160 70% 45% / 0.18), transparent 60%), radial-gradient(50% 80% at 100% 0%, hsl(190 80% 50% / 0.15), transparent 60%)",
+          }}
+        />
+        <p className="text-sm text-muted-foreground capitalize">{today}</p>
+        <h1 className="mt-1 text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
+          {greeting}{trainerName ? `, ${trainerName}` : ""} 👋
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {t("greetingSubtitle")}
+        </p>
       </div>
 
       {/* KPI Cards - 6 cards in 2x3 grid */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
-        {kpis.map((kpi) => {
+        {kpis.map((kpi, idx) => {
           const Icon = kpi.icon;
           return (
             <Card
               key={kpi.label}
-              className={`glass-elevated shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-default ${kpi.glow}`}
+              style={{ animationDelay: `${idx * 80}ms` }}
+              className={`glass-elevated shadow-xl border-t-2 ${accentBorder[kpi.color] ?? "border-t-transparent"} transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-default animate-fade-in-up ${kpi.glow}`}
             >
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">

@@ -102,6 +102,10 @@
   "dashboard": {
     "title": "Panel de control",
     "welcome": "Bienvenido, {name}",
+    "greetingMorning": "Buenos días",
+    "greetingAfternoon": "Buenas tardes",
+    "greetingEvening": "Buenas noches",
+    "greetingSubtitle": "Aquí tienes el resumen de tu actividad",
     "activeClients": "Clientes activos",
     "totalRoutines": "Rutinas creadas",
     "unreadMessages": "Mensajes sin leer",

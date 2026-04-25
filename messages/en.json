@@ -102,6 +102,10 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome, {name}",
+    "greetingMorning": "Good morning",
+    "greetingAfternoon": "Good afternoon",
+    "greetingEvening": "Good evening",
+    "greetingSubtitle": "Here is the summary of your activity",
     "activeClients": "Active clients",
     "totalRoutines": "Routines created",
     "unreadMessages": "Unread messages",
