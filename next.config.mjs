@@ -9,6 +9,31 @@ const withPWA = withPWAInit({
   register: true,
   skipWaiting: true,
   fallbacks: { document: "/offline" },
+  workboxOptions: {
+    extendDefaultRuntimeCaching: true,
+    runtimeCaching: [
+      {
+        urlPattern: ({ url }) => url.hostname.endsWith(".supabase.co"),
+        handler: "NetworkOnly",
+        method: "GET",
+      },
+      {
+        urlPattern: ({ url }) => url.hostname.endsWith(".supabase.co"),
+        handler: "NetworkOnly",
+        method: "POST",
+      },
+      {
+        urlPattern: ({ url }) => url.hostname.endsWith(".supabase.co"),
+        handler: "NetworkOnly",
+        method: "PATCH",
+      },
+      {
+        urlPattern: ({ url }) => url.hostname.endsWith(".supabase.co"),
+        handler: "NetworkOnly",
+        method: "DELETE",
+      },
+    ],
+  },
 });
 
 const securityHeaders = [
