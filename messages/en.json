@@ -115,6 +115,7 @@
     "createRoutine": "Create routine",
     "viewMessages": "View messages",
     "noActivity": "No recent activity",
+    "noActivityHint": "Your clients' activity will appear here",
     "activity_client_added": "Client",
     "activity_routine_created": "Routine",
     "activity_routine_assigned": "Assignment",

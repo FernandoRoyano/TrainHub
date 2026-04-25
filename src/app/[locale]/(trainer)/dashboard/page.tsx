@@ -26,6 +26,7 @@ import {
   AlertTriangle,
   BarChart3,
   CheckCircle2,
+  Inbox,
 } from "lucide-react";
 import {
   BarChart,
@@ -61,6 +62,36 @@ function getGreetingKey(): "greetingMorning" | "greetingAfternoon" | "greetingEv
   if (h < 12) return "greetingMorning";
   if (h < 20) return "greetingAfternoon";
   return "greetingEvening";
+}
+
+const AVATAR_GRADIENTS = [
+  "from-emerald-400 to-cyan-500",
+  "from-cyan-400 to-blue-500",
+  "from-violet-400 to-fuchsia-500",
+  "from-amber-400 to-rose-500",
+  "from-rose-400 to-pink-500",
+  "from-blue-400 to-indigo-500",
+  "from-teal-400 to-emerald-500",
+] as const;
+
+function ClientAvatar({ name, size = "sm" }: { name: string; size?: "sm" | "md" }) {
+  const initials = name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((s) => s[0])
+    .join("")
+    .toUpperCase() || "?";
+  const hash = Array.from(name).reduce((a, c) => a + c.charCodeAt(0), 0);
+  const gradient = AVATAR_GRADIENTS[hash % AVATAR_GRADIENTS.length];
+  const dim = size === "md" ? "h-9 w-9 text-xs" : "h-7 w-7 text-[10px]";
+  return (
+    <div
+      className={`${dim} rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center font-bold text-white shrink-0 ring-1 ring-white/10`}
+    >
+      {initials}
+    </div>
+  );
 }
 
 export default function DashboardPage() {
@@ -196,40 +227,75 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* KPI Cards - 6 cards in 2x3 grid */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
-        {kpis.map((kpi, idx) => {
+      {/* Hero KPIs - 2 prominentes */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {kpis.slice(0, 2).map((kpi, idx) => {
           const Icon = kpi.icon;
           return (
             <Card
               key={kpi.label}
               style={{ animationDelay: `${idx * 80}ms` }}
-              className={`glass-elevated shadow-xl border-t-2 ${accentBorder[kpi.color] ?? "border-t-transparent"} transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-default animate-fade-in-up ${kpi.glow}`}
+              className={`glass-elevated shadow-xl border-t-2 ${accentBorder[kpi.color] ?? "border-t-transparent"} transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-default animate-fade-in-up ${kpi.glow}`}
             >
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-muted-foreground truncate">
+              <CardContent className="pt-6 pb-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-muted-foreground">
                       {kpi.label}
                     </p>
-                    <p className={`text-3xl font-bold mt-1 tabular-nums ${kpi.urgent ? "text-rose-400 animate-pulse" : ""}`}>
+                    <p className={`text-5xl font-bold mt-2 tabular-nums tracking-tight ${kpi.urgent ? "text-rose-400 animate-pulse" : ""}`}>
                       {kpi.value}
                     </p>
+                    {kpi.subtitle && (
+                      <p className="mt-1 text-xs text-muted-foreground">{kpi.subtitle}</p>
+                    )}
                   </div>
                   <div
-                    className={`h-12 w-12 rounded-xl ${kpi.bg} flex items-center justify-center shrink-0 transition-transform group-hover:scale-110`}
+                    className={`h-14 w-14 rounded-2xl ${kpi.bg} flex items-center justify-center shrink-0`}
                   >
-                    <Icon className={`h-6 w-6 ${kpi.color}`} />
+                    <Icon className={`h-7 w-7 ${kpi.color}`} />
                   </div>
                 </div>
                 {kpi.progress !== undefined && (
-                  <div className="mt-3 h-1.5 w-full rounded-full bg-muted">
+                  <div className="mt-4 h-2 w-full rounded-full bg-muted overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-cyan-400 transition-all duration-500"
+                      className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-400 transition-all duration-700"
                       style={{ width: `${Math.min(kpi.progress, 100)}%` }}
                     />
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* KPIs secundarios - 4 compactos */}
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        {kpis.slice(2).map((kpi, idx) => {
+          const Icon = kpi.icon;
+          return (
+            <Card
+              key={kpi.label}
+              style={{ animationDelay: `${(idx + 2) * 80}ms` }}
+              className={`glass-elevated shadow-md border-t-2 ${accentBorder[kpi.color] ?? "border-t-transparent"} transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-default animate-fade-in-up ${kpi.glow}`}
+            >
+              <CardContent className="pt-4 pb-4">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`h-10 w-10 rounded-xl ${kpi.bg} flex items-center justify-center shrink-0`}
+                  >
+                    <Icon className={`h-5 w-5 ${kpi.color}`} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-medium text-muted-foreground truncate uppercase tracking-wide">
+                      {kpi.label}
+                    </p>
+                    <p className={`text-2xl font-bold tabular-nums leading-tight ${kpi.urgent ? "text-rose-400 animate-pulse" : ""}`}>
+                      {kpi.value}
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           );
@@ -320,7 +386,15 @@ export default function DashboardPage() {
                 })}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">{t("noActivity")}</p>
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                  <Inbox className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-medium">{t("noActivity")}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("noActivityHint")}
+                </p>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -338,6 +412,12 @@ export default function DashboardPage() {
           <div className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} barSize={32}>
+                <defs>
+                  <linearGradient id="barFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#6dbd57" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#6dbd57" stopOpacity={0.25} />
+                  </linearGradient>
+                </defs>
                 <XAxis
                   dataKey="day"
                   axisLine={false}
@@ -361,7 +441,7 @@ export default function DashboardPage() {
                   labelStyle={{ color: "hsl(var(--foreground))" }}
                   formatter={(value) => [value, t("workoutsLabel")]}
                 />
-                <Bar dataKey="workouts" fill="#6dbd57" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="workouts" fill="url(#barFill)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -399,21 +479,24 @@ export default function DashboardPage() {
                         ? "bg-amber-400"
                         : "bg-rose-400";
                   return (
-                    <div key={client.clientId} className="space-y-1">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-medium truncate mr-2">{client.name}</span>
-                        <span className="text-xs text-muted-foreground shrink-0">
-                          {t("complianceRate", {
-                            done: client.workoutsThisWeek,
-                            total: client.assignedDays || "–",
-                          })}
-                        </span>
-                      </div>
-                      <div className="h-1.5 w-full rounded-full bg-muted">
-                        <div
-                          className={`h-full rounded-full ${color} transition-all duration-500`}
-                          style={{ width: `${Math.min(client.compliancePercent, 100)}%` }}
-                        />
+                    <div key={client.clientId} className="flex items-center gap-3">
+                      <ClientAvatar name={client.name} />
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex items-center justify-between text-sm gap-2">
+                          <span className="font-medium truncate">{client.name}</span>
+                          <span className="text-xs text-muted-foreground shrink-0">
+                            {t("complianceRate", {
+                              done: client.workoutsThisWeek,
+                              total: client.assignedDays || "–",
+                            })}
+                          </span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${color} transition-all duration-500`}
+                            style={{ width: `${Math.min(client.compliancePercent, 100)}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
                   );
@@ -438,9 +521,10 @@ export default function DashboardPage() {
                   <Link
                     key={client.clientId}
                     href={`/clients/${client.clientId}`}
-                    className="flex items-center justify-between gap-2 text-sm rounded-lg border p-3 hover:bg-accent/50 hover:border-border transition-all active:scale-[0.98]"
+                    className="flex items-center gap-3 text-sm rounded-lg border p-3 hover:bg-accent/50 hover:border-border transition-all active:scale-[0.98]"
                   >
-                    <span className="font-medium truncate">{client.name}</span>
+                    <ClientAvatar name={client.name} />
+                    <span className="font-medium truncate flex-1">{client.name}</span>
                     <Badge variant="outline" className="text-rose-400 border-rose-500/20 shrink-0">
                       {client.daysSinceLastWorkout === -1
                         ? t("neverTrained")
