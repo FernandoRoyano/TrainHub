@@ -3,6 +3,7 @@ import { TopBar } from "@/components/shared/top-bar";
 import { OnboardingDialog } from "@/components/shared/onboarding-dialog";
 import { SectionBackground } from "@/components/shared/section-background";
 import { NavigationProgress } from "@/components/shared/navigation-progress";
+import { PageTransition } from "@/components/shared/page-transition";
 
 export default function TrainerLayout({
   children,
@@ -15,7 +16,9 @@ export default function TrainerLayout({
       <AppSidebar />
       <SectionBackground>
         <TopBar />
-        <main className="flex-1 p-3 sm:p-6 overflow-x-hidden overflow-y-auto scrollbar-thin">{children}</main>
+        <main className="flex-1 p-3 sm:p-6 overflow-x-hidden overflow-y-auto scrollbar-thin">
+          <PageTransition>{children}</PageTransition>
+        </main>
       </SectionBackground>
       <OnboardingDialog />
     </div>

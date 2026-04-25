@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NavigationProgress } from "@/components/shared/navigation-progress";
+import { PageTransition } from "@/components/shared/page-transition";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { ClientFeaturesProvider, useClientFeatures } from "@/contexts/client-features-context";
@@ -164,7 +165,9 @@ export default function ClientLayout({
           <ThemeToggle />
         </header>
         <main className="flex-1 min-h-0 overflow-y-auto px-4 pt-4 pb-8 md:px-8 md:pt-6 md:pb-10">
-          <div className="max-w-4xl mx-auto w-full">{children}</div>
+          <div className="max-w-4xl mx-auto w-full">
+            <PageTransition>{children}</PageTransition>
+          </div>
         </main>
         <ClientNavBar />
       </div>
