@@ -138,7 +138,14 @@ export const clientsService = {
       })
       .select()
       .single();
-    if (error) throw error;
+    if (error) {
+      // Detecta el error del trigger trg_enforce_client_limit (migración 00035)
+      // para que la UI pueda mostrar un mensaje específico de límite alcanzado.
+      if (error.message?.includes("CLIENT_LIMIT_REACHED")) {
+        throw new Error("CLIENT_LIMIT_REACHED");
+      }
+      throw error;
+    }
     return client as Client;
   },
 

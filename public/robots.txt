@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /client/
+Disallow: /trainer/
+Disallow: /join/
+Disallow: /reset-password/
+Disallow: /auth/
+Allow: /
+
+Sitemap: https://train-hub-five.vercel.app/sitemap.xml

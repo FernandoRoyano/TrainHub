@@ -177,6 +177,7 @@
     "phonePlaceholder": "+1 555 000 000",
     "clientCreated": "Client created",
     "clientCreateError": "Error creating client",
+    "clientLimitReachedToast": "You've reached your plan's client limit. Upgrade to add more.",
     "clientUpdated": "Client updated",
     "clientUpdateError": "Error updating client",
     "clientDeleted": "Client deleted",

@@ -5,6 +5,10 @@ import { getStripe, STRIPE_PRICES } from "@/lib/stripe/client";
 import type { SubscriptionTier, BillingInterval } from "@/lib/stripe/client";
 
 export async function POST(request: Request) {
+  // Pagos deshabilitados hasta que Stripe esté configurado en Vercel.
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json({ error: "Payments not enabled" }, { status: 503 });
+  }
   try {
     const { tier, interval } = (await request.json()) as {
       tier: SubscriptionTier;

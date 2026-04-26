@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { sendGmail } from "@/lib/email/gmail-smtp";
 import { getEmailTranslations, getLocaleForEmail } from "@/lib/email/translations";
+import { escapeHtml } from "@/lib/utils";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -74,6 +75,11 @@ export async function POST(request: Request) {
   const trainerName = trainer?.full_name || "Tu entrenador";
   const clientName = client.full_name || client.email;
 
+  // Escapa nombres derivados de input de usuario antes de inyectarlos en HTML.
+  const safeTrainerName = escapeHtml(trainerName);
+  const safeClientName = escapeHtml(clientName);
+  const safeJoinUrl = encodeURI(joinUrl);
+
   // Send branded email via Gmail SMTP
   const html = `
     <div style="font-family: 'Inter', Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 40px 20px; background: #f8f8f8;">
@@ -82,12 +88,12 @@ export async function POST(request: Request) {
       </div>
       <div style="background: #ffffff; border-radius: 12px; padding: 32px 28px; border: 1px solid #e5e7eb;">
         <p style="font-size: 20px; font-weight: 600; color: #1a1f36;">
-          ${t.inviteTitle.replace("{name}", clientName)}
+          ${t.inviteTitle.replace("{name}", safeClientName)}
         </p>
         <p style="font-size: 14px; color: #4b5563; line-height: 1.6;">
-          ${t.inviteBody.replace("{trainer}", trainerName)}
+          ${t.inviteBody.replace("{trainer}", safeTrainerName)}
         </p>
-        <a href="${joinUrl}" style="display: inline-block; margin-top: 16px; background: #6dbd57; color: #ffffff; border-radius: 8px; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none;">
+        <a href="${safeJoinUrl}" style="display: inline-block; margin-top: 16px; background: #6dbd57; color: #ffffff; border-radius: 8px; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none;">
           ${t.inviteCta}
         </a>
         <p style="font-size: 12px; color: #9ca3af; margin-top: 24px; line-height: 1.5;">

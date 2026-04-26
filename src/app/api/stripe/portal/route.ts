@@ -4,6 +4,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/client";
 
 export async function POST() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json({ error: "Payments not enabled" }, { status: 503 });
+  }
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

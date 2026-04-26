@@ -28,10 +28,27 @@ export async function POST(request: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     console.error("Webhook signature verification failed:", message);
-    return NextResponse.json({ error: `Webhook error: ${message}` }, { status: 400 });
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
   const admin = createAdminClient();
+
+  // Idempotencia atómica: insert con PK = event.id; si ya existe, error 23505
+  // (unique_violation) → es un retry de Stripe, devolvemos 200 sin reprocesar.
+  // Si el handler falla más abajo, el insert del registro de procesado ocurre
+  // tras el switch — así Stripe puede reintentar correctamente.
+  const reserved = await admin
+    .from("stripe_events")
+    .insert({ id: event.id, type: event.type })
+    .select("id")
+    .maybeSingle();
+  if (reserved.error?.code === "23505") {
+    return NextResponse.json({ received: true, duplicate: true });
+  }
+  if (reserved.error) {
+    console.error("Failed to record stripe event:", reserved.error.code);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+  }
 
   try {
     switch (event.type) {
@@ -166,6 +183,8 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     console.error("Webhook handler error:", error);
+    // Libera el slot de idempotencia para que el reintento de Stripe pueda procesar.
+    await admin.from("stripe_events").delete().eq("id", event.id);
     return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
   }
 

@@ -59,8 +59,12 @@ export function useCreateClient() {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast.success(t("clientCreated"));
     },
-    onError: () => {
-      toast.error(t("clientCreateError"));
+    onError: (error: Error) => {
+      if (error.message === "CLIENT_LIMIT_REACHED") {
+        toast.error(t("clientLimitReachedToast"));
+      } else {
+        toast.error(t("clientCreateError"));
+      }
     },
   });
 }

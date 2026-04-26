@@ -177,6 +177,7 @@
     "phonePlaceholder": "+34 600 000 000",
     "clientCreated": "Cliente creado",
     "clientCreateError": "Error al crear cliente",
+    "clientLimitReachedToast": "Has alcanzado el límite de clientes de tu plan. Actualiza para añadir más.",
     "clientUpdated": "Cliente actualizado",
     "clientUpdateError": "Error al actualizar cliente",
     "clientDeleted": "Cliente eliminado",

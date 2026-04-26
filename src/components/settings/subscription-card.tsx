@@ -64,6 +64,9 @@ export function SubscriptionCard() {
   const tier = subscription?.tier || "free";
   const tierConfig = TIER_CONFIG[tier as keyof typeof TIER_CONFIG] || TIER_CONFIG.free;
   const isPaid = tier !== "free" && subscription?.status === "active";
+  // Pagos deshabilitados hasta que Stripe esté configurado en producción.
+  // Cambia NEXT_PUBLIC_ENABLE_PAYMENTS=true en Vercel cuando estén las claves.
+  const paymentsEnabled = process.env.NEXT_PUBLIC_ENABLE_PAYMENTS === "true";
 
   const tierLabel =
     tier === "pro" ? t("proPlan") : tier === "elite" ? t("elitePlan") : t("freePlan");
@@ -171,35 +174,51 @@ export function SubscriptionCard() {
         </div>
 
         {/* Actions */}
-        <div className="flex flex-wrap gap-2">
-          {isPaid && subscription?.stripe_customer_id && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleManageBilling}
-              disabled={loadingPortal}
-            >
-              {loadingPortal ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <ExternalLink className="mr-2 h-4 w-4" />
-              )}
-              {t("manageBilling")}
-            </Button>
-          )}
-
-          {tier === "free" && (
-            <>
+        {paymentsEnabled ? (
+          <div className="flex flex-wrap gap-2">
+            {isPaid && subscription?.stripe_customer_id && (
               <Button
+                variant="outline"
                 size="sm"
-                onClick={() => handleUpgrade("pro")}
-                disabled={!!loadingCheckout}
+                onClick={handleManageBilling}
+                disabled={loadingPortal}
               >
-                {loadingCheckout === "pro" && (
+                {loadingPortal ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <ExternalLink className="mr-2 h-4 w-4" />
                 )}
-                {t("upgradePlan")} Pro
+                {t("manageBilling")}
               </Button>
+            )}
+
+            {tier === "free" && (
+              <>
+                <Button
+                  size="sm"
+                  onClick={() => handleUpgrade("pro")}
+                  disabled={!!loadingCheckout}
+                >
+                  {loadingCheckout === "pro" && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  {t("upgradePlan")} Pro
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleUpgrade("elite")}
+                  disabled={!!loadingCheckout}
+                >
+                  {loadingCheckout === "elite" && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  {t("upgradePlan")} Elite
+                </Button>
+              </>
+            )}
+
+            {tier === "pro" && (
               <Button
                 size="sm"
                 variant="outline"
@@ -211,23 +230,15 @@ export function SubscriptionCard() {
                 )}
                 {t("upgradePlan")} Elite
               </Button>
-            </>
-          )}
-
-          {tier === "pro" && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => handleUpgrade("elite")}
-              disabled={!!loadingCheckout}
-            >
-              {loadingCheckout === "elite" && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              {t("upgradePlan")} Elite
-            </Button>
-          )}
-        </div>
+            )}
+          </div>
+        ) : (
+          tier === "free" && (
+            <p className="text-xs text-muted-foreground italic">
+              Planes Pro y Elite próximamente. Estás en el plan gratuito con hasta 3 clientes.
+            </p>
+          )
+        )}
       </CardContent>
     </Card>
   );

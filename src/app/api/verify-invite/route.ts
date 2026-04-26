@@ -1,15 +1,27 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { checkRateLimit } from "@/lib/simple-rate-limit";
+import { getClientIp } from "@/lib/utils";
 import { NextResponse } from "next/server";
+import { z } from "zod";
+
+const VERIFY_INVITE_RPM = 30;
+const tokenSchema = z.uuid();
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const token = searchParams.get("token");
+  const parsed = tokenSchema.safeParse(searchParams.get("token"));
 
-  if (!token) {
+  // Rechaza tokens con formato inválido antes de tocar la DB (evita enumeración)
+  if (!parsed.success) {
     return NextResponse.json({ valid: false });
   }
+  const token = parsed.data;
 
-  // Use admin client since this is a public endpoint (no auth)
+  // Rate-limit por IP: endpoint público con admin client, vector de enumeración
+  if (!checkRateLimit(`verify-invite:${getClientIp(request)}`, VERIFY_INVITE_RPM)) {
+    return NextResponse.json({ valid: false }, { status: 429 });
+  }
+
   const admin = createAdminClient();
   const { data: client } = await admin
     .from("clients")
