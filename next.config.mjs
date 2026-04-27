@@ -14,6 +14,12 @@ const withPWA = withPWAInit({
   extendDefaultRuntimeCaching: true,
   workboxOptions: {
     runtimeCaching: [
+      // Las rutas de auth nunca deben pasar por cache del SW. Si el SW responde
+      // un 404 cacheado al callback, la confirmación de email queda en blanco.
+      {
+        urlPattern: ({ url }) => url.pathname.startsWith("/auth/"),
+        handler: "NetworkOnly",
+      },
       {
         urlPattern: ({ url }) => url.hostname.endsWith(".supabase.co"),
         handler: "NetworkOnly",
