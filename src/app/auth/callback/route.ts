@@ -10,7 +10,10 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type");
-  const next = searchParams.get("next") ?? "/dashboard";
+  // Detecta locale desde cookie de next-intl, fallback a 'es'.
+  const cookieLocale = request.headers.get("cookie")?.match(/NEXT_LOCALE=([a-z]{2})/i)?.[1];
+  const locale = cookieLocale === "en" ? "en" : "es";
+  const next = searchParams.get("next") ?? `/${locale}/dashboard`;
 
   const supabase = await createClient();
 
@@ -66,7 +69,7 @@ export async function GET(request: Request) {
           // Send welcome email (non-blocking)
           sendWelcomeEmail(user.email, client.full_name, client.trainer_id, origin).catch(() => {});
 
-          return NextResponse.redirect(`${origin}/my-routine`);
+          return NextResponse.redirect(`${origin}/${locale}/my-routine`);
         }
 
         // Try linking by invite_token (shareable link flow)
@@ -101,7 +104,7 @@ export async function GET(request: Request) {
             // Send welcome email (non-blocking)
             sendWelcomeEmail(user.email!, tokenClient.full_name, tokenClient.trainer_id, origin).catch(() => {});
 
-            return NextResponse.redirect(`${origin}/my-routine`);
+            return NextResponse.redirect(`${origin}/${locale}/my-routine`);
           }
         }
 
@@ -132,7 +135,7 @@ export async function GET(request: Request) {
 
             sendWelcomeEmail(user.email!, nameClient.full_name, nameClient.trainer_id, origin).catch(() => {});
 
-            return NextResponse.redirect(`${origin}/my-routine`);
+            return NextResponse.redirect(`${origin}/${locale}/my-routine`);
           }
         }
       }
@@ -141,7 +144,7 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/login`);
+  return NextResponse.redirect(`${origin}/${locale}/login`);
 }
 
 async function sendWelcomeEmail(
