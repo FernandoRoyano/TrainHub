@@ -115,5 +115,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
+  // Excluye `auth` porque /auth/callback es un route handler fuera de [locale];
+  // sin esto next-intl lo reescribe a /es/auth/callback (que no existe) y devuelve 404.
+  matcher: ["/((?!api|auth|_next|_vercel|.*\\..*).*)"],
 };
