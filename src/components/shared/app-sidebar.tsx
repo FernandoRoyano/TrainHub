@@ -24,6 +24,7 @@ import {
   ChevronRight,
   Shield,
   Briefcase,
+  HelpCircle,
 } from "lucide-react";
 import { useUIStore } from "@/stores/ui-store";
 
@@ -73,6 +74,7 @@ const navEntries: NavEntry[] = [
   { key: "calendar", href: "/calendar", icon: CalendarDays, badgeKey: null },
   { key: "analytics", href: "/analytics", icon: BarChart3, badgeKey: null },
   { key: "settings", href: "/settings", icon: Settings, badgeKey: null },
+  { key: "help", href: "/help", icon: HelpCircle, badgeKey: null },
 ];
 
 export function AppSidebar() {

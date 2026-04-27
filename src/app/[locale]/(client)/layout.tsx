@@ -15,6 +15,7 @@ import {
   User,
   Timer,
   Heart,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NavigationProgress } from "@/components/shared/navigation-progress";
@@ -47,6 +48,7 @@ const moreNavItems: NavItem[] = [
   { href: "/my-measurements", icon: Ruler, labelKey: "myMeasurements", featureKey: "measurements" },
   { href: "/my-cycle", icon: Heart, labelKey: "myCycle" },
   { href: "/my-profile", icon: User, labelKey: "myProfile" },
+  { href: "/help", icon: HelpCircle, labelKey: "help" },
 ];
 
 function ClientNavBar() {
