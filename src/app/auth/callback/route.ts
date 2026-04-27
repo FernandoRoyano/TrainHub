@@ -10,10 +10,17 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type");
+  const errorCode = searchParams.get("error_code");
   // Detecta locale desde cookie de next-intl, fallback a 'es'.
   const cookieLocale = request.headers.get("cookie")?.match(/NEXT_LOCALE=([a-z]{2})/i)?.[1];
   const locale = cookieLocale === "en" ? "en" : "es";
   const next = searchParams.get("next") ?? `/${locale}/dashboard`;
+
+  // Supabase devuelve errores en query string (otp_expired, access_denied, etc).
+  // Sin esto el callback se queda en blanco porque ningún branch matchea.
+  if (errorCode) {
+    return NextResponse.redirect(`${origin}/${locale}/login?error=${errorCode}`);
+  }
 
   const supabase = await createClient();
 
