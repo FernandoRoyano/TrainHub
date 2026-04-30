@@ -141,9 +141,21 @@ export function useGenerateInviteLink() {
       }
       return res.json();
     },
-    onSuccess: (data: { link: string }) => {
-      navigator.clipboard.writeText(data.link);
-      toast.success(t("inviteLinkCopied"));
+    onSuccess: async (data: { link: string }) => {
+      // iOS Safari bloquea el clipboard si no está en el gesto de usuario
+      // original. Aquí el fetch async corta el gesto, así que envolvemos en
+      // try/catch y mostramos el link en el toast para copia manual.
+      let copied = false;
+      try {
+        await navigator.clipboard?.writeText(data.link);
+        copied = true;
+      } catch {
+        copied = false;
+      }
+      toast.success(copied ? t("inviteLinkCopied") : t("inviteLinkCopyManually"), {
+        description: data.link,
+        duration: copied ? 4000 : 15000,
+      });
     },
     onError: (error: Error) => {
       if (error.message === "Client already has an account") {

@@ -197,6 +197,7 @@
     "inviteError": "Error al enviar invitación",
     "copyInviteLink": "Copiar link",
     "inviteLinkCopied": "Link copiado al portapapeles",
+    "inviteLinkCopyManually": "Link generado. Mantén pulsado para copiarlo:",
     "inviteLinkError": "Error al generar el link",
     "clientAlreadyRegistered": "Este cliente ya tiene cuenta registrada",
     "openInviteLink": "Link de registro",

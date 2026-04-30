@@ -197,6 +197,7 @@
     "inviteError": "Error sending invitation",
     "copyInviteLink": "Copy link",
     "inviteLinkCopied": "Link copied to clipboard",
+    "inviteLinkCopyManually": "Link generated. Long-press to copy it:",
     "inviteLinkError": "Error generating link",
     "clientAlreadyRegistered": "This client already has a registered account",
     "openInviteLink": "Registration link",
