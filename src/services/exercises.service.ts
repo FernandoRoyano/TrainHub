@@ -57,6 +57,7 @@ export const exercisesService = {
     let query = supabase
       .from("exercises")
       .select("*", { count: "exact" })
+      .is("archived_at", null)
       .order("name", { ascending: true })
       .range(from, to);
 
@@ -197,9 +198,12 @@ export const exercisesService = {
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
+    // Soft delete: marca archived_at en vez de borrar la fila. Esto evita que
+    // las rutinas que usan el ejercicio se queden con referencias rotas y que
+    // el historial de logs del cliente pierda contexto.
     const { error } = await supabase
       .from("exercises")
-      .delete()
+      .update({ archived_at: new Date().toISOString() })
       .eq("id", id);
     if (error) throw error;
   },
