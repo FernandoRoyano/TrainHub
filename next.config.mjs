@@ -49,12 +49,12 @@ const withPWA = withPWAInit({
 // un cambio mayor; este baseline ya bloquea XSS de orígenes externos.
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://challenges.cloudflare.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://challenges.cloudflare.com https://vercel.live",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' data: blob: https:",
   "media-src 'self' data: blob: https:",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.nal.usda.gov https://challenges.cloudflare.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.nal.usda.gov https://challenges.cloudflare.com https://raw.githubusercontent.com https://vercel.live wss://ws-us3.pusher.com",
   "frame-src https://js.stripe.com https://challenges.cloudflare.com https://hooks.stripe.com",
   "worker-src 'self' blob:",
   "child-src 'self' blob:",

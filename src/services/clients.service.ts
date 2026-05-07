@@ -236,26 +236,21 @@ export const clientsService = {
       connectionMap[c.id] = c.updated_at || c.created_at;
     }
 
-    // Query client_routines to get days_per_week for active routines per client
+    // days_per_week vive en `routines`, no en `client_routines` (la query
+    // antigua daba 400). Hacemos join para leerlo.
     const { data: routines, error: routinesError } = await supabase
       .from("client_routines")
-      .select("client_id, days_per_week, status")
+      .select("client_id, routines(days_per_week)")
       .in("client_id", clientIds)
       .eq("status", "active");
 
     if (routinesError) throw routinesError;
 
-    // Build a map of client_id -> days_per_week from active routines
     const daysPerWeekMap: Record<string, number> = {};
-    for (const routine of routines ?? []) {
-      if (routine.days_per_week != null) {
-        // If a client has multiple active routines, use the highest days_per_week
-        const clientId = routine.client_id as string;
-        daysPerWeekMap[clientId] = Math.max(
-          daysPerWeekMap[clientId] ?? 0,
-          routine.days_per_week
-        );
-      }
+    for (const cr of routines ?? []) {
+      const dpw = (cr.routines as unknown as { days_per_week: number } | null)?.days_per_week ?? 0;
+      const clientId = cr.client_id as string;
+      daysPerWeekMap[clientId] = Math.max(daysPerWeekMap[clientId] ?? 0, dpw);
     }
 
     // Build activity data from logs
