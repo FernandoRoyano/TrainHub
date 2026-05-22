@@ -50,6 +50,7 @@ describe("POST /api/stripe/checkout", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.NEXT_PUBLIC_APP_URL = "https://train-hub-five.vercel.app";
+    process.env.STRIPE_SECRET_KEY = "sk_test_dummy";
   });
 
   it("returns 401 without auth", async () => {

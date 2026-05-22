@@ -45,15 +45,15 @@ describe("GET /auth/callback", () => {
     vi.clearAllMocks();
   });
 
-  it("redirects to /login when no code provided", async () => {
+  it("redirects to /es/login when no code provided", async () => {
     const req = new Request("http://localhost/auth/callback");
     const res = await GET(req);
 
     expect(res.status).toBe(307);
-    expect(res.headers.get("location")).toBe("http://localhost/login");
+    expect(res.headers.get("location")).toBe("http://localhost/es/login");
   });
 
-  it("redirects to /login when code exchange fails", async () => {
+  it("redirects to /es/login when code exchange fails", async () => {
     mockExchangeCodeForSession.mockResolvedValue({
       error: { message: "invalid code" },
     });
@@ -62,7 +62,19 @@ describe("GET /auth/callback", () => {
     const res = await GET(req);
 
     expect(res.status).toBe(307);
-    expect(res.headers.get("location")).toBe("http://localhost/login");
+    expect(res.headers.get("location")).toBe("http://localhost/es/login");
+  });
+
+  it("redirects to /es/login with error param when Supabase returns error_code", async () => {
+    const req = new Request(
+      "http://localhost/auth/callback?error=access_denied&error_code=otp_expired"
+    );
+    const res = await GET(req);
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe(
+      "http://localhost/es/login?error=otp_expired"
+    );
   });
 
   it("redirects client to /my-routine when email matches unlinked client", async () => {
@@ -108,7 +120,7 @@ describe("GET /auth/callback", () => {
     const res = await GET(req);
 
     expect(res.status).toBe(307);
-    expect(res.headers.get("location")).toBe("http://localhost/my-routine");
+    expect(res.headers.get("location")).toBe("http://localhost/es/my-routine");
   });
 
   it("redirects client to /my-routine when invite_token matches", async () => {
@@ -180,7 +192,7 @@ describe("GET /auth/callback", () => {
     const res = await GET(req);
 
     expect(res.status).toBe(307);
-    expect(res.headers.get("location")).toBe("http://localhost/my-routine");
+    expect(res.headers.get("location")).toBe("http://localhost/es/my-routine");
   });
 
   it("redirects trainer to /dashboard when no client match", async () => {
@@ -213,7 +225,7 @@ describe("GET /auth/callback", () => {
     const res = await GET(req);
 
     expect(res.status).toBe(307);
-    expect(res.headers.get("location")).toBe("http://localhost/dashboard");
+    expect(res.headers.get("location")).toBe("http://localhost/es/dashboard");
   });
 
   it("uses admin client instead of user client for RLS bypass", async () => {

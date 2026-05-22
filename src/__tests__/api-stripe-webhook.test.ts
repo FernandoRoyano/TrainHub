@@ -3,8 +3,20 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // Mock admin client
 const mockUpsert = vi.fn().mockResolvedValue({ error: null });
 const mockUpdate = vi.fn();
-const mockInsert = vi.fn().mockResolvedValue({ error: null });
 const mockUpdateEq = vi.fn().mockResolvedValue({ error: null });
+
+// insert debe soportar dos usos: await directo (payments) y
+// .select().maybeSingle() (idempotencia stripe_events).
+const mockInsert = vi.fn(() => {
+  const thenable = {
+    select: () => ({
+      maybeSingle: () => Promise.resolve({ data: { id: "evt_test" }, error: null }),
+    }),
+    then: (onFulfilled: (v: { error: null }) => unknown) =>
+      Promise.resolve({ error: null }).then(onFulfilled),
+  };
+  return thenable;
+});
 
 const mockAdminFrom = vi.fn().mockImplementation(() => ({
   upsert: mockUpsert,
