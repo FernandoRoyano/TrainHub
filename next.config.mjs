@@ -8,37 +8,53 @@ const withPWA = withPWAInit({
   disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: true,
-  fallbacks: { document: "/offline" },
-  // extendDefaultRuntimeCaching es opción del plugin next-pwa, no de workbox.
-  // Estaba dentro de workboxOptions y rompía el build (warning silenciado por cache).
-  extendDefaultRuntimeCaching: true,
+  // clientsClaim: el SW nuevo toma control de las pestañas abiertas sin esperar
+  // a cierre/reload. Sin esto los usuarios ven la versión vieja tras un deploy
+  // y tienen que borrar caché manualmente (causa raíz reportada).
+  reloadOnOnline: true,
+  cacheOnFrontEndNav: false,
   workboxOptions: {
+    clientsClaim: true,
+    skipWaiting: true,
     runtimeCaching: [
-      // Las rutas de auth nunca deben pasar por cache del SW. Si el SW responde
-      // un 404 cacheado al callback, la confirmación de email queda en blanco.
+      // Auth: nunca cachear, evita el bug del 404 del callback.
       {
         urlPattern: ({ url }) => url.pathname.startsWith("/auth/"),
         handler: "NetworkOnly",
       },
+      // API y Supabase REST: siempre red (datos vivos).
       {
-        urlPattern: ({ url }) => url.hostname.endsWith(".supabase.co"),
+        urlPattern: ({ url }) =>
+          url.pathname.startsWith("/api/") ||
+          url.hostname.endsWith(".supabase.co"),
         handler: "NetworkOnly",
-        method: "GET",
       },
+      // Imágenes de Supabase Storage: NetworkFirst con fallback a caché y
+      // ttl corto. Evita servir imágenes rotas indefinidamente y mantiene
+      // velocidad cuando hay red.
       {
-        urlPattern: ({ url }) => url.hostname.endsWith(".supabase.co"),
-        handler: "NetworkOnly",
-        method: "POST",
+        urlPattern: ({ request, url }) =>
+          request.destination === "image" &&
+          url.hostname.endsWith(".supabase.co"),
+        handler: "NetworkFirst",
+        options: {
+          cacheName: "supabase-images",
+          networkTimeoutSeconds: 5,
+          expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 7 },
+          cacheableResponse: { statuses: [0, 200] },
+        },
       },
+      // Imágenes externas de la librería de ejercicios.
       {
-        urlPattern: ({ url }) => url.hostname.endsWith(".supabase.co"),
-        handler: "NetworkOnly",
-        method: "PATCH",
-      },
-      {
-        urlPattern: ({ url }) => url.hostname.endsWith(".supabase.co"),
-        handler: "NetworkOnly",
-        method: "DELETE",
+        urlPattern: ({ request, url }) =>
+          request.destination === "image" &&
+          url.hostname === "raw.githubusercontent.com",
+        handler: "StaleWhileRevalidate",
+        options: {
+          cacheName: "exercise-db-images",
+          expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 30 },
+          cacheableResponse: { statuses: [0, 200] },
+        },
       },
     ],
   },
@@ -78,6 +94,16 @@ const securityHeaders = [
 
 const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
+  // next/image rechaza URLs externas si no están declaradas aquí. Sin esto
+  // muchas imágenes de ejercicios y de Supabase Storage no cargaban.
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "*.supabase.co" },
+      { protocol: "https", hostname: "raw.githubusercontent.com" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+    ],
+    minimumCacheTTL: 60 * 60 * 24,
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
