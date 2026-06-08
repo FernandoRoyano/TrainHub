@@ -208,8 +208,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-2xl px-6 py-8 animate-fade-in-up">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="relative overflow-hidden rounded-2xl px-5 py-6 sm:px-6 sm:py-8 animate-fade-in-up">
         <div
           aria-hidden
           className="absolute inset-0 -z-10 opacity-60"
@@ -218,17 +218,40 @@ export default function DashboardPage() {
               "radial-gradient(60% 80% at 0% 0%, hsl(160 70% 45% / 0.18), transparent 60%), radial-gradient(50% 80% at 100% 0%, hsl(190 80% 50% / 0.15), transparent 60%)",
           }}
         />
-        <p className="text-sm text-muted-foreground capitalize">{today}</p>
-        <h1 className="mt-1 text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
+        <p className="text-xs sm:text-sm text-muted-foreground capitalize">{today}</p>
+        <h1 className="mt-1 text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
           {greeting}{trainerName ? `, ${trainerName}` : ""} 👋
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
           {t("greetingSubtitle")}
         </p>
       </div>
 
+      {/* Quick actions - táctiles, lo primero al alcance del pulgar */}
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+        {[
+          { href: "/clients/new", icon: UserPlus, label: t("addClient"), accent: "text-emerald-400 bg-emerald-400/15" },
+          { href: "/routines/new", icon: Plus, label: t("createRoutine"), accent: "text-blue-400 bg-blue-400/15" },
+          { href: "/messages", icon: Mail, label: t("viewMessages"), accent: "text-amber-400 bg-amber-400/15" },
+        ].map((action) => {
+          const Icon = action.icon;
+          return (
+            <Link
+              key={action.href}
+              href={action.href}
+              className="glass flex min-h-[80px] flex-col items-center justify-center gap-2 rounded-2xl px-2 py-3 text-center transition-all hover:scale-[1.02] active:scale-[0.97]"
+            >
+              <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${action.accent}`}>
+                <Icon className="h-5 w-5" />
+              </span>
+              <span className="text-[11px] sm:text-xs font-medium leading-tight">{action.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+
       {/* Hero KPIs - 2 prominentes */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2">
         {kpis.slice(0, 2).map((kpi, idx) => {
           const Icon = kpi.icon;
           return (
@@ -237,23 +260,23 @@ export default function DashboardPage() {
               style={{ animationDelay: `${idx * 80}ms` }}
               className={`glass-elevated shadow-xl border-t-2 ${accentBorder[kpi.color] ?? "border-t-transparent"} transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-default animate-fade-in-up ${kpi.glow}`}
             >
-              <CardContent className="pt-6 pb-6">
-                <div className="flex items-start justify-between gap-4">
+              <CardContent className="pt-4 pb-4 sm:pt-6 sm:pb-6">
+                <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-muted-foreground">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                       {kpi.label}
                     </p>
-                    <p className={`text-5xl font-bold mt-2 tabular-nums tracking-tight ${kpi.urgent ? "text-rose-400 animate-pulse" : ""}`}>
+                    <p className={`text-3xl sm:text-5xl font-bold mt-1.5 sm:mt-2 tabular-nums tracking-tight ${kpi.urgent ? "text-rose-400 animate-pulse" : ""}`}>
                       {kpi.value}
                     </p>
                     {kpi.subtitle && (
-                      <p className="mt-1 text-xs text-muted-foreground">{kpi.subtitle}</p>
+                      <p className="mt-1 text-[11px] sm:text-xs text-muted-foreground">{kpi.subtitle}</p>
                     )}
                   </div>
                   <div
-                    className={`h-14 w-14 rounded-2xl ${kpi.bg} flex items-center justify-center shrink-0`}
+                    className={`h-11 w-11 sm:h-14 sm:w-14 rounded-2xl ${kpi.bg} flex items-center justify-center shrink-0`}
                   >
-                    <Icon className={`h-7 w-7 ${kpi.color}`} />
+                    <Icon className={`h-5 w-5 sm:h-7 sm:w-7 ${kpi.color}`} />
                   </div>
                 </div>
                 {kpi.progress !== undefined && (
@@ -325,26 +348,6 @@ export default function DashboardPage() {
                 <p className="text-2xl font-bold">{summary?.messagesSent ?? 0}</p>
                 <p className="text-xs text-muted-foreground mt-1">{t("messagesSentThisWeek")}</p>
               </div>
-            </div>
-            <div className="flex flex-wrap gap-3 mt-4">
-              <Button asChild size="sm">
-                <Link href="/clients/new">
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  {t("addClient")}
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/routines/new">
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t("createRoutine")}
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/messages">
-                  <Mail className="mr-2 h-4 w-4" />
-                  {t("viewMessages")}
-                </Link>
-              </Button>
             </div>
           </CardContent>
         </Card>
