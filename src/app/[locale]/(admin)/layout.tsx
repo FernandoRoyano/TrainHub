@@ -31,6 +31,9 @@ export default function AdminLayout({
   const pathname = usePathname();
   const { profile, signOut, isSigningOut } = useAuth();
 
+  const isActive = (href: string) =>
+    href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+
   const initials = profile?.full_name
     ? profile.full_name
         .split(" ")
@@ -41,9 +44,10 @@ export default function AdminLayout({
     : "AD";
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen max-w-[100vw] overflow-x-hidden">
       <NavigationProgress />
-      {/* Sidebar */}
+
+      {/* Sidebar (desktop) */}
       <aside className="hidden md:flex flex-col w-64 glass-sidebar">
         <div className="flex items-center gap-2 px-4 h-16">
           <Shield className="h-6 w-6 text-primary" />
@@ -54,10 +58,6 @@ export default function AdminLayout({
 
         <nav className="flex-1 px-3 py-4 space-y-1">
           {adminNavItems.map((item) => {
-            const isActive =
-              item.href === "/admin"
-                ? pathname === "/admin"
-                : pathname.startsWith(item.href);
             const Icon = item.icon;
             return (
               <Link
@@ -65,12 +65,12 @@ export default function AdminLayout({
                 href={item.href}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                  isActive
+                  isActive(item.href)
                     ? "bg-primary/15 text-primary"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"
                 )}
               >
-                <Icon className={cn("h-[18px] w-[18px]", isActive && "text-primary")} />
+                <Icon className={cn("h-[18px] w-[18px]", isActive(item.href) && "text-primary")} />
                 <span>{t(`nav.${item.key}`)}</span>
               </Link>
             );
@@ -120,10 +120,64 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 p-6 overflow-y-auto scrollbar-thin">
-        {children}
-      </main>
+      {/* Main column */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Mobile header */}
+        <header className="md:hidden sticky top-0 z-40 flex items-center justify-between h-14 px-4 glass-topbar">
+          <div className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" />
+            <span className="text-base font-bold tracking-tight">
+              Admin<span className="text-primary">Panel</span>
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => signOut()}
+            disabled={isSigningOut}
+            className="text-muted-foreground hover:text-destructive"
+            aria-label={tn("logout")}
+          >
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </header>
+
+        <main className="flex-1 p-4 sm:p-6 pb-24 md:pb-6 overflow-y-auto scrollbar-thin">
+          {children}
+        </main>
+      </div>
+
+      {/* Mobile bottom nav */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border/50 bg-card/95 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]">
+        <div className="mx-auto flex max-w-md items-stretch justify-around px-2">
+          {adminNavItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.href);
+            return (
+              <Link
+                key={item.key}
+                href={item.href}
+                className={cn(
+                  "flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1.5 transition active:scale-95",
+                  active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Icon className="h-[22px] w-[22px]" />
+                <span className="text-[10px] font-medium leading-none">
+                  {t(`nav.${item.key}`)}
+                </span>
+              </Link>
+            );
+          })}
+          <Link
+            href="/dashboard"
+            className="flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1.5 text-muted-foreground hover:text-foreground transition active:scale-95"
+          >
+            <Dumbbell className="h-[22px] w-[22px]" />
+            <span className="text-[10px] font-medium leading-none">TrainHub</span>
+          </Link>
+        </div>
+      </nav>
     </div>
   );
 }
