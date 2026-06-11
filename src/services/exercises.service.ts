@@ -172,20 +172,22 @@ export const exercisesService = {
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
+    // Solo coercionar a null los campos PRESENTES: un update parcial no debe
+    // borrar los campos que no incluye (mismo bug que updateClient).
     const { error } = await supabase
       .from("exercises")
       .update({
         ...data,
-        description: data.description || null,
-        instructions: data.instructions || null,
-        video_url: data.video_url || null,
-        thumbnail_url: data.thumbnail_url || null,
-        name_es: data.name_es || null,
+        ...(data.description !== undefined && { description: data.description || null }),
+        ...(data.instructions !== undefined && { instructions: data.instructions || null }),
+        ...(data.video_url !== undefined && { video_url: data.video_url || null }),
+        ...(data.thumbnail_url !== undefined && { thumbnail_url: data.thumbnail_url || null }),
+        ...(data.name_es !== undefined && { name_es: data.name_es || null }),
         primary_muscles: data.primary_muscles ?? undefined,
         secondary_muscles: data.secondary_muscles ?? undefined,
-        exercise_type: data.exercise_type || null,
-        mechanics: data.mechanics || null,
-        force: data.force || null,
+        ...(data.exercise_type !== undefined && { exercise_type: data.exercise_type || null }),
+        ...(data.mechanics !== undefined && { mechanics: data.mechanics || null }),
+        ...(data.force !== undefined && { force: data.force || null }),
       })
       .eq("id", id);
     if (error) throw error;

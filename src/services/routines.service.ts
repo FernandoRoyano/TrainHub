@@ -76,6 +76,38 @@ export interface RoutineFilters {
   pageSize?: number;
 }
 
+// Mapea un día (con sus grupos) a datos de formulario para copiarlo. Antes
+// duplicar/usar-plantilla solo copiaba la lista plana de ejercicios: las
+// biseries/circuitos/EMOM/AMRAP se aplanaban y la descripción del día se perdía.
+function mapDayForCopy(day: RoutineDay) {
+  const mapExercise = (ex: RoutineExercise) => ({
+    exercise_id: ex.exercise_id,
+    order_index: ex.order_index,
+    sets: ex.sets,
+    reps: ex.reps,
+    rest_seconds: ex.rest_seconds,
+    notes: ex.notes ?? "",
+    superset_group: ex.superset_group,
+  });
+  return {
+    day_number: day.day_number,
+    name: day.name ?? "",
+    notes: day.notes ?? "",
+    description: day.description ?? "",
+    groups: (day.groups ?? []).map((g) => ({
+      group_type: g.group_type,
+      order_index: g.order_index,
+      rounds: g.rounds,
+      time_limit_seconds: g.time_limit_seconds,
+      rest_between_rounds: g.rest_between_rounds,
+      label: g.label ?? "",
+      notes: g.notes ?? "",
+      exercises: g.exercises.map(mapExercise),
+    })),
+    exercises: day.exercises.map(mapExercise),
+  };
+}
+
 export const routinesService = {
   async getRoutines(filters?: RoutineFilters) {
     const supabase = createClient();
@@ -458,20 +490,8 @@ export const routinesService = {
       difficulty: routine.difficulty as RoutineFormData["difficulty"],
       target_gender: routine.target_gender as RoutineFormData["target_gender"],
       is_template: routine.is_template,
-      days: (routine.days ?? []).map((day) => ({
-        day_number: day.day_number,
-        name: day.name ?? "",
-        notes: day.notes ?? "",
-        exercises: day.exercises.map((ex) => ({
-          exercise_id: ex.exercise_id,
-          order_index: ex.order_index,
-          sets: ex.sets,
-          reps: ex.reps,
-          rest_seconds: ex.rest_seconds,
-          notes: ex.notes ?? "",
-          superset_group: ex.superset_group,
-        })),
-      })),
+      cover_image: routine.cover_image ?? "",
+      days: (routine.days ?? []).map(mapDayForCopy),
     };
     return this.createRoutine(formData);
   },
@@ -486,20 +506,8 @@ export const routinesService = {
       difficulty: routine.difficulty as RoutineFormData["difficulty"],
       target_gender: routine.target_gender as RoutineFormData["target_gender"],
       is_template: false,
-      days: (routine.days ?? []).map((day) => ({
-        day_number: day.day_number,
-        name: day.name ?? "",
-        notes: day.notes ?? "",
-        exercises: day.exercises.map((ex) => ({
-          exercise_id: ex.exercise_id,
-          order_index: ex.order_index,
-          sets: ex.sets,
-          reps: ex.reps,
-          rest_seconds: ex.rest_seconds,
-          notes: ex.notes ?? "",
-          superset_group: ex.superset_group,
-        })),
-      })),
+      cover_image: routine.cover_image ?? "",
+      days: (routine.days ?? []).map(mapDayForCopy),
     };
     return this.createRoutine(formData);
   },

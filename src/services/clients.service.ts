@@ -156,13 +156,16 @@ export const clientsService = {
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
+    // Solo coercionar a null los campos PRESENTES en el payload. Con
+    // `data.email || null` un update parcial (p. ej. solo notes) escribía
+    // NULL en email/phone/notes y borraba datos del cliente.
     const { error } = await supabase
       .from("clients")
       .update({
         ...data,
-        email: data.email || null,
-        phone: data.phone || null,
-        notes: data.notes || null,
+        ...(data.email !== undefined && { email: data.email || null }),
+        ...(data.phone !== undefined && { phone: data.phone || null }),
+        ...(data.notes !== undefined && { notes: data.notes || null }),
       })
       .eq("id", id)
       .eq("trainer_id", user.id);

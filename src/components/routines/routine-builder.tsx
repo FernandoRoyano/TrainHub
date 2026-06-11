@@ -9,7 +9,7 @@ import { createRoutineSchema, type RoutineFormData } from "@/lib/validations/rou
 import { useCreateRoutine, useUpdateRoutine } from "@/hooks/use-routines";
 import { useRoutineBuilderStore } from "@/stores/routine-builder-store";
 import type { BuilderExercise, GroupType } from "@/stores/routine-builder-store";
-import type { Routine } from "@/services/routines.service";
+import type { Routine, RoutineDay } from "@/services/routines.service";
 import type { ExerciseBlock } from "@/services/blocks.service";
 import { DIFFICULTY_LEVELS } from "@/lib/constants";
 import { useUploadMedia } from "@/hooks/use-exercises";
@@ -372,22 +372,39 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
   // Load existing routine data into the store
   useEffect(() => {
     if (routine?.days && routine.days.length > 0) {
+      const mapExercise = (ex: RoutineDay["exercises"][number]) => ({
+        id: `loaded_${ex.id}`,
+        exercise_id: ex.exercise_id,
+        exercise: ex.exercise,
+        order_index: ex.order_index,
+        sets: ex.sets,
+        reps: ex.reps,
+        rest_seconds: ex.rest_seconds,
+        notes: ex.notes ?? "",
+        superset_group: ex.superset_group,
+      });
+
       const builderDays = routine.days.map((day) => ({
         id: `loaded_${day.id}`,
         day_number: day.day_number,
         name: day.name ?? "",
         notes: day.notes ?? "",
         description: day.description ?? "",
-        exercises: day.exercises.map((ex) => ({
-          id: `loaded_${ex.id}`,
-          exercise_id: ex.exercise_id,
-          exercise: ex.exercise,
-          order_index: ex.order_index,
-          sets: ex.sets,
-          reps: ex.reps,
-          rest_seconds: ex.rest_seconds,
-          notes: ex.notes ?? "",
-          superset_group: ex.superset_group,
+        exercises: day.exercises.map(mapExercise),
+        // CRÍTICO: cargar los grupos reales. Sin esto, el editor reconstruía
+        // los grupos desde superset_group (null para circuit/EMOM/AMRAP y
+        // grupos creados en UI) y al guardar (delete + reinsert) se perdía
+        // toda la estructura de grupos de la rutina.
+        groups: (day.groups ?? []).map((g) => ({
+          id: `loaded_${g.id}`,
+          group_type: g.group_type,
+          order_index: g.order_index,
+          rounds: g.rounds,
+          time_limit_seconds: g.time_limit_seconds,
+          rest_between_rounds: g.rest_between_rounds,
+          label: g.label ?? "",
+          notes: g.notes ?? "",
+          exercises: g.exercises.map(mapExercise),
         })),
       }));
       setDays(builderDays);
@@ -505,7 +522,10 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                   reps: ex.reps,
                   rest_seconds: ex.rest_seconds,
                   notes: ex.notes,
-                  superset_group: ex.superset_group,
+                  // Derivado del grupo, no del valor por-ejercicio (que queda
+                  // obsoleto al agrupar en UI): sin esto las vistas planas no
+                  // ven la agrupación y no hay datos para reconstruirla.
+                  superset_group: g.group_type !== "solo" ? gi : null,
                 };
               }),
             })),
