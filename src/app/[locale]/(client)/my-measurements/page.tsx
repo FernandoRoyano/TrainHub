@@ -1,5 +1,6 @@
 "use client";
 
+import { FeatureGate } from "@/components/shared/feature-gate";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useMyMeasurements, useAddMyMeasurement } from "@/hooks/use-client-app";
@@ -29,7 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { Ruler, TrendingDown, Plus, Loader2 } from "lucide-react";
 
-export default function MyMeasurementsPage() {
+function MyMeasurementsPageContent() {
   const t = useTranslations("measurements");
   const tc = useTranslations("clientApp");
   const te = useTranslations("empty");
@@ -353,5 +354,13 @@ export default function MyMeasurementsPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function MyMeasurementsPage() {
+  return (
+    <FeatureGate feature="measurements">
+      <MyMeasurementsPageContent />
+    </FeatureGate>
   );
 }

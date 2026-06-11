@@ -1,5 +1,6 @@
 "use client";
 
+import { FeatureGate } from "@/components/shared/feature-gate";
 import { useTranslations } from "next-intl";
 import { useMyMealPlan } from "@/hooks/use-client-app";
 import { MacroSummary } from "@/components/nutrition/macro-summary";
@@ -9,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { UtensilsCrossed } from "lucide-react";
 
-export default function MyNutritionPage() {
+function MyNutritionPageContent() {
   const t = useTranslations("nutrition");
   const tc = useTranslations("clientApp");
   const { data: mealPlan, isLoading } = useMyMealPlan();
@@ -97,5 +98,13 @@ export default function MyNutritionPage() {
         </Card>
       )}
     </div>
+  );
+}
+
+export default function MyNutritionPage() {
+  return (
+    <FeatureGate feature="nutrition">
+      <MyNutritionPageContent />
+    </FeatureGate>
   );
 }

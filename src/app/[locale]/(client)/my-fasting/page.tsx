@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import {
   useActiveFast,
@@ -110,15 +110,23 @@ export default function MyFastingPage() {
 
   const [selectedProtocol, setSelectedProtocol] = useState<string | null>(null);
   const [customHours, setCustomHours] = useState<number>(24);
+  // Tick periódico: sin él, el tiempo transcurrido y el anillo se quedaban
+  // congelados (el refetch devuelve el mismo objeto y no re-renderiza)
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!activeFast) return;
+    const interval = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(interval);
+  }, [activeFast]);
 
   const protocol = selectedProtocol ?? settings?.default_protocol ?? "16_8";
 
   const elapsedHours = useMemo(() => {
     if (!activeFast) return 0;
     const start = new Date(activeFast.fast_start).getTime();
-    const now = Date.now();
     return (now - start) / (1000 * 60 * 60);
-  }, [activeFast]);
+  }, [activeFast, now]);
 
   const targetHours = activeFast?.target_hours ?? PROTOCOLS[protocol] ?? 16;
   const progress = targetHours > 0 ? elapsedHours / targetHours : 0;

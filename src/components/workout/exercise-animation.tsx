@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Image as ImageIcon } from "lucide-react";
 
 interface ExerciseAnimationProps {
@@ -25,7 +25,13 @@ export function ExerciseAnimation({
 }: ExerciseAnimationProps) {
   const [frame, setFrame] = useState(0);
   const [hasSecondFrame, setHasSecondFrame] = useState(false);
-  const urls = thumbnailUrl ? getAnimationUrls(thumbnailUrl) : null;
+  // Memo: un array nuevo en cada render hacía que el efecto del intervalo se
+  // destruyera/recreara con cada re-render del padre (p. ej. al teclear reps)
+  // y la animación se quedara visualmente congelada
+  const urls = useMemo(
+    () => (thumbnailUrl ? getAnimationUrls(thumbnailUrl) : null),
+    [thumbnailUrl]
+  );
 
   useEffect(() => {
     if (!urls) return;

@@ -1,5 +1,6 @@
 "use client";
 
+import { FeatureGate } from "@/components/shared/feature-gate";
 import { useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useMyRoutine, useWorkoutLogs, useProgressData, useMyMeasurements } from "@/hooks/use-client-app";
@@ -20,7 +21,7 @@ import { WeeklyCheckinForm } from "@/components/checkins/weekly-checkin-form";
 import { WorkoutCalendar } from "@/components/progress/workout-calendar";
 import { BarChart3, Calendar, Check, ChevronDown, ChevronUp } from "lucide-react";
 
-export default function MyProgressPage() {
+function MyProgressPageContent() {
   const t = useTranslations("clientApp");
   const locale = useLocale();
   const { data: routine, isLoading: routineLoading } = useMyRoutine();
@@ -293,5 +294,13 @@ function WorkoutHistory({
         })}
       </CardContent>
     </Card>
+  );
+}
+
+export default function MyProgressPage() {
+  return (
+    <FeatureGate feature="progress_tracking">
+      <MyProgressPageContent />
+    </FeatureGate>
   );
 }

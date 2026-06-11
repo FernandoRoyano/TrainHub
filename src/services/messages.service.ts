@@ -199,11 +199,13 @@ export const messagesService = {
       .single();
     if (error) throw error;
 
-    // Update conversation last_message_at
-    await supabase
+    // Update conversation last_message_at — si falla, el orden de
+    // conversaciones y la vista previa quedan obsoletos: no silenciarlo
+    const { error: tsError } = await supabase
       .from("conversations")
       .update({ last_message_at: new Date().toISOString() })
       .eq("id", conversationId);
+    if (tsError) console.error("[messages] last_message_at update failed:", tsError.message);
 
     return data as Message;
   },
@@ -217,12 +219,15 @@ export const messagesService = {
 
     await verifyConversationAccess(supabase, conversationId, user.id);
 
-    await supabase
+    // Si falla (p. ej. RLS), el badge de no-leídos no se limpia: propagar para
+    // que el hook no invalide la caché como si hubiera funcionado
+    const { error } = await supabase
       .from("messages")
       .update({ read: true })
       .eq("conversation_id", conversationId)
       .eq("read", false)
       .neq("sender_id", user.id);
+    if (error) throw error;
   },
 
   async getClientConversation() {

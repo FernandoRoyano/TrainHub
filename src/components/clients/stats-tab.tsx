@@ -78,8 +78,10 @@ export function StatsTab({ clientId }: StatsTabProps) {
     ? calculateBMI(effectiveWeight, effectiveHeight)
     : null;
 
+  // Mifflin-St Jeor difiere -166 kcal para mujeres: sin pasar el género, a
+  // todas las clientas se les sobreestimaba el TMB con la fórmula masculina
   const tmb = effectiveWeight && effectiveHeight && age
-    ? calculateTMB(effectiveWeight, effectiveHeight, age)
+    ? calculateTMB(effectiveWeight, effectiveHeight, age, client?.gender !== "female")
     : null;
 
   const chartData = sortedMeasurements

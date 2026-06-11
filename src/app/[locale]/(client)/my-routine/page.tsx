@@ -1,5 +1,6 @@
 "use client";
 
+import { FeatureGate } from "@/components/shared/feature-gate";
 import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import type { Exercise } from "@/services/exercises.service";
@@ -227,7 +228,7 @@ function ExerciseCard({
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-export default function MyRoutinePage() {
+function MyRoutinePageContent() {
   const t = useTranslations("clientApp");
   const te = useTranslations("exercises");
   const tr = useTranslations("routines");
@@ -249,7 +250,7 @@ export default function MyRoutinePage() {
   const exerciseData = useWorkoutSessionStore((s) => s.exerciseData);
   const workoutNotes = useWorkoutSessionStore((s) => s.workoutNotes);
   const loggedExercises = useWorkoutSessionStore((s) => s.loggedExercises);
-  const selectedDayIndex = useWorkoutSessionStore((s) => s.selectedDayIndex);
+  const storedDayIndex = useWorkoutSessionStore((s) => s.selectedDayIndex);
   const sessionStart = useWorkoutSessionStore((s) => s.startSession);
   const sessionEnd = useWorkoutSessionStore((s) => s.endSession);
   const storeSetExerciseData = useWorkoutSessionStore((s) => s.setExerciseData);
@@ -260,6 +261,11 @@ export default function MyRoutinePage() {
   const [simpleView, setSimpleView] = useState(false);
   const today = localDateString();
   const [completionDate, setCompletionDate] = useState<string>(today);
+
+  // El índice persiste en localStorage: si la nueva rutina tiene menos días
+  // que la anterior, quedaba fuera de rango y la página no mostraba ejercicios
+  const dayCount = routine?.routine?.days?.length ?? 0;
+  const selectedDayIndex = dayCount > 0 ? Math.min(storedDayIndex, dayCount - 1) : 0;
 
   // Clear stale session: if no active workout and store has leftover data, clean up
   useEffect(() => {
@@ -686,5 +692,13 @@ export default function MyRoutinePage() {
         onOpenChange={(open) => !open && setSelectedExercise(null)}
       />
     </div>
+  );
+}
+
+export default function MyRoutinePage() {
+  return (
+    <FeatureGate feature="training">
+      <MyRoutinePageContent />
+    </FeatureGate>
   );
 }

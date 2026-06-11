@@ -1,5 +1,6 @@
 "use client";
 
+import { FeatureGate } from "@/components/shared/feature-gate";
 import { useTranslations } from "next-intl";
 import { useClientConversation } from "@/hooks/use-messages";
 import { MessageThread } from "@/components/messages/message-thread";
@@ -7,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { MessageCircle } from "lucide-react";
 
-export default function MyMessagesPage() {
+function MyMessagesPageContent() {
   const t = useTranslations("messages");
   const te = useTranslations("empty");
   const { data: conversation, isLoading } = useClientConversation();
@@ -41,5 +42,13 @@ export default function MyMessagesPage() {
         <MessageThread conversationId={conversation.id} />
       </div>
     </div>
+  );
+}
+
+export default function MyMessagesPage() {
+  return (
+    <FeatureGate feature="messaging">
+      <MyMessagesPageContent />
+    </FeatureGate>
   );
 }
