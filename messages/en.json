@@ -531,7 +531,10 @@
     "routineCancelError": "Error cancelling routine",
     "copySuffix": "(copy)",
     "exerciseCount_one": "exercise",
-    "exerciseCount_other": "exercises"
+    "exerciseCount_other": "exercises",
+    "downloadPdf": "Download PDF",
+    "sharePdf": "Share",
+    "pdfError": "Could not generate the PDF"
   },
   "nutrition": {
     "title": "Meal Plans",

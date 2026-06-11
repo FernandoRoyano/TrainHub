@@ -531,7 +531,10 @@
     "routineCancelError": "Error al cancelar rutina",
     "copySuffix": "(copia)",
     "exerciseCount_one": "ejercicio",
-    "exerciseCount_other": "ejercicios"
+    "exerciseCount_other": "ejercicios",
+    "downloadPdf": "Descargar PDF",
+    "sharePdf": "Compartir",
+    "pdfError": "No se pudo generar el PDF"
   },
   "nutrition": {
     "title": "Planes de nutrición",
