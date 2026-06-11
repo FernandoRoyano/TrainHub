@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useMyRoutine, useWorkoutLogs, useProgressData, useMyMeasurements } from "@/hooks/use-client-app";
+import { localDateString } from "@/lib/local-date";
 import type { WorkoutLog, WorkoutWithExercises } from "@/services/client-app.service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -62,7 +63,7 @@ export default function MyProgressPage() {
     for (let i = 27; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
-      const dateStr = d.toISOString().split("T")[0];
+      const dateStr = localDateString(d);
       days.push({
         date: dateStr,
         day: d.getDate(),

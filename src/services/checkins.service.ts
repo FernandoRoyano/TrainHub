@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { localWeekStartMonday } from "@/lib/local-date";
 
 export interface WeeklyCheckin {
   id: string;
@@ -15,11 +16,10 @@ export interface WeeklyCheckin {
 export type CheckinInput = Omit<WeeklyCheckin, "id" | "client_id" | "created_at">;
 
 function getWeekStart(date = new Date()): string {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = day === 0 ? -6 : 1 - day; // Monday
-  d.setDate(d.getDate() + diff);
-  return d.toISOString().split("T")[0];
+  // Fecha LOCAL: con toISOString(), un check-in entre las 00:00 y la 01:00
+  // del lunes caía en el domingo de la semana ANTERIOR y el upsert por
+  // (client_id, week_start) creaba dos filas para la misma semana lógica.
+  return localWeekStartMonday(date);
 }
 
 export const checkinsService = {

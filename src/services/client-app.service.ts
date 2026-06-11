@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { localDateString } from "@/lib/local-date";
 import type { Routine, RoutineDay, RoutineExercise, ExerciseGroup } from "./routines.service";
 import type { BodyMeasurement } from "./measurements.service";
 import type { MealPlan, MealPlanMeal, MealFood } from "./nutrition.service";
@@ -268,7 +269,9 @@ export const clientAppService = {
         client_id: authClientId,
         client_routine_id: clientRoutineId,
         routine_day_id: routineDayId,
-        date: new Date().toISOString().split("T")[0],
+        // Fecha LOCAL: con toISOString(), entrenar entre las 00:00 y la 01:00
+        // (España) registraba el entreno en el día anterior
+        date: localDateString(),
         started_at: new Date().toISOString(),
       })
       .select()
@@ -328,6 +331,9 @@ export const clientAppService = {
       .single();
     if (!wl) throw new Error("Not authorized");
 
+    // Respaldado por uq_exercise_logs_workout_exercise (migración 00037).
+    // El fallback a insert que había aquí creaba un duplicado en cada guardado
+    // porque la constraint del onConflict no existía y el upsert fallaba siempre.
     const { data: log, error } = await supabase
       .from("exercise_logs")
       .upsert(
@@ -340,20 +346,7 @@ export const clientAppService = {
       )
       .select()
       .single();
-    if (error) {
-      // If upsert fails (no unique constraint), try insert
-      const { data: inserted, error: insertError } = await supabase
-        .from("exercise_logs")
-        .insert({
-          workout_log_id: workoutLogId,
-          routine_exercise_id: routineExerciseId,
-          ...data,
-        })
-        .select()
-        .single();
-      if (insertError) throw insertError;
-      return inserted as ExerciseLog;
-    }
+    if (error) throw error;
     return log as ExerciseLog;
   },
 
@@ -606,6 +599,7 @@ export const clientAppService = {
       .from("client_service_tiers")
       .select("*, service_tier:service_tiers(*)")
       .eq("client_id", clientId)
+      .eq("status", "active")
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useMyMeasurements, useAddMyMeasurement } from "@/hooks/use-client-app";
+import { localDateString } from "@/lib/local-date";
 import {
   LineChart,
   Line,
@@ -36,7 +37,7 @@ export default function MyMeasurementsPage() {
   const addMeasurement = useAddMyMeasurement();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
-    date: new Date().toISOString().split("T")[0],
+    date: localDateString(),
     weight: "",
     body_fat_pct: "",
     chest_cm: "",
@@ -67,7 +68,7 @@ export default function MyMeasurementsPage() {
         onSuccess: () => {
           setShowForm(false);
           setForm({
-            date: new Date().toISOString().split("T")[0],
+            date: localDateString(),
             weight: "",
             body_fat_pct: "",
             chest_cm: "",

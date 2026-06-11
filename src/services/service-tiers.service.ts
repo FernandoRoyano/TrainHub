@@ -164,6 +164,7 @@ export const serviceTiersService = {
       .from("client_service_tiers")
       .select("*, service_tier:service_tiers(*)")
       .eq("client_id", clientId)
+      .eq("status", "active")
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -178,7 +179,16 @@ export const serviceTiersService = {
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
-    // Set active tier to null
+    // Cancela la asignación viva: las lecturas usan client_service_tiers, así
+    // que poner solo active_service_tier_id a null dejaba el tier "activo"
+    // (y sus restricciones) tanto para el trainer como para el cliente.
+    const { error: cancelError } = await supabase
+      .from("client_service_tiers")
+      .update({ status: "cancelled", end_date: new Date().toISOString().split("T")[0] })
+      .eq("client_id", clientId)
+      .eq("status", "active");
+    if (cancelError) throw cancelError;
+
     const { error: updateError } = await supabase
       .from("clients")
       .update({ active_service_tier_id: null })

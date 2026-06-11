@@ -20,6 +20,7 @@ import { WorkoutTimer } from "@/components/workout/workout-timer";
 import { useRestTimerStore } from "@/stores/rest-timer-store";
 import { useWorkoutSessionStore } from "@/stores/workout-session-store";
 import { cn } from "@/lib/utils";
+import { localDateString } from "@/lib/local-date";
 import { AdaptiveTrainingCard } from "@/components/cycle-training/adaptive-training-card";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -257,7 +258,7 @@ export default function MyRoutinePage() {
   const setSelectedDayIndex = useWorkoutSessionStore((s) => s.setSelectedDayIndex);
 
   const [simpleView, setSimpleView] = useState(false);
-  const today = new Date().toISOString().split("T")[0];
+  const today = localDateString();
   const [completionDate, setCompletionDate] = useState<string>(today);
 
   // Clear stale session: if no active workout and store has leftover data, clean up

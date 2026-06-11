@@ -80,6 +80,7 @@ export function useCompleteWorkout() {
       clientAppService.completeWorkout(id, notes, customDate),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["workout-logs"] });
+      queryClient.invalidateQueries({ queryKey: ["progress-data"] });
       toast.success(t("workoutCompletedToast"));
     },
     onError: () => {
@@ -103,7 +104,11 @@ export function useLogExercise() {
     }) =>
       clientAppService.logExercise(workoutLogId, routineExerciseId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["exercise-logs"] });
+      // Los exercise_logs viven embebidos en ["workout-logs", id] y alimentan
+      // ["progress-data"]; la clave ["exercise-logs"] no existía y la UI se
+      // quedaba con datos obsoletos hasta expirar el staleTime.
+      queryClient.invalidateQueries({ queryKey: ["workout-logs"] });
+      queryClient.invalidateQueries({ queryKey: ["progress-data"] });
       toast.success(t("exerciseSaved"));
     },
   });

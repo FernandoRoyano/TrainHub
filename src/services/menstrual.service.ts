@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { parseLocalDate, daysBetweenLocal } from "@/lib/local-date";
 
 export type CyclePhase = "menstrual" | "follicular" | "ovulation" | "luteal";
 export type FlowLevel = "none" | "light" | "medium" | "heavy" | "spotting";
@@ -200,16 +201,17 @@ export const menstrualService = {
 
     if (!settings?.last_period_start) return null;
 
-    const lastStart = new Date(settings.last_period_start);
+    // DATE parseado como local: mezclar medianoche UTC (lastStart) con
+    // medianoche local (today) daba diffDays = -1 el primer día del periodo
+    // en UTC+ y el módulo con signo de JS producía "día de ciclo 0".
+    const lastStart = parseLocalDate(settings.last_period_start);
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
 
-    const diffMs = today.getTime() - lastStart.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffDays = daysBetweenLocal(lastStart, today);
     const cycleLength = settings.average_cycle_length || 28;
     const periodLength = settings.average_period_length || 5;
 
-    const cycleDay = (diffDays % cycleLength) + 1;
+    const cycleDay = (((diffDays % cycleLength) + cycleLength) % cycleLength) + 1;
     const daysUntilNextPeriod = cycleLength - cycleDay + 1;
     const nextPeriodDate = new Date(today);
     nextPeriodDate.setDate(nextPeriodDate.getDate() + daysUntilNextPeriod);

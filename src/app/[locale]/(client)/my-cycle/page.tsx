@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dialog";
 import { Heart, ChevronLeft, ChevronRight, Settings, Dumbbell } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { localDateString } from "@/lib/local-date";
 import { CyclePrivacySettings } from "@/components/cycle-training/cycle-privacy-settings";
 
 const PHASE_COLORS: Record<CyclePhase, string> = {
@@ -68,7 +69,9 @@ const FLOWS: FlowLevel[] = ["none", "light", "medium", "heavy", "spotting"];
 const MOODS: MoodLevel[] = ["great", "good", "neutral", "low", "bad"];
 
 function toDateString(d: Date): string {
-  return d.toISOString().split("T")[0];
+  // Fecha LOCAL: con toISOString() el marcador de "hoy" y la fecha
+  // seleccionada caían en el día anterior entre las 00:00 y la 01:00/02:00
+  return localDateString(d);
 }
 
 export default function MyCyclePage() {

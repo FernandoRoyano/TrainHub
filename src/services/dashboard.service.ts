@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { localWeekStartMonday, parseLocalDate } from "@/lib/local-date";
 
 export interface DailyActivity {
   day: string;
@@ -67,7 +68,11 @@ export const dashboardService = {
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
-    const mondayISO = getMonday();
+    const mondayISO = getMonday(); // instante UTC: solo para columnas timestamptz
+    // Para columnas DATE hay que comparar con la fecha LOCAL: el lunes 00:00
+    // local serializado a ISO cae en domingo en UTC+ y arrastraba el domingo
+    // anterior a "esta semana".
+    const mondayDate = localWeekStartMonday();
 
     const [
       clientsResult,
@@ -132,7 +137,7 @@ export const dashboardService = {
         .from("workout_logs")
         .select("id, client_id, date, client_routine:client_routines!inner(trainer_id)")
         .eq("client_routine.trainer_id" as string, user.id)
-        .gte("date", mondayISO),
+        .gte("date", mondayDate),
       // Pending reviews: active routines assigned > 28 days ago
       supabase
         .from("client_routines")
@@ -250,7 +255,9 @@ export const dashboardService = {
     for (const name of dayNames) dayCounts[name] = 0;
 
     for (const log of weekWorkouts) {
-      const d = new Date(log.date);
+      // log.date es DATE: parsear como local. new Date("YYYY-MM-DD") es UTC
+      // y en husos negativos desplazaba cada barra un día a la izquierda.
+      const d = parseLocalDate(log.date);
       const jsDay = d.getDay(); // 0=Sun
       const idx = jsDay === 0 ? 6 : jsDay - 1; // Convert to 0=Mon
       dayCounts[dayNames[idx]]++;

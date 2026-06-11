@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import type { CyclePhase } from "@/services/menstrual.service";
+import { parseLocalDate, daysBetweenLocal, localDateString } from "@/lib/local-date";
 
 export interface CycleTrainingConfig {
   id: string;
@@ -386,22 +387,23 @@ export const cycleTrainingService = {
 
     if (!settings?.last_period_start) return null;
 
-    const lastStart = new Date(settings.last_period_start);
+    // Mismo cálculo que menstrual.service (fecha local + módulo positivo y
+    // límites de fase sin floor) para que trainer y cliente vean la misma fase
+    const lastStart = parseLocalDate(settings.last_period_start);
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diffDays = Math.floor((today.getTime() - lastStart.getTime()) / 86400000);
+    const diffDays = daysBetweenLocal(lastStart, today);
     const cycleLen = settings.average_cycle_length || 28;
     const periodLen = settings.average_period_length || 5;
-    const cycleDay = (diffDays % cycleLen) + 1;
+    const cycleDay = (((diffDays % cycleLen) + cycleLen) % cycleLen) + 1;
 
     let phase: CyclePhase;
     if (cycleDay <= periodLen) phase = "menstrual";
-    else if (cycleDay <= Math.floor(cycleLen * 0.5)) phase = "follicular";
-    else if (cycleDay <= Math.floor(cycleLen * 0.5) + 2) phase = "ovulation";
+    else if (cycleDay <= cycleLen * 0.5) phase = "follicular";
+    else if (cycleDay <= cycleLen * 0.5 + 2) phase = "ovulation";
     else phase = "luteal";
 
     // Get latest energy
-    const todayStr = today.toISOString().split("T")[0];
+    const todayStr = localDateString(today);
     const { data: todayLog } = await supabase
       .from("menstrual_logs")
       .select("energy_level")
