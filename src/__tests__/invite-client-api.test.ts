@@ -4,7 +4,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.stubGlobal("crypto", { randomUUID: () => "generated-uuid-token" });
 
 // Mock Supabase
-const mockSingle = vi.fn();
 const mockUpdateEq = vi.fn().mockResolvedValue({ error: null });
 const mockGetUser = vi.fn();
 
@@ -47,7 +46,6 @@ function makeRequest(body: Record<string, unknown>) {
 
 // Helper to set up "from" mock chain for different tables
 function setupFromMock(clientData: Record<string, unknown> | null, clientError: unknown, trainerData?: Record<string, unknown> | null) {
-  let callCount = 0;
   mockSupabase.from.mockImplementation((table: string) => {
     if (table === "clients") {
       return {

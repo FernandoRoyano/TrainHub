@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock admin client
 const mockUpsert = vi.fn().mockResolvedValue({ error: null });
-const mockUpdate = vi.fn();
 const mockUpdateEq = vi.fn().mockResolvedValue({ error: null });
 
 // insert debe soportar dos usos: await directo (payments) y

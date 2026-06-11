@@ -101,9 +101,7 @@ describe("questionnairesService.getTemplateById", () => {
     const template = { id: "t1", name: "Intake" };
     const questions = [{ id: "q1", template_id: "t1", question_text: "Age?" }];
 
-    let callCount = 0;
     mockSupabase.from.mockImplementation((table: string) => {
-      callCount++;
       if (table === "questionnaire_templates") {
         const chain = createChain();
         chain.single.mockResolvedValue({ data: template, error: null });
@@ -141,9 +139,7 @@ describe("questionnairesService.createTemplate", () => {
     const createdTemplate = { id: "t-new", name: "New Form" };
     mockGetUser.mockResolvedValue({ data: { user: { id: "trainer-1" } } });
 
-    let callCount = 0;
     mockSupabase.from.mockImplementation((table: string) => {
-      callCount++;
       if (table === "questionnaire_templates") {
         const chain = createChain();
         chain.single.mockResolvedValue({ data: createdTemplate, error: null });

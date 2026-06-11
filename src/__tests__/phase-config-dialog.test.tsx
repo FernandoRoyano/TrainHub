@@ -22,7 +22,7 @@ describe("PhaseConfigDialog", () => {
     mockConfigData.mockReturnValue({ data: null, isLoading: false });
     mockUpsertMutation.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
 
-    const { container } = render(
+    render(
       <PhaseConfigDialog open={false} onOpenChange={vi.fn()} clientId="c1" />
     );
 

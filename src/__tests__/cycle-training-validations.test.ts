@@ -79,6 +79,7 @@ describe("cycleTrainingConfigSchema", () => {
   });
 
   it("rejects when enabled is missing", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { enabled, ...withoutEnabled } = validConfig;
     const result = cycleTrainingConfigSchema.safeParse(withoutEnabled);
     expect(result.success).toBe(false);
@@ -186,6 +187,7 @@ describe("cyclePrivacySchema", () => {
   });
 
   it("rejects when share_phase is missing", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { share_phase, ...without } = validPrivacy;
     const result = cyclePrivacySchema.safeParse(without);
     expect(result.success).toBe(false);

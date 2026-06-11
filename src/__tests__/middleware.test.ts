@@ -1,13 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 
 // Test the role-based routing logic extracted from middleware
 // We test the pure logic, not the Next.js middleware wrapper
-
-interface RouteTestCase {
-  pathname: string;
-  role: string | undefined;
-  expectedRedirect: string | null;
-}
 
 function getRouteRedirect(pathname: string, role?: string): string | null {
   const isClient = role === "client";

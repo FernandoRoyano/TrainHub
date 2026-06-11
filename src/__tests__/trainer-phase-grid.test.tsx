@@ -85,7 +85,6 @@ describe("TrainerPhaseGrid", () => {
 
     // Skeleton should be present during loading
     // The component shows Skeleton elements while loading
-    const skeletons = document.querySelectorAll("[class*='skeleton'], [class*='Skeleton']");
     // May or may not be visible depending on timing
     expect(true).toBe(true); // Just verify no crash
   });

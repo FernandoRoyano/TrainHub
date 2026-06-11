@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 
 // Mock all hooks used by PlanTab
 vi.mock("@/hooks/use-coaching-plans", () => ({
@@ -67,7 +67,6 @@ describe("PlanTab", () => {
     const { container } = render(<PlanTab clientId="client-123" />);
     // Skeleton component renders divs with animate-pulse from shadcn
     // The component shows 3 Skeleton elements when loading
-    const skeletons = container.querySelectorAll("[class*='animate-pulse'], [data-slot='skeleton']");
     // At minimum the container should render the skeleton wrapper
     expect(container.querySelector(".space-y-4")).toBeTruthy();
   });

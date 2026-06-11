@@ -16,12 +16,6 @@ describe("Routine print data preparation", () => {
     notes: string | null;
   }
 
-  interface PrintDay {
-    day_number: number;
-    name: string;
-    exercises: PrintExercise[];
-  }
-
   function groupSupersets(exercises: PrintExercise[]): PrintExercise[][] {
     const groups: PrintExercise[][] = [];
     let currentGroup: PrintExercise[] = [];

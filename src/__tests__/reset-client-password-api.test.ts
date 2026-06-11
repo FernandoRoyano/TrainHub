@@ -3,14 +3,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // Mock Supabase server client
 const mockSingle = vi.fn();
 const mockGetUser = vi.fn();
-const mockFromSelect = vi.fn();
 
 const mockSupabase = {
   auth: { getUser: mockGetUser },
   from: vi.fn().mockImplementation(() => ({
-    select: (...args: unknown[]) => ({
-      eq: (...eqArgs: unknown[]) => ({
-        eq: (...eqArgs2: unknown[]) => ({
+    select: () => ({
+      eq: () => ({
+        eq: () => ({
           single: mockSingle,
         }),
       }),

@@ -439,7 +439,6 @@ describe("cycleTrainingService", () => {
       };
 
       // First maybeSingle: null (not found), then insert
-      let privacyCallCount = 0;
       const privacyChain = createChain();
       privacyChain.maybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
       privacyChain.single = vi.fn().mockResolvedValue({ data: defaultPrivacy, error: null });
@@ -447,7 +446,6 @@ describe("cycleTrainingService", () => {
       mockSupabase.from.mockImplementation((table: string) => {
         if (table === "clients") return clientChain;
         if (table === "cycle_privacy_settings") {
-          privacyCallCount++;
           return privacyChain;
         }
         return createChain();

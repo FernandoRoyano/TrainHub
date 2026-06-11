@@ -4,9 +4,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.stubGlobal("crypto", { randomUUID: () => "generated-uuid-token" });
 
 // Build mock Supabase chain
-const mockSingle = vi.fn();
-const mockUpdate = vi.fn();
-const mockUpdateEq = vi.fn();
 const mockGetUser = vi.fn();
 
 const mockSupabase = {
