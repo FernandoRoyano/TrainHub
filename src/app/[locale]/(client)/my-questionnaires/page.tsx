@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useMyQuestionnaires } from "@/hooks/use-client-app";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,10 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { FileQuestion, ChevronRight } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 export default function MyQuestionnairesPage() {
   const t = useTranslations("clientApp");
+  const locale = useLocale();
   const { data: questionnaires, isLoading } = useMyQuestionnaires();
 
   if (isLoading) {
@@ -68,12 +69,12 @@ export default function MyQuestionnairesPage() {
                 </div>
                 {q.due_date && (
                   <p className="text-xs text-muted-foreground">
-                    {t("dueDate")}: {new Date(q.due_date).toLocaleDateString()}
+                    {t("dueDate")}: {new Date(q.due_date).toLocaleDateString(locale)}
                   </p>
                 )}
                 {q.status === "completed" && q.completed_at && (
                   <p className="text-xs text-muted-foreground">
-                    {t("completedAt")}: {new Date(q.completed_at).toLocaleDateString()}
+                    {t("completedAt")}: {new Date(q.completed_at).toLocaleDateString(locale)}
                   </p>
                 )}
               </div>

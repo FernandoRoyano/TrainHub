@@ -529,7 +529,9 @@
     "routineAssignError": "Error al asignar rutina",
     "routineCancelled": "Rutina cancelada",
     "routineCancelError": "Error al cancelar rutina",
-    "copySuffix": "(copia)"
+    "copySuffix": "(copia)",
+    "exerciseCount_one": "ejercicio",
+    "exerciseCount_other": "ejercicios"
   },
   "nutrition": {
     "title": "Planes de nutrición",
@@ -788,7 +790,8 @@
     "completed": "Completado",
     "dueDate": "Fecha limite",
     "completedAt": "Completado el",
-    "back": "Volver"
+    "back": "Volver",
+    "restShort": "descanso"
   },
   "workouts": {
     "noWorkoutsYet": "Sin entrenamientos registrados",
@@ -1472,7 +1475,14 @@
     "viewNutrition": "Mi Nutrición",
     "daysPerWeek": "días/semana",
     "weeks": "semanas",
-    "messages": "Mensajes"
+    "messages": "Mensajes",
+    "status_pending": "Pendiente",
+    "status_assigned": "Asignado",
+    "status_in_progress": "En progreso",
+    "status_completed": "Completado",
+    "status_expired": "Expirado",
+    "status_active": "Activo",
+    "status_cancelled": "Cancelado"
   },
   "assignPlanWizard": {
     "title": "Asignar Plan",

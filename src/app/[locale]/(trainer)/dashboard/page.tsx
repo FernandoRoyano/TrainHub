@@ -36,7 +36,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { TrainerPhaseGrid } from "@/components/cycle-training/trainer-phase-grid";
 
 const activityIcons = {
@@ -46,15 +46,16 @@ const activityIcons = {
   message_received: MessageCircle,
 } as const;
 
-function timeAgo(timestamp: string): string {
+function timeAgo(timestamp: string, locale: string): string {
+  // Localizado: antes devolvía "now"/"5m" en inglés también en la UI española
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto", style: "narrow" });
   const diff = Date.now() - new Date(timestamp).getTime();
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "now";
-  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 1) return rtf.format(0, "minute");
+  if (minutes < 60) return rtf.format(-minutes, "minute");
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h`;
-  const days = Math.floor(hours / 24);
-  return `${days}d`;
+  if (hours < 24) return rtf.format(-hours, "hour");
+  return rtf.format(-Math.floor(hours / 24), "day");
 }
 
 function getGreetingKey(): "greetingMorning" | "greetingAfternoon" | "greetingEvening" {
@@ -382,7 +383,7 @@ export default function DashboardPage() {
                         </p>
                       </div>
                       <span className="text-xs text-muted-foreground shrink-0">
-                        {timeAgo(item.timestamp)}
+                        {timeAgo(item.timestamp, locale)}
                       </span>
                     </div>
                   );

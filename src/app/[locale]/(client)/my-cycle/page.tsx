@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   useMenstrualSettings,
   useUpdateMenstrualSettings,
@@ -76,6 +76,7 @@ function toDateString(d: Date): string {
 
 export default function MyCyclePage() {
   const t = useTranslations("menstrual");
+  const locale = useLocale();
   const tc = useTranslations("common");
 
   const today = new Date();
@@ -219,7 +220,11 @@ export default function MyCyclePage() {
     );
   }
 
-  const monthName = new Date(viewYear, viewMonth - 1).toLocaleString(undefined, { month: "long" });
+  const monthName = new Date(viewYear, viewMonth - 1).toLocaleString(locale, { month: "long" });
+  // Iniciales de los días según el idioma activo (semana empezando en domingo)
+  const weekdayLetters = Array.from({ length: 7 }, (_, i) =>
+    new Intl.DateTimeFormat(locale, { weekday: "narrow" }).format(new Date(2024, 0, 7 + i))
+  );
 
   return (
     <div className="space-y-6 max-w-lg mx-auto">
@@ -325,7 +330,7 @@ export default function MyCyclePage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-7 gap-1 text-center">
-            {["D", "L", "M", "X", "J", "V", "S"].map((d, i) => (
+            {weekdayLetters.map((d, i) => (
               <div key={i} className="text-xs font-medium text-muted-foreground py-1">
                 {d}
               </div>

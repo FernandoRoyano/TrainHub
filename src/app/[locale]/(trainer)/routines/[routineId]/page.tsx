@@ -52,6 +52,7 @@ export default function RoutineDetailPage() {
   const t = useTranslations("routines");
   const te = useTranslations("exercises");
   const tc = useTranslations("common");
+  const tca = useTranslations("clientApp");
   const locale = useLocale();
   const router = useRouter();
 
@@ -74,7 +75,7 @@ export default function RoutineDetailPage() {
   }
 
   if (!routine) {
-    return <p className="text-muted-foreground">Routine not found</p>;
+    return <p className="text-muted-foreground">{tc("notFound")}</p>;
   }
 
   return (
@@ -216,7 +217,7 @@ export default function RoutineDetailPage() {
                                   <span className="text-xs text-muted-foreground">{Math.floor(group.time_limit_seconds / 60)} min</span>
                                 )}
                                 {group.rest_between_rounds != null && group.rest_between_rounds > 0 && (
-                                  <span className="text-xs text-muted-foreground">· {group.rest_between_rounds}s descanso</span>
+                                  <span className="text-xs text-muted-foreground">· {group.rest_between_rounds}s {tca("restShort")}</span>
                                 )}
                               </div>
                             )}

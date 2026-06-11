@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { createRoutineSchema, type RoutineFormData } from "@/lib/validations/routine";
 import { useCreateRoutine, useUpdateRoutine } from "@/hooks/use-routines";
@@ -80,7 +80,7 @@ import {
   Zap,
   Layers,
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import type { Exercise } from "@/services/exercises.service";
 
 interface RoutineBuilderProps {
@@ -968,7 +968,7 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                                     </span>
                                     {group.exercises.length > 0 && (
                                       <span className="text-xs text-muted-foreground">
-                                        {group.exercises.length} {group.exercises.length === 1 ? "ejercicio" : "ejercicios"}
+                                        {group.exercises.length} {group.exercises.length === 1 ? t("exerciseCount_one") : t("exerciseCount_other")}
                                       </span>
                                     )}
                                   </div>
@@ -1147,15 +1147,15 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                       <DropdownMenuContent>
                         <DropdownMenuItem onClick={() => addGroup(activeDayIndex, "superset")}>
                           <Link2 className="h-3.5 w-3.5 mr-2" />
-                          Superserie
+                          {t("supersetGroup")}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => addGroup(activeDayIndex, "triset")}>
                           <Layers className="h-3.5 w-3.5 mr-2" />
-                          Triserie
+                          {t("trisetGroup")}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => addGroup(activeDayIndex, "circuit")}>
                           <Repeat className="h-3.5 w-3.5 mr-2" />
-                          Circuito
+                          {t("circuitGroup")}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => addGroup(activeDayIndex, "emom")}>
                           <Timer className="h-3.5 w-3.5 mr-2" />

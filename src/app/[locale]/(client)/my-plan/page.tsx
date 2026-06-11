@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import {
   ClipboardList,
   Calendar,
@@ -42,6 +42,10 @@ const featureIcons: Record<string, typeof Dumbbell> = {
 
 export default function MyPlanPage() {
   const t = useTranslations("myPlan");
+  // Traduce estados crudos de BD; si aparece uno no mapeado, muestra el valor tal cual
+  const KNOWN_STATUSES = ["pending", "assigned", "in_progress", "completed", "expired", "active", "cancelled"];
+  const statusLabel = (s: string) =>
+    KNOWN_STATUSES.includes(s) ? t(`status_${s}` as Parameters<typeof t>[0]) : s;
   const { data: planData, isLoading } = useMyActiveCoachingPlan();
   const { data: routine } = useMyRoutine();
   const { data: questionnaires } = useMyQuestionnaires();
@@ -111,8 +115,8 @@ export default function MyPlanPage() {
                     href={`/my-questionnaires/${q.id}`}
                     className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent transition-colors"
                   >
-                    <p className="text-sm font-medium">{q.template?.name ?? "Cuestionario"}</p>
-                    <Badge variant="outline" className={statusColors[q.status] ?? ""}>{q.status}</Badge>
+                    <p className="text-sm font-medium">{q.template?.name ?? t("questionnaires")}</p>
+                    <Badge variant="outline" className={statusColors[q.status] ?? ""}>{statusLabel(q.status)}</Badge>
                   </Link>
                 ))}
               </div>
@@ -176,7 +180,7 @@ export default function MyPlanPage() {
                   {plan?.name ?? t("title")}
                 </h2>
                 <Badge variant="outline" className={statusColors[planData.status] ?? ""}>
-                  {planData.status}
+                  {statusLabel(planData.status)}
                 </Badge>
                 {tier && (
                   <Badge

@@ -103,7 +103,7 @@ function ExerciseCard({
               className="text-left"
             >
               <p className="font-medium text-sm md:text-base hover:text-primary transition-colors leading-tight">
-                {(locale === "es" ? ex.exercise?.name_es : null) ?? ex.exercise?.name ?? "Exercise"}
+                {(locale === "es" ? ex.exercise?.name_es : null) ?? ex.exercise?.name ?? ""}
               </p>
             </button>
             <div className="flex items-center gap-2 mt-1">
@@ -134,8 +134,8 @@ function ExerciseCard({
           <div className="space-y-2">
             <div className="flex gap-2 text-xs text-muted-foreground px-1 font-medium">
               <span className="w-8 text-center">#</span>
-              <span className="flex-1 text-center">Reps</span>
-              <span className="flex-1 text-center">Peso (kg)</span>
+              <span className="flex-1 text-center">{t("repsShort")}</span>
+              <span className="flex-1 text-center">{t("weightShort")} (kg)</span>
             </div>
             {setDetails.map((set, si) => (
               <div key={si} className="space-y-1 rounded-lg bg-muted/30 p-1.5">
@@ -631,7 +631,7 @@ function MyRoutinePageContent() {
                         </Badge>
                         {group.rest_between_rounds != null && group.rest_between_rounds > 0 && (
                           <span className="text-xs text-muted-foreground">
-                            ({group.rest_between_rounds}s rest)
+                            ({group.rest_between_rounds}s {t("restShort")})
                           </span>
                         )}
                         {group.notes && (

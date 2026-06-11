@@ -124,15 +124,16 @@ export function useMyMeasurements() {
 
 export function useAddMyMeasurement() {
   const qc = useQueryClient();
+  const t = useTranslations("measurements");
   return useMutation({
     mutationFn: (input: Parameters<typeof clientAppService.addMyMeasurement>[0]) =>
       clientAppService.addMyMeasurement(input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["my-measurements"] });
-      toast.success("Medicion guardada");
+      toast.success(t("measurementSaved"));
     },
     onError: () => {
-      toast.error("Error al guardar medicion");
+      toast.error(t("measurementSaveError"));
     },
   });
 }

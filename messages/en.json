@@ -529,7 +529,9 @@
     "routineAssignError": "Error assigning routine",
     "routineCancelled": "Routine cancelled",
     "routineCancelError": "Error cancelling routine",
-    "copySuffix": "(copy)"
+    "copySuffix": "(copy)",
+    "exerciseCount_one": "exercise",
+    "exerciseCount_other": "exercises"
   },
   "nutrition": {
     "title": "Meal Plans",
@@ -788,7 +790,8 @@
     "completed": "Completed",
     "dueDate": "Due date",
     "completedAt": "Completed on",
-    "back": "Back"
+    "back": "Back",
+    "restShort": "rest"
   },
   "workouts": {
     "noWorkoutsYet": "No workouts logged yet",
@@ -1472,7 +1475,14 @@
     "viewNutrition": "My Nutrition",
     "daysPerWeek": "days/week",
     "weeks": "weeks",
-    "messages": "Messages"
+    "messages": "Messages",
+    "status_pending": "Pending",
+    "status_assigned": "Assigned",
+    "status_in_progress": "In progress",
+    "status_completed": "Completed",
+    "status_expired": "Expired",
+    "status_active": "Active",
+    "status_cancelled": "Cancelled"
   },
   "assignPlanWizard": {
     "title": "Assign Plan",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   useActiveFast,
   useFastingSettings,
@@ -96,6 +96,7 @@ function formatHoursMinutes(totalHours: number): string {
 
 export default function MyFastingPage() {
   const t = useTranslations("fasting");
+  const locale = useLocale();
   const tc = useTranslations("common");
 
   const { data: activeFast, isLoading: fastLoading } = useActiveFast();
@@ -287,7 +288,7 @@ export default function MyFastingPage() {
                       {t(`protocols.${log.protocol}`)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(log.fast_start).toLocaleDateString()}
+                      {new Date(log.fast_start).toLocaleDateString(locale)}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

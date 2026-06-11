@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useAdminUsers, useUpdateUserRole } from "@/hooks/use-admin";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { es, enUS } from "date-fns/locale";
 
 const roleColors: Record<string, string> = {
   admin: "bg-primary/10 text-primary border-primary/20",
@@ -48,6 +49,7 @@ const roleIcons: Record<string, typeof Shield> = {
 
 export default function AdminUsersPage() {
   const t = useTranslations("admin");
+  const locale = useLocale();
   const tc = useTranslations("common");
 
   const [search, setSearch] = useState("");
@@ -172,6 +174,7 @@ export default function AdminUsersPage() {
                       <div className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(user.created_at), {
                           addSuffix: true,
+                          locale: locale === "es" ? es : enUS,
                         })}
                       </div>
                       <div>

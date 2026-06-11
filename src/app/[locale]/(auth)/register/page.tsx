@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RegisterForm } from "@/components/auth/register-form";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 export default function RegisterPage() {
   const t = useTranslations("auth");

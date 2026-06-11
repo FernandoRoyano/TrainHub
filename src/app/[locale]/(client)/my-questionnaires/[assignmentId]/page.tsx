@@ -179,6 +179,7 @@ function QuestionInput({
   onChange: (val: Partial<AnswerMap[string]>) => void;
   disabled: boolean;
 }) {
+  const tc = useTranslations("common");
   const type = question.question_type;
   const options = question.options ?? [];
   const config = question.config ?? {};
@@ -281,8 +282,8 @@ function QuestionInput({
       return (
         <div className="flex gap-4">
           {[
-            { label: "Si", val: true },
-            { label: "No", val: false },
+            { label: tc("yes"), val: true },
+            { label: tc("no"), val: false },
           ].map((opt) => (
             <label
               key={String(opt.val)}

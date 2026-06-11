@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useAdminStats } from "@/hooks/use-admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,6 +15,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { es, enUS } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 
 const roleColors: Record<string, string> = {
@@ -54,6 +55,7 @@ function UserAvatar({ name }: { name: string }) {
 
 export default function AdminDashboardPage() {
   const t = useTranslations("admin");
+  const locale = useLocale();
   const { data, isLoading } = useAdminStats();
 
   if (isLoading) {
@@ -200,6 +202,7 @@ export default function AdminDashboardPage() {
                   <span className="text-[10px] text-muted-foreground">
                     {formatDistanceToNow(new Date(user.created_at), {
                       addSuffix: true,
+                      locale: locale === "es" ? es : enUS,
                     })}
                   </span>
                 </div>

@@ -52,7 +52,7 @@ export default function ClientDetailPage() {
   }
 
   if (!client) {
-    return <p className="text-muted-foreground">Client not found</p>;
+    return <p className="text-muted-foreground">{tc("notFound")}</p>;
   }
 
   const initials = client.full_name
