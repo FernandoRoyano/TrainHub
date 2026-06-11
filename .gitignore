@@ -44,3 +44,7 @@ public/swe-worker-*.js
 public/fallback-*.js
 
 .vercel
+
+# Artefactos locales
+playwright-report/
+dedupe-rollback-*.json
