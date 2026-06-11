@@ -30,34 +30,24 @@ export async function POST(request: Request) {
     return NextResponse.json({});
   }
 
-  // Query auth.users directly via admin client (SQL)
+  // El last_sign_in_at real solo existe en auth.users (Admin API).
+  // El alias anterior sobre public.users.updated_at devolvía la fecha de la
+  // última edición de perfil, no la última conexión.
   const admin = createAdminClient();
-  const { data: authData } = await admin
-    .from("users")
-    .select("id, last_sign_in_at:updated_at")
-    .in("id", userIds);
-
-  // Also try getting from auth.users via admin API for each user
   const result: Record<string, string | null> = {};
 
-  for (const client of clients) {
-    if (!client.user_id) continue;
-
-    // Try from the public users table first
-    const publicUser = authData?.find((u: { id: string }) => u.id === client.user_id);
-    if (publicUser?.last_sign_in_at) {
-      result[client.id] = publicUser.last_sign_in_at;
-      continue;
-    }
-
-    // Fallback: get from auth admin
-    try {
-      const { data: authUser } = await admin.auth.admin.getUserById(client.user_id);
-      result[client.id] = authUser?.user?.last_sign_in_at ?? null;
-    } catch {
-      result[client.id] = null;
-    }
-  }
+  await Promise.all(
+    clients
+      .filter((c) => c.user_id)
+      .map(async (client) => {
+        try {
+          const { data: authUser } = await admin.auth.admin.getUserById(client.user_id as string);
+          result[client.id] = authUser?.user?.last_sign_in_at ?? null;
+        } catch {
+          result[client.id] = null;
+        }
+      })
+  );
 
   return NextResponse.json(result);
 }

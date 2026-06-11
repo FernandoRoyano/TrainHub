@@ -40,7 +40,12 @@ export async function GET(request: NextRequest) {
     .range(from, to);
 
   if (search) {
-    query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
+    // Sanea el término: coma/paréntesis/asterisco tienen significado en la
+    // gramática de filtros de PostgREST y permitirían inyectar condiciones
+    const safeSearch = search.replace(/[,()*]/g, " ").trim();
+    if (safeSearch) {
+      query = query.or(`full_name.ilike.%${safeSearch}%,email.ilike.%${safeSearch}%`);
+    }
   }
 
   if (role) {

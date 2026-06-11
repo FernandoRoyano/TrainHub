@@ -21,6 +21,8 @@ export async function POST(request: Request) {
       email: `pending-${token}@placeholder.local`,
       status: "pending",
       invite_token: token,
+      // Caducidad obligatoria: sin expires_at el enlace era válido para siempre
+      invite_token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     })
     .select("id")
     .single();

@@ -7,11 +7,10 @@ import { getEmailTranslations, getLocaleForEmail } from "@/lib/email/translation
 
 export async function POST(request: Request) {
   try {
-    const authHeader = request.headers.get("authorization");
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
+    // Esta ruta la llaman los hooks del navegador tras asignar una rutina, no
+    // el cron: exigir CRON_SECRET hacía que devolviera 401 siempre y el email
+    // de asignación nunca se enviara. La autorización correcta es el usuario
+    // autenticado + que el cliente le pertenezca.
     const supabase = await createClient();
     const {
       data: { user },
@@ -25,6 +24,7 @@ export async function POST(request: Request) {
       .from("clients")
       .select("email, full_name, user_id")
       .eq("id", clientId)
+      .eq("trainer_id", user.id)
       .single();
 
     if (!client?.email || !client.user_id) {

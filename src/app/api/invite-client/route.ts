@@ -46,9 +46,11 @@ export async function POST(request: Request) {
   let token = client.invite_token;
   if (!token) {
     token = crypto.randomUUID();
+    // Caducidad obligatoria: un token sin expires_at era válido para siempre
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
     const { error: updateError } = await supabase
       .from("clients")
-      .update({ invite_token: token })
+      .update({ invite_token: token, invite_token_expires_at: expiresAt })
       .eq("id", client.id);
 
     if (updateError) {

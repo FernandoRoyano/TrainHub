@@ -24,15 +24,20 @@ export async function POST(request: Request) {
 
     if (!conversation) return NextResponse.json({ skipped: true });
 
-    // Determine sender and receiver
-    const isTrainerSender = conversation.trainer_id === user.id;
-
-    // Create in-app notification for the receiver
     const { data: client } = await admin
       .from("clients")
       .select("email, full_name, user_id")
       .eq("id", conversation.client_id)
       .single();
+
+    // Seguridad: solo los participantes de la conversación pueden disparar
+    // notificaciones. Sin esto, cualquier usuario autenticado podía falsificar
+    // notificaciones "Nuevo mensaje de X" hacia cualquier trainer.
+    const isTrainerSender = conversation.trainer_id === user.id;
+    const isClientSender = client?.user_id === user.id;
+    if (!isTrainerSender && !isClientSender) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const { data: trainer } = await admin
       .from("users")

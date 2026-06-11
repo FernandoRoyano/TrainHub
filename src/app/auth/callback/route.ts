@@ -115,36 +115,10 @@ export async function GET(request: Request) {
           }
         }
 
-        // Try linking by full_name match (fallback for clients created without email)
-        const fullName = user.user_metadata?.full_name;
-        if (fullName) {
-          const { data: nameClient } = await admin
-            .from("clients")
-            .select("id, trainer_id, full_name")
-            .ilike("full_name", fullName)
-            .is("user_id", null)
-            .maybeSingle();
-
-          if (nameClient) {
-            await admin
-              .from("clients")
-              .update({
-                user_id: user.id,
-                status: "active",
-                email: user.email,
-              })
-              .eq("id", nameClient.id);
-
-            await admin
-              .from("users")
-              .update({ role: "client" })
-              .eq("id", user.id);
-
-            sendWelcomeEmail(user.email!, nameClient.full_name, nameClient.trainer_id, origin).catch(() => {});
-
-            return NextResponse.redirect(`${origin}/${locale}/my-routine`);
-          }
-        }
+        // Seguridad: NO vincular por coincidencia de full_name. El nombre lo
+        // controla quien se registra (user_metadata), así que un tercero podría
+        // registrarse con el nombre de un cliente pendiente y quedarse con su
+        // cuenta. Solo email verificado o invite_token son señales válidas.
       }
 
       return NextResponse.redirect(`${origin}${next}`);

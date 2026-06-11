@@ -7,11 +7,9 @@ import { getEmailTranslations, getLocaleForEmail } from "@/lib/email/translation
 
 export async function POST(request: Request) {
   try {
-    const authHeader = request.headers.get("authorization");
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
+    // Llamada desde hooks del navegador, no desde el cron: el check de
+    // CRON_SECRET devolvía 401 siempre y el email nunca se enviaba.
+    // Autorización correcta: usuario autenticado + cliente del trainer.
     const supabase = await createClient();
     const {
       data: { user },
@@ -25,6 +23,7 @@ export async function POST(request: Request) {
       .from("clients")
       .select("email, full_name, user_id")
       .eq("id", clientId)
+      .eq("trainer_id", user.id)
       .single();
 
     if (!client?.email || !client.user_id) {

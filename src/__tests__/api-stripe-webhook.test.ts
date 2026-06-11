@@ -176,14 +176,16 @@ describe("POST /api/stripe/webhook", () => {
     expect(res.status).toBe(200);
 
     expect(mockAdminFrom).toHaveBeenCalledWith("payments");
-    expect(mockInsert).toHaveBeenCalledWith(
+    // Upsert (no insert): los reintentos de cobro reutilizan payment_intent
+    expect(mockUpsert).toHaveBeenCalledWith(
       expect.objectContaining({
         user_id: "user-1",
         stripe_payment_intent_id: "pi_123",
         amount: 2900,
         currency: "eur",
         status: "succeeded",
-      })
+      }),
+      { onConflict: "stripe_payment_intent_id" }
     );
   });
 
@@ -210,12 +212,13 @@ describe("POST /api/stripe/webhook", () => {
     const res = await POST(req);
     expect(res.status).toBe(200);
 
-    // Should insert failed payment
+    // Should upsert failed payment
     expect(mockAdminFrom).toHaveBeenCalledWith("payments");
-    expect(mockInsert).toHaveBeenCalledWith(
+    expect(mockUpsert).toHaveBeenCalledWith(
       expect.objectContaining({
         status: "failed",
-      })
+      }),
+      { onConflict: "stripe_payment_intent_id" }
     );
 
     // Should mark subscription as past_due

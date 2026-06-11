@@ -141,7 +141,10 @@ export async function POST(request: Request) {
           : invoice.payment_intent?.id;
 
         if (userId && paymentIntentId) {
-          await admin.from("payments").insert({
+          // Upsert: un reintento de cobro reutiliza el mismo payment_intent.
+          // Con insert, la unique de stripe_payment_intent_id lanzaba error,
+          // el catch devolvía 500 y Stripe reintentaba el evento para siempre.
+          await admin.from("payments").upsert({
             user_id: userId,
             stripe_payment_intent_id: paymentIntentId,
             stripe_invoice_id: invoice.id,
@@ -149,7 +152,7 @@ export async function POST(request: Request) {
             currency: invoice.currency,
             status: "succeeded",
             description: invoice.lines?.data?.[0]?.description || "Subscription payment",
-          });
+          }, { onConflict: "stripe_payment_intent_id" });
         }
         break;
       }
@@ -164,7 +167,7 @@ export async function POST(request: Request) {
           : invoice.payment_intent?.id;
 
         if (userId && paymentIntentId) {
-          await admin.from("payments").insert({
+          await admin.from("payments").upsert({
             user_id: userId,
             stripe_payment_intent_id: paymentIntentId,
             stripe_invoice_id: invoice.id,
@@ -172,7 +175,7 @@ export async function POST(request: Request) {
             currency: invoice.currency,
             status: "failed",
             description: "Payment failed",
-          });
+          }, { onConflict: "stripe_payment_intent_id" });
 
           await admin.from("subscriptions")
             .update({ status: "past_due" })

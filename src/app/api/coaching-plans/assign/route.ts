@@ -65,6 +65,54 @@ export async function POST(request: Request) {
       );
     }
 
+    // Seguridad: los IDs de override vienen del body y se insertan con el
+    // cliente admin (sin RLS), así que hay que verificar que pertenecen al
+    // trainer autenticado. Sin esto, un trainer podría asignar contenido
+    // privado de otro trainer a sus propios clientes (IDOR).
+    if (routine_override_id) {
+      const { data: ownedRoutine } = await admin
+        .from("routines")
+        .select("id")
+        .eq("id", routine_override_id)
+        .eq("trainer_id", user.id)
+        .maybeSingle();
+      if (!ownedRoutine) {
+        return NextResponse.json(
+          { error: "Routine override not found or not authorized" },
+          { status: 403 }
+        );
+      }
+    }
+
+    if (meal_plan_override_id) {
+      const { data: ownedMealPlan } = await admin
+        .from("meal_plans")
+        .select("id")
+        .eq("id", meal_plan_override_id)
+        .eq("trainer_id", user.id)
+        .maybeSingle();
+      if (!ownedMealPlan) {
+        return NextResponse.json(
+          { error: "Meal plan override not found or not authorized" },
+          { status: 403 }
+        );
+      }
+    }
+
+    if (Array.isArray(questionnaire_template_ids) && questionnaire_template_ids.length > 0) {
+      const { data: ownedTemplates } = await admin
+        .from("questionnaire_templates")
+        .select("id")
+        .in("id", questionnaire_template_ids)
+        .eq("trainer_id", user.id);
+      if ((ownedTemplates?.length ?? 0) !== questionnaire_template_ids.length) {
+        return NextResponse.json(
+          { error: "Questionnaire template not found or not authorized" },
+          { status: 403 }
+        );
+      }
+    }
+
     // 2. Deactivate any existing active client_coaching_plan for this client
     const { data: existingPlans } = await admin
       .from("client_coaching_plans")
