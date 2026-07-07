@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useAdminUsers, useUpdateUserRole } from "@/hooks/use-admin";
+import { useAdminUsers, useUpdateUserRole, useDeleteUser } from "@/hooks/use-admin";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
+  Trash2,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es, enUS } from "date-fns/locale";
@@ -60,6 +61,10 @@ export default function AdminUsersPage() {
     name: string;
     newRole: string;
   } | null>(null);
+  const [userToDelete, setUserToDelete] = useState<{
+    userId: string;
+    name: string;
+  } | null>(null);
 
   const debouncedSearch = useDebounce(search, 300);
   const { data, isLoading } = useAdminUsers({
@@ -68,6 +73,7 @@ export default function AdminUsersPage() {
     page,
   });
   const updateRole = useUpdateUserRole();
+  const deleteUser = useDeleteUser();
 
   const users = data?.users ?? [];
   const totalCount = data?.count ?? 0;
@@ -201,6 +207,18 @@ export default function AdminUsersPage() {
                                   {t("changeRoleTo", { role: newRole })}
                                 </DropdownMenuItem>
                               ))}
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() =>
+                                setUserToDelete({
+                                  userId: user.id,
+                                  name: user.full_name || user.email,
+                                })
+                              }
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              {t("deleteUser")}
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
@@ -262,6 +280,25 @@ export default function AdminUsersPage() {
               { userId: roleChange.userId, role: roleChange.newRole },
               { onSuccess: () => setRoleChange(null) }
             );
+          }
+        }}
+      />
+
+      {/* Delete user confirmation */}
+      <ConfirmDialog
+        open={!!userToDelete}
+        onOpenChange={() => setUserToDelete(null)}
+        title={t("deleteUser")}
+        description={t("deleteUserConfirm", { name: userToDelete?.name ?? "" })}
+        confirmLabel={tc("confirm")}
+        cancelLabel={tc("cancel")}
+        isLoading={deleteUser.isPending}
+        variant="destructive"
+        onConfirm={() => {
+          if (userToDelete) {
+            deleteUser.mutate(userToDelete.userId, {
+              onSuccess: () => setUserToDelete(null),
+            });
           }
         }}
       />

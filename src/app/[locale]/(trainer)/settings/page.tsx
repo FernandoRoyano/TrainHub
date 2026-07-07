@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/use-auth";
 import { authService } from "@/services/auth.service";
+import { PASSWORD_REGEX } from "@/lib/validations/auth";
 import { createClient } from "@/lib/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { toast } from "sonner";
 import { User, Languages, Lock } from "lucide-react";
 import { SubscriptionCard } from "@/components/settings/subscription-card";
+import { DangerZoneCard } from "@/components/settings/danger-zone-card";
 
 export default function SettingsPage() {
   const t = useTranslations("settings");
@@ -74,7 +76,7 @@ export default function SettingsPage() {
       toast.error(t("passwordMismatch"));
       return;
     }
-    if (passwordForm.newPassword.length < 6) {
+    if (!PASSWORD_REGEX.test(passwordForm.newPassword)) {
       toast.error(t("passwordTooShort"));
       return;
     }
@@ -221,6 +223,9 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Danger zone */}
+      {profile?.email && <DangerZoneCard email={profile.email} />}
     </div>
   );
 }

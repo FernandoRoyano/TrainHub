@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { deleteUserCompletely } from "@/lib/auth/delete-user";
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -110,6 +111,47 @@ export async function PATCH(request: NextRequest) {
   await admin.auth.admin.updateUserById(userId, {
     user_metadata: { role: newRole },
   });
+
+  return NextResponse.json({ success: true });
+}
+
+export async function DELETE(request: NextRequest) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const admin = createAdminClient();
+  const { data: profile } = await admin
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const { userId } = await request.json();
+  if (!userId || typeof userId !== "string") {
+    return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+  }
+
+  if (userId === user.id) {
+    return NextResponse.json(
+      { error: "Cannot delete own account here" },
+      { status: 400 }
+    );
+  }
+
+  const { error } = await deleteUserCompletely(admin, userId);
+  if (error) {
+    return NextResponse.json({ error }, { status: 500 });
+  }
 
   return NextResponse.json({ success: true });
 }

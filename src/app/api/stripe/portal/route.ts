@@ -31,6 +31,11 @@ export async function POST() {
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: subscription.stripe_customer_id,
       return_url: `${appUrl}/settings`,
+      // Cuenta Stripe compartida con otros proyectos: la configuración default
+      // del portal no es la de TrainHub, hay que referenciarla explícitamente.
+      ...(process.env.STRIPE_PORTAL_CONFIG_ID && {
+        configuration: process.env.STRIPE_PORTAL_CONFIG_ID,
+      }),
     });
 
     return NextResponse.json({ url: portalSession.url });

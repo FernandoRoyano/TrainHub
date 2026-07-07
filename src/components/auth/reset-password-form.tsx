@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
+import { createPasswordSchema } from "@/lib/validations/auth";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
 import {
@@ -21,14 +22,15 @@ import {
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
-function createResetSchema(t: (key: string) => string) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createResetSchema(t: (key: string, values?: any) => string) {
   return z
     .object({
-      password: z.string().min(6, t("passwordMin")),
+      password: createPasswordSchema(t),
       confirmPassword: z.string(),
     })
     .refine((data) => data.password === data.confirmPassword, {
-      message: t("passwordsMustMatch"),
+      message: t("passwordMismatch"),
       path: ["confirmPassword"],
     });
 }

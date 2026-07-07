@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { PLAN_PRICES } from "@/lib/stripe/plans";
 
 interface PlanConfig {
   nameKey: string;
@@ -39,8 +40,8 @@ const planConfigs: PlanConfig[] = [
   {
     nameKey: "planProName",
     tier: "pro",
-    priceMonthly: 29,
-    priceYearly: 24,
+    priceMonthly: PLAN_PRICES.pro.monthly,
+    priceYearly: PLAN_PRICES.pro.yearly,
     descKey: "planProDesc",
     featureKeys: [
       "planProFeature1",
@@ -56,8 +57,8 @@ const planConfigs: PlanConfig[] = [
   {
     nameKey: "planBusinessName",
     tier: "elite",
-    priceMonthly: 79,
-    priceYearly: 66,
+    priceMonthly: PLAN_PRICES.elite.monthly,
+    priceYearly: PLAN_PRICES.elite.yearly,
     descKey: "planBusinessDesc",
     featureKeys: [
       "planBusinessFeature1",

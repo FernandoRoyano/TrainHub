@@ -48,3 +48,5 @@ public/fallback-*.js
 # Artefactos locales
 playwright-report/
 dedupe-rollback-*.json
+
+.vercel

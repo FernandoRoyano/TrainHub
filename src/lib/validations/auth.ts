@@ -3,6 +3,18 @@ import { z } from "zod";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type T = (key: string, values?: any) => string;
 
+// Política única de contraseñas nuevas: 8+, una mayúscula y un número (misma
+// regla que el reset por trainer). El login NO la aplica: cuentas antiguas
+// pueden tener contraseñas de 6 caracteres y deben poder seguir entrando.
+export const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+export function createPasswordSchema(t: T) {
+  return z
+    .string()
+    .min(8, t("minChars", { min: 8 }))
+    .regex(PASSWORD_REGEX, t("weakPassword"));
+}
+
 export function createLoginSchema(t: T) {
   return z.object({
     email: z.string().email(t("invalidEmail")),
@@ -18,8 +30,8 @@ export function createRegisterSchema(t: T) {
         .max(80, t("maxChars", { max: 80 }))
         .regex(/^[a-zA-ZÀ-ÿñÑ\s'-]+$/, t("invalidName")),
       email: z.string().email(t("invalidEmail")),
-      password: z.string().min(6, t("minChars", { min: 6 })),
-      confirmPassword: z.string().min(6, t("minChars", { min: 6 })),
+      password: createPasswordSchema(t),
+      confirmPassword: z.string(),
     })
     .refine((data) => data.password === data.confirmPassword, {
       message: t("passwordMismatch"),

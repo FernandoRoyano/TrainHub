@@ -33,9 +33,12 @@ export async function POST(request: Request) {
 
   const { origin } = new URL(request.url);
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || origin;
+  // Enlace en el idioma del trainer (cookie next-intl), no siempre en español.
+  const cookieLocale = request.headers.get("cookie")?.match(/NEXT_LOCALE=([a-z]{2})/i)?.[1];
+  const locale = cookieLocale === "en" ? "en" : "es";
 
   return NextResponse.json({
-    link: `${appUrl}/es/join/${token}`,
+    link: `${appUrl}/${locale}/join/${token}`,
     clientId: client.id,
   });
 }

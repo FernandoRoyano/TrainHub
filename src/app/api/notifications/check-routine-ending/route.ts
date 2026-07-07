@@ -102,5 +102,16 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json({ created });
+  // Limpieza diaria: clientes placeholder de invitaciones abiertas que
+  // caducaron sin usarse. Sin esto quedan huérfanos para siempre y consumen
+  // el límite de clientes del plan.
+  const { count: cleanedInvites } = await admin
+    .from("clients")
+    .delete({ count: "exact" })
+    .like("email", "pending-%@placeholder.local")
+    .eq("status", "pending")
+    .is("user_id", null)
+    .lt("invite_token_expires_at", today.toISOString());
+
+  return NextResponse.json({ created, cleanedInvites: cleanedInvites ?? 0 });
 }

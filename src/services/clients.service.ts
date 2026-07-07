@@ -173,18 +173,17 @@ export const clientsService = {
   },
 
   async deleteClient(id: string) {
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("Not authenticated");
-
-    const { error } = await supabase
-      .from("clients")
-      .delete()
-      .eq("id", id)
-      .eq("trainer_id", user.id);
-    if (error) throw error;
+    // Vía API route: además de la fila de clients (y sus cascadas) hay que
+    // borrar la cuenta auth del cliente, que requiere el admin client.
+    const res = await fetch("/api/delete-client", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientId: id }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || "Failed to delete client");
+    }
   },
 
   async getClientStats() {

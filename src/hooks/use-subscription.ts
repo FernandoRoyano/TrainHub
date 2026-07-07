@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
+import { TIER_LIMITS } from "@/lib/stripe/plans";
 
 export interface SubscriptionData {
   tier: "free" | "pro" | "elite";
@@ -10,12 +11,6 @@ export interface SubscriptionData {
   canAddClient: boolean;
   activeClientCount: number;
 }
-
-const TIER_LIMITS = {
-  free: 3,
-  pro: 25,
-  elite: Infinity,
-} as const;
 
 export function useSubscription() {
   return useQuery({
@@ -40,14 +35,18 @@ export function useSubscription() {
           .eq("trainer_id", user.id),
       ]);
 
-      const tier = (subResult.data?.tier as "free" | "pro" | "elite") || "free";
+      const rawTier = (subResult.data?.tier as "free" | "pro" | "elite") || "free";
+      const status = subResult.data?.status || "active";
+      // Mismo criterio que el trigger de BD (00035): el tier de pago solo cuenta
+      // con suscripción active/trialing; past_due, canceled, etc. limitan como free.
+      const tier = status === "active" || status === "trialing" ? rawTier : "free";
       const activeClientCount = clientResult.count ?? 0;
       const clientLimit = TIER_LIMITS[tier];
       const canAddClient = activeClientCount < clientLimit;
 
       return {
         tier,
-        status: subResult.data?.status || "active",
+        status,
         clientLimit,
         canAddClient,
         activeClientCount,

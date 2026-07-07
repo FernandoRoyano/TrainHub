@@ -3,7 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoginForm } from "@/components/auth/login-form";
 import { Link } from "@/i18n/navigation";
 
-export default function LoginPage() {
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams?: { error?: string };
+}) {
   const t = useTranslations("auth");
 
   return (
@@ -12,7 +16,7 @@ export default function LoginPage() {
         <CardTitle className="text-center">{t("login")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <LoginForm />
+        <LoginForm urlError={searchParams?.error} />
         <div className="text-center text-sm space-y-2">
           <Link
             href="/forgot-password"

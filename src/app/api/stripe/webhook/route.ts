@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getStripe } from "@/lib/stripe/client";
+import { getStripe, tierFromPriceId } from "@/lib/stripe/client";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs";
@@ -61,7 +61,8 @@ export async function POST(request: Request) {
 
           const sub: StripeObj = await stripe.subscriptions.retrieve(subscriptionId);
           const userId = session.metadata?.user_id || sub.metadata?.user_id;
-          const tier = session.metadata?.tier || sub.metadata?.tier || "pro";
+          const tier = tierFromPriceId(sub.items?.data?.[0]?.price?.id)
+            || session.metadata?.tier || sub.metadata?.tier || "pro";
 
           if (userId) {
             const periodStart = sub.current_period_start ?? sub.start_date;
@@ -91,7 +92,8 @@ export async function POST(request: Request) {
         const userId = sub.metadata?.user_id;
 
         if (userId) {
-          const tier = sub.metadata?.tier || "pro";
+          const tier = tierFromPriceId(sub.items?.data?.[0]?.price?.id)
+            || sub.metadata?.tier || "pro";
           const isCanceled = sub.status === "canceled";
           const periodStart = sub.current_period_start ?? sub.start_date;
           const periodEnd = sub.current_period_end ?? sub.ended_at;

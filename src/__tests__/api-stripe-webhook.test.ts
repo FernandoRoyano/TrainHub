@@ -17,9 +17,11 @@ const mockInsert = vi.fn(() => {
   return thenable;
 });
 
+const mockUpdate = vi.fn(() => ({ eq: mockUpdateEq }));
+
 const mockAdminFrom = vi.fn().mockImplementation(() => ({
   upsert: mockUpsert,
-  update: () => ({ eq: mockUpdateEq }),
+  update: mockUpdate,
   insert: mockInsert,
 }));
 
@@ -36,6 +38,8 @@ vi.mock("@/lib/stripe/client", () => ({
     webhooks: { constructEvent: mockConstructEvent },
     subscriptions: { retrieve: mockRetrieveSubscription },
   }),
+  tierFromPriceId: (priceId: string | null | undefined) =>
+    priceId === "price_pro" ? "pro" : priceId === "price_elite" ? "elite" : null,
 }));
 
 const { POST } = await import("@/app/api/stripe/webhook/route");
@@ -123,6 +127,42 @@ describe("POST /api/stripe/webhook", () => {
     // Should update user tier
     expect(mockAdminFrom).toHaveBeenCalledWith("users");
     expect(mockUpdateEq).toHaveBeenCalledWith("id", "user-1");
+  });
+
+  it("customer.subscription.updated — deriva el tier del price ID, no de metadata", async () => {
+    // Cambio de plan desde el Billing Portal: metadata sigue diciendo "pro"
+    // pero el price activo es elite. Debe ganar el price.
+    mockConstructEvent.mockReturnValue({
+      type: "customer.subscription.updated",
+      data: {
+        object: {
+          status: "active",
+          metadata: { user_id: "user-1", tier: "pro" },
+          items: {
+            data: [{ price: { id: "price_elite", recurring: { interval: "month" } } }],
+          },
+          current_period_start: 1700000000,
+          current_period_end: 1702592000,
+          cancel_at_period_end: false,
+        },
+      },
+    });
+
+    const req = new Request("http://localhost/api/stripe/webhook", {
+      method: "POST",
+      body: "event_body",
+      headers: { "stripe-signature": "valid_sig" },
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+
+    expect(mockAdminFrom).toHaveBeenCalledWith("subscriptions");
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ tier: "elite" })
+    );
+    expect(mockAdminFrom).toHaveBeenCalledWith("users");
+    expect(mockUpdate).toHaveBeenCalledWith({ subscription_tier: "elite" });
   });
 
   it("handles customer.subscription.deleted — sets tier to free", async () => {

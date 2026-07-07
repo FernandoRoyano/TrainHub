@@ -25,3 +25,15 @@ export const STRIPE_PRICES: Record<string, Record<string, string>> = {
 
 export type SubscriptionTier = "free" | "pro" | "elite";
 export type BillingInterval = "monthly" | "yearly";
+
+// El tier debe derivarse del price activo, no de metadata: un cambio de plan
+// desde el Billing Portal no actualiza la metadata original del checkout.
+export function tierFromPriceId(priceId: string | null | undefined): SubscriptionTier | null {
+  if (!priceId) return null;
+  for (const [tier, intervals] of Object.entries(STRIPE_PRICES)) {
+    if (Object.values(intervals).includes(priceId)) {
+      return tier as SubscriptionTier;
+    }
+  }
+  return null;
+}

@@ -31,9 +31,9 @@ export async function GET(request: Request) {
       type: "recovery",
     });
     if (!error) {
-      return NextResponse.redirect(`${origin}/es/reset-password`);
+      return NextResponse.redirect(`${origin}/${locale}/reset-password`);
     }
-    return NextResponse.redirect(`${origin}/es/login`);
+    return NextResponse.redirect(`${origin}/${locale}/login?error=otp_expired`);
   }
 
   if (code) {
@@ -41,7 +41,7 @@ export async function GET(request: Request) {
 
     // If this is a password recovery flow, redirect to reset page
     if (!error && type === "recovery") {
-      return NextResponse.redirect(`${origin}/es/reset-password`);
+      return NextResponse.redirect(`${origin}/${locale}/reset-password`);
     }
 
     if (!error) {

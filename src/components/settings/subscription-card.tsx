@@ -176,7 +176,9 @@ export function SubscriptionCard() {
         {/* Actions */}
         {paymentsEnabled ? (
           <div className="flex flex-wrap gap-2">
-            {isPaid && subscription?.stripe_customer_id && (
+            {/* El portal debe estar accesible también en past_due/canceled para
+                que el usuario pueda arreglar su método de pago o reactivar. */}
+            {subscription?.stripe_customer_id && (
               <Button
                 variant="outline"
                 size="sm"

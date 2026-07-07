@@ -21,6 +21,22 @@ export function useAdminUsers(filters?: AdminUserFilters) {
   });
 }
 
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+  const t = useTranslations("admin");
+  return useMutation({
+    mutationFn: (userId: string) => adminService.deleteUser(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
+      toast.success(t("userDeleted"));
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || t("userDeleteError"));
+    },
+  });
+}
+
 export function useUpdateUserRole() {
   const queryClient = useQueryClient();
   const t = useTranslations("admin");

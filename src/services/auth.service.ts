@@ -41,6 +41,18 @@ export const authService = {
     return data;
   },
 
+  async resendConfirmation(email: string) {
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) throw error;
+  },
+
   async signIn(email: string, password: string) {
     const supabase = createClient();
     const { data, error } = await supabase.auth.signInWithPassword({
