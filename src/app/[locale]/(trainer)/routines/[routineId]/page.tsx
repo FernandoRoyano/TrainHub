@@ -363,6 +363,16 @@ export default function RoutineDetailPage() {
         </Card>
       )}
 
+      {/* Apuntes del entrenador (el cliente los ve al final de su rutina) */}
+      {routine.final_notes && (
+        <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+          <p className="text-sm font-semibold mb-1">{t("finalNotes")}</p>
+          <p className="text-sm text-muted-foreground whitespace-pre-line">
+            {routine.final_notes}
+          </p>
+        </div>
+      )}
+
       {/* Dialogs */}
       <ConfirmDialog
         open={showDelete}

@@ -40,6 +40,7 @@ export function createRoutineSchema(t: T) {
   return z.object({
     name: z.string().min(2, t("minChars", { min: 2 })),
     description: z.string().optional().or(z.literal("")),
+    final_notes: z.string().optional().or(z.literal("")),
     duration_weeks: z.number().int().min(1).max(52),
     days_per_week: z.number().int().min(1).max(7),
     difficulty: z.enum(["beginner", "intermediate", "advanced"]),

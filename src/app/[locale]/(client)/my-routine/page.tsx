@@ -684,6 +684,16 @@ function MyRoutinePageContent() {
         </div>
       )}
 
+      {/* Apuntes del entrenador: recomendaciones de la rutina fuera del gym */}
+      {routine.routine?.final_notes && (
+        <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+          <p className="text-sm font-semibold mb-1">{t("trainerNotes")}</p>
+          <p className="text-sm text-muted-foreground whitespace-pre-line">
+            {routine.routine.final_notes}
+          </p>
+        </div>
+      )}
+
       <RestTimer />
 
       <ExerciseDetailDialog

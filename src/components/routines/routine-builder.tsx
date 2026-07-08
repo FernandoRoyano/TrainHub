@@ -358,6 +358,7 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
     defaultValues: {
       name: routine?.name ?? "",
       description: routine?.description ?? "",
+      final_notes: routine?.final_notes ?? "",
       duration_weeks: routine?.duration_weeks ?? 4,
       days_per_week: routine?.days_per_week ?? 3,
       difficulty: (routine?.difficulty as RoutineFormData["difficulty"]) ?? "beginner",
@@ -610,6 +611,20 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                     <FormLabel>{t("description")}</FormLabel>
                     <FormControl>
                       <Textarea rows={2} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="final_notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("finalNotes")}</FormLabel>
+                    <FormControl>
+                      <Textarea rows={4} placeholder={t("finalNotesHint")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

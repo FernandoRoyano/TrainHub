@@ -502,6 +502,8 @@
     "superset": "Biserie",
     "clientView": "Vista de cliente",
     "trainerView": "Vista de entrenador",
+    "finalNotes": "Apuntes del entrenador",
+    "finalNotesHint": "Recomendaciones fuera del gimnasio: hábitos, pasos, descanso... El cliente las verá al final de su rutina.",
     "assignToClient": "Asignar a cliente",
     "selectClient": "Seleccionar cliente",
     "startDate": "Fecha de inicio",
@@ -729,6 +731,7 @@
     "deleteAccountError": "No se pudo eliminar la cuenta. Inténtalo de nuevo."
   },
   "clientApp": {
+    "trainerNotes": "Apuntes de tu entrenador",
     "myRoutine": "Mi Rutina",
     "noRoutineAssigned": "No tienes una rutina asignada",
     "noRoutineDescription": "Tu entrenador te asignará una rutina pronto",

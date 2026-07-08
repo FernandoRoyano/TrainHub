@@ -502,6 +502,8 @@
     "superset": "Bi-set",
     "clientView": "Client view",
     "trainerView": "Trainer view",
+    "finalNotes": "Trainer notes",
+    "finalNotesHint": "Out-of-gym recommendations: habits, steps, rest... The client will see them at the end of their routine.",
     "assignToClient": "Assign to client",
     "selectClient": "Select client",
     "startDate": "Start date",
@@ -729,6 +731,7 @@
     "deleteAccountError": "Could not delete the account. Please try again."
   },
   "clientApp": {
+    "trainerNotes": "Notes from your trainer",
     "myRoutine": "My Routine",
     "noRoutineAssigned": "No routine assigned",
     "noRoutineDescription": "Your trainer will assign a routine to you soon",

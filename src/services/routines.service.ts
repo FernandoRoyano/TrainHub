@@ -44,6 +44,7 @@ export interface Routine {
   trainer_id: string;
   name: string;
   description: string | null;
+  final_notes: string | null;
   duration_weeks: number;
   days_per_week: number;
   difficulty: string | null;
@@ -258,6 +259,7 @@ export const routinesService = {
         trainer_id: user.id,
         name: data.name,
         description: data.description || null,
+        final_notes: data.final_notes || null,
         duration_weeks: data.duration_weeks,
         days_per_week: data.days_per_week,
         difficulty: data.difficulty,
@@ -367,6 +369,7 @@ export const routinesService = {
       .update({
         name: data.name,
         description: data.description || null,
+        final_notes: data.final_notes || null,
         duration_weeks: data.duration_weeks,
         days_per_week: data.days_per_week,
         difficulty: data.difficulty,
@@ -485,6 +488,7 @@ export const routinesService = {
     const formData: RoutineFormData = {
       name: `${routine.name} ${copySuffix}`,
       description: routine.description ?? "",
+      final_notes: routine.final_notes ?? "",
       duration_weeks: routine.duration_weeks,
       days_per_week: routine.days_per_week,
       difficulty: routine.difficulty as RoutineFormData["difficulty"],
@@ -501,6 +505,7 @@ export const routinesService = {
     const formData: RoutineFormData = {
       name: newName,
       description: routine.description ?? "",
+      final_notes: routine.final_notes ?? "",
       duration_weeks: routine.duration_weeks,
       days_per_week: routine.days_per_week,
       difficulty: routine.difficulty as RoutineFormData["difficulty"],
