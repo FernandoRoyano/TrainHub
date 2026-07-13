@@ -15,6 +15,10 @@ vi.mock("@/lib/supabase/client", () => ({
         Promise.resolve({
           data: { user: { id: "trainer-1" } },
         }),
+      getSession: () =>
+        Promise.resolve({
+          data: { session: { user: { id: "trainer-1" } } },
+        }),
     },
     from: mockFrom,
   }),

@@ -27,7 +27,8 @@ export const checkinsService = {
 
   async getMyCheckins(): Promise<WeeklyCheckin[]> {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data: client } = await supabase
@@ -48,7 +49,8 @@ export const checkinsService = {
 
   async submitCheckin(input: Omit<CheckinInput, "week_start"> & { week_start?: string }): Promise<WeeklyCheckin> {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data: client } = await supabase

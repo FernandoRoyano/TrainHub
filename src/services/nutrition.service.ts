@@ -65,12 +65,55 @@ export interface NutritionFilters {
   pageSize?: number;
 }
 
+// Plan completo (comidas + alimentos) con queries planas batched.
+// Compartido con client-app.service (getMyActiveMealPlan).
+// NOTA: NO usar un embed anidado de PostgREST — ver nota en
+// fetchRoutineDetail (routines.service.ts): json_agg + RLS anidado
+// se degrada bajo concurrencia.
+export async function fetchMealPlanDetail(
+  supabase: ReturnType<typeof createClient>,
+  mealPlanId: string
+): Promise<MealPlan> {
+  const [planResult, mealsResult] = await Promise.all([
+    supabase.from("meal_plans").select("*").eq("id", mealPlanId).single(),
+    supabase
+      .from("meal_plan_meals")
+      .select("*")
+      .eq("meal_plan_id", mealPlanId)
+      .order("order_index", { ascending: true }),
+  ]);
+  if (planResult.error) throw planResult.error;
+  if (mealsResult.error) throw mealsResult.error;
+  const mealPlan = planResult.data;
+  const meals = mealsResult.data ?? [];
+
+  const mealIds = meals.map((m) => m.id);
+  let foods: MealFood[] = [];
+  if (mealIds.length > 0) {
+    const { data: foodData, error: foodError } = await supabase
+      .from("meal_foods")
+      .select("*")
+      .in("meal_plan_meal_id", mealIds)
+      .order("order_index", { ascending: true });
+    if (foodError) throw foodError;
+    foods = (foodData ?? []) as MealFood[];
+  }
+
+  const assembledMeals: MealPlanMeal[] = meals.map((meal) => ({
+    ...meal,
+    foods: foods.filter((f) => f.meal_plan_meal_id === meal.id),
+  }));
+
+  return { ...mealPlan, meals: assembledMeals } as MealPlan;
+}
+
 export const nutritionService = {
   async getMealPlans(filters?: NutritionFilters) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const page = filters?.page ?? 0;
@@ -104,51 +147,15 @@ export const nutritionService = {
 
   async getMealPlanById(id: string) {
     const supabase = createClient();
-
-    // Get meal plan
-    const { data: mealPlan, error: planError } = await supabase
-      .from("meal_plans")
-      .select("*")
-      .eq("id", id)
-      .single();
-    if (planError) throw planError;
-
-    // Get meals
-    const { data: meals, error: mealsError } = await supabase
-      .from("meal_plan_meals")
-      .select("*")
-      .eq("meal_plan_id", id)
-      .order("order_index", { ascending: true });
-    if (mealsError) throw mealsError;
-
-    // Get foods for all meals
-    const mealIds = (meals ?? []).map((m) => m.id);
-    let foods: MealFood[] = [];
-
-    if (mealIds.length > 0) {
-      const { data: foodData, error: foodError } = await supabase
-        .from("meal_foods")
-        .select("*")
-        .in("meal_plan_meal_id", mealIds)
-        .order("order_index", { ascending: true });
-      if (foodError) throw foodError;
-      foods = (foodData ?? []) as MealFood[];
-    }
-
-    // Assemble
-    const assembledMeals: MealPlanMeal[] = (meals ?? []).map((meal) => ({
-      ...meal,
-      foods: foods.filter((f) => f.meal_plan_meal_id === meal.id),
-    }));
-
-    return { ...mealPlan, meals: assembledMeals } as MealPlan;
+    return fetchMealPlanDetail(supabase, id);
   },
 
   async createMealPlan(data: MealPlanFormData) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // 1. Create meal plan
@@ -238,8 +245,9 @@ export const nutritionService = {
   async updateMealPlan(id: string, data: MealPlanFormData) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // 1. Update meal plan metadata
@@ -331,8 +339,9 @@ export const nutritionService = {
   async deleteMealPlan(id: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { error } = await supabase
@@ -379,8 +388,9 @@ export const nutritionService = {
   async assignToClient(data: AssignMealPlanData) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data: assignment, error } = await supabase
@@ -401,8 +411,9 @@ export const nutritionService = {
   async getClientMealPlans(clientId: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data, error } = await supabase
@@ -418,8 +429,9 @@ export const nutritionService = {
   async cancelClientMealPlan(id: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { error } = await supabase

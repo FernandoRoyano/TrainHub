@@ -4,6 +4,7 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
+  keepPreviousData,
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import {
@@ -11,13 +12,16 @@ import {
   type ExerciseFilters,
 } from "@/services/exercises.service";
 import type { ExerciseFormData } from "@/lib/validations/exercise";
+import { STALE } from "@/lib/query-config";
 import { toast } from "sonner";
 
 export function useExercises(filters?: ExerciseFilters) {
   return useQuery({
     queryKey: ["exercises", filters],
     queryFn: () => exercisesService.getExercises(filters),
-    staleTime: 2 * 60 * 1000,
+    // Catálogo casi estático; las mutaciones propias invalidan ["exercises"]
+    staleTime: STALE.catalog,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -26,7 +30,7 @@ export function useExercise(id: string) {
     queryKey: ["exercises", id],
     queryFn: () => exercisesService.getExerciseById(id),
     enabled: !!id,
-    staleTime: 2 * 60 * 1000,
+    staleTime: STALE.catalog,
   });
 }
 

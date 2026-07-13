@@ -18,8 +18,9 @@ export const calendarService = {
   ): Promise<CalendarEvent[]> {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // Get all workout logs for this trainer's clients in the date range

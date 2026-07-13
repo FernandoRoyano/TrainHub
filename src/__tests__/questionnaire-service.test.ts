@@ -22,7 +22,13 @@ const tableCalls: string[] = [];
 let chainForTable: Record<string, ReturnType<typeof createChain>> = {};
 
 const mockSupabase = {
-  auth: { getUser: mockGetUser },
+  auth: {
+    getUser: mockGetUser,
+    getSession: async () => {
+      const { data } = await mockGetUser();
+      return { data: { session: data?.user ? { user: data.user } : null } };
+    },
+  },
   from: vi.fn().mockImplementation((table: string) => {
     tableCalls.push(table);
     if (chainForTable[table]) return chainForTable[table];

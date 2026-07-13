@@ -67,8 +67,9 @@ export const questionnairesService = {
   async getTemplates() {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data, error } = await supabase
@@ -108,8 +109,9 @@ export const questionnairesService = {
   async createTemplate(data: QuestionnaireTemplateFormData) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // 1. Create template
@@ -149,8 +151,9 @@ export const questionnairesService = {
   async updateTemplate(id: string, data: QuestionnaireTemplateFormData) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // 1. Update template metadata
@@ -194,8 +197,9 @@ export const questionnairesService = {
   async deleteTemplate(id: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { error } = await supabase
@@ -227,8 +231,9 @@ export const questionnairesService = {
   async assignToClient(data: AssignQuestionnaireData) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data: assignment, error } = await supabase
@@ -249,8 +254,9 @@ export const questionnairesService = {
   async getClientQuestionnaires(clientId: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data, error } = await supabase

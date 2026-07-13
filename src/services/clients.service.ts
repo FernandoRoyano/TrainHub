@@ -78,8 +78,9 @@ export const clientsService = {
   async getClients(filters?: ClientFilters) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const page = filters?.page ?? 0;
@@ -123,8 +124,9 @@ export const clientsService = {
   async createClient(data: ClientFormData) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data: client, error } = await supabase
@@ -152,8 +154,9 @@ export const clientsService = {
   async updateClient(id: string, data: Partial<ClientFormData>) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // Solo coercionar a null los campos PRESENTES en el payload. Con
@@ -189,8 +192,9 @@ export const clientsService = {
   async getClientStats() {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data, error } = await supabase
@@ -370,8 +374,9 @@ export const clientsService = {
   async getClientWorkoutHistory(clientId: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // Verify trainer owns this client

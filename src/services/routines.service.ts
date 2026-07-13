@@ -77,6 +77,105 @@ export interface RoutineFilters {
   pageSize?: number;
 }
 
+// Rutina completa (días + grupos + ejercicios) con queries planas batched.
+// Compartido con client-app.service (getMyActiveRoutine).
+// NOTA: NO usar un embed anidado de PostgREST aquí — el load test de jul-2026
+// mostró que la query única con json_agg + RLS en 4 tablas se desploma bajo
+// concurrencia (statement timeout con 10 usuarios a la vez), mientras que
+// estas queries planas con .in() aguantan sin errores.
+export async function fetchRoutineDetail(
+  supabase: ReturnType<typeof createClient>,
+  routineId: string
+): Promise<Routine> {
+  // Routine + days en paralelo
+  const [routineResult, daysResult] = await Promise.all([
+    supabase.from("routines").select("*").eq("id", routineId).single(),
+    supabase
+      .from("routine_days")
+      .select("*")
+      .eq("routine_id", routineId)
+      .order("day_number", { ascending: true }),
+  ]);
+  if (routineResult.error) throw routineResult.error;
+  if (daysResult.error) throw daysResult.error;
+  const routine = routineResult.data;
+  const days = daysResult.data ?? [];
+
+  const dayIds = days.map((d) => d.id);
+  let exercises: RoutineExercise[] = [];
+  let groups: ExerciseGroup[] = [];
+  if (dayIds.length > 0) {
+    const [exResult, groupResult] = await Promise.all([
+      supabase
+        .from("routine_exercises")
+        .select("*, exercise:exercises(*)")
+        .in("routine_day_id", dayIds)
+        .order("order_index", { ascending: true }),
+      supabase
+        .from("exercise_groups")
+        .select("*")
+        .in("routine_day_id", dayIds)
+        .order("order_index", { ascending: true }),
+    ]);
+    if (exResult.error) throw exResult.error;
+    exercises = (exResult.data ?? []) as RoutineExercise[];
+    groups = (groupResult.data ?? []) as ExerciseGroup[];
+  }
+
+  const assembledDays: RoutineDay[] = days.map((day) => {
+    const dayExercises = exercises.filter((e) => e.routine_day_id === day.id);
+    const dayGroups: ExerciseGroup[] = groups
+      .filter((g) => g.routine_day_id === day.id)
+      .map((g) => ({
+        ...g,
+        exercises: dayExercises
+          .filter((e) => (e as RoutineExercise & { exercise_group_id?: string }).exercise_group_id === g.id)
+          .sort((a, b) => a.order_index - b.order_index),
+      }));
+
+    // Wrap orphan exercises (missing exercise_group_id OR pointing to a
+    // non-existent group) in synthetic solo groups so nothing disappears.
+    const validGroupIds = new Set(dayGroups.map((g) => g.id));
+    const orphanExercises = dayExercises
+      .filter((e) => {
+        const gid = (e as RoutineExercise & { exercise_group_id?: string }).exercise_group_id;
+        return !gid || !validGroupIds.has(gid);
+      })
+      .sort((a, b) => a.order_index - b.order_index);
+
+    if (orphanExercises.length > 0) {
+      const maxOrderIndex = dayGroups.reduce(
+        (max, g) => Math.max(max, g.order_index ?? 0),
+        -1
+      );
+      orphanExercises.forEach((ex, i) => {
+        dayGroups.push({
+          id: `synthetic-solo-${ex.id}`,
+          routine_day_id: day.id,
+          group_type: "solo",
+          order_index: maxOrderIndex + 1 + i,
+          rounds: null,
+          time_limit_seconds: null,
+          rest_between_rounds: null,
+          label: null,
+          notes: null,
+          exercises: [ex],
+        });
+      });
+      dayGroups.sort((a, b) => a.order_index - b.order_index);
+    }
+
+    return {
+      ...day,
+      description: day.description ?? null,
+      exercises: dayExercises,
+      groups: dayGroups.length > 0 ? dayGroups : undefined,
+    };
+  });
+
+  return { ...routine, days: assembledDays } as Routine;
+}
+
 // Mapea un día (con sus grupos) a datos de formulario para copiarlo. Antes
 // duplicar/usar-plantilla solo copiaba la lista plana de ejercicios: las
 // biseries/circuitos/EMOM/AMRAP se aplanaban y la descripción del día se perdía.
@@ -113,8 +212,9 @@ export const routinesService = {
   async getRoutines(filters?: RoutineFilters) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const page = filters?.page ?? 0;
@@ -148,108 +248,15 @@ export const routinesService = {
 
   async getRoutineById(id: string) {
     const supabase = createClient();
-
-    // Get routine
-    const { data: routine, error: routineError } = await supabase
-      .from("routines")
-      .select("*")
-      .eq("id", id)
-      .single();
-    if (routineError) throw routineError;
-
-    // Get days with exercises
-    const { data: days, error: daysError } = await supabase
-      .from("routine_days")
-      .select("*")
-      .eq("routine_id", id)
-      .order("day_number", { ascending: true });
-    if (daysError) throw daysError;
-
-    // Get exercises for all days
-    const dayIds = (days ?? []).map((d) => d.id);
-    let exercises: RoutineExercise[] = [];
-
-    if (dayIds.length > 0) {
-      const { data: exData, error: exError } = await supabase
-        .from("routine_exercises")
-        .select("*, exercise:exercises(*)")
-        .in("routine_day_id", dayIds)
-        .order("order_index", { ascending: true });
-      if (exError) throw exError;
-      exercises = (exData ?? []) as RoutineExercise[];
-    }
-
-    // Get exercise groups
-    let groups: ExerciseGroup[] = [];
-    if (dayIds.length > 0) {
-      const { data: groupData } = await supabase
-        .from("exercise_groups")
-        .select("*")
-        .in("routine_day_id", dayIds)
-        .order("order_index", { ascending: true });
-      groups = (groupData ?? []) as ExerciseGroup[];
-    }
-
-    // Assemble
-    const assembledDays: RoutineDay[] = (days ?? []).map((day) => {
-      const dayExercises = exercises.filter((e) => e.routine_day_id === day.id);
-      const dayGroups: ExerciseGroup[] = groups
-        .filter((g) => g.routine_day_id === day.id)
-        .map((g) => ({
-          ...g,
-          exercises: dayExercises
-            .filter((e) => (e as RoutineExercise & { exercise_group_id?: string }).exercise_group_id === g.id)
-            .sort((a, b) => a.order_index - b.order_index),
-        }));
-
-      // Wrap orphan exercises (missing exercise_group_id OR pointing to a
-      // non-existent group) in synthetic solo groups so nothing disappears.
-      const validGroupIds = new Set(dayGroups.map((g) => g.id));
-      const orphanExercises = dayExercises
-        .filter((e) => {
-          const gid = (e as RoutineExercise & { exercise_group_id?: string }).exercise_group_id;
-          return !gid || !validGroupIds.has(gid);
-        })
-        .sort((a, b) => a.order_index - b.order_index);
-
-      if (orphanExercises.length > 0) {
-        const maxOrderIndex = dayGroups.reduce(
-          (max, g) => Math.max(max, g.order_index ?? 0),
-          -1
-        );
-        orphanExercises.forEach((ex, i) => {
-          dayGroups.push({
-            id: `synthetic-solo-${ex.id}`,
-            routine_day_id: day.id,
-            group_type: "solo",
-            order_index: maxOrderIndex + 1 + i,
-            rounds: null,
-            time_limit_seconds: null,
-            rest_between_rounds: null,
-            label: null,
-            notes: null,
-            exercises: [ex],
-          });
-        });
-        dayGroups.sort((a, b) => a.order_index - b.order_index);
-      }
-
-      return {
-        ...day,
-        description: day.description ?? null,
-        exercises: dayExercises,
-        groups: dayGroups.length > 0 ? dayGroups : undefined,
-      };
-    });
-
-    return { ...routine, days: assembledDays } as Routine;
+    return fetchRoutineDetail(supabase, id);
   },
 
   async createRoutine(data: RoutineFormData) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // 1. Create routine
@@ -359,8 +366,9 @@ export const routinesService = {
   async updateRoutine(id: string, data: RoutineFormData) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // 1. Update routine metadata
@@ -471,8 +479,9 @@ export const routinesService = {
   async deleteRoutine(id: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { error } = await supabase
@@ -520,8 +529,9 @@ export const routinesService = {
   async assignToClient(data: AssignRoutineData) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data: assignment, error } = await supabase
@@ -542,8 +552,9 @@ export const routinesService = {
   async getClientRoutines(clientId: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data, error } = await supabase
@@ -559,8 +570,9 @@ export const routinesService = {
   async cancelClientRoutine(id: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { error } = await supabase
@@ -574,8 +586,9 @@ export const routinesService = {
   async deleteClientRoutine(id: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { error } = await supabase

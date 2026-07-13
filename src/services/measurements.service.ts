@@ -21,8 +21,9 @@ export type MeasurementInput = Omit<BodyMeasurement, "id" | "created_at">;
 async function verifyClientOwnership(clientId: string) {
   const supabase = createClient();
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
   if (!user) throw new Error("Not authenticated");
 
   const { data: client } = await supabase

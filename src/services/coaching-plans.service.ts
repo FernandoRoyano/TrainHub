@@ -53,8 +53,9 @@ export const coachingPlansService = {
   async getCoachingPlans(filters?: CoachingPlanFilters) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const page = filters?.page ?? 0;
@@ -118,8 +119,9 @@ export const coachingPlansService = {
   async createCoachingPlan(data: CoachingPlanFormData) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { questionnaire_template_ids, ...planData } = data;
@@ -163,8 +165,9 @@ export const coachingPlansService = {
   async updateCoachingPlan(id: string, data: CoachingPlanFormData) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { questionnaire_template_ids, ...planData } = data;
@@ -211,8 +214,9 @@ export const coachingPlansService = {
   async deleteCoachingPlan(id: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { error } = await supabase
@@ -246,8 +250,9 @@ export const coachingPlansService = {
   async getClientCoachingPlan(clientId: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data, error } = await supabase
@@ -266,8 +271,9 @@ export const coachingPlansService = {
   async getClientCoachingPlanHistory(clientId: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data, error } = await supabase
@@ -283,8 +289,9 @@ export const coachingPlansService = {
   async cancelClientCoachingPlan(id: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { error } = await supabase

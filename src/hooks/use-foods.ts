@@ -4,19 +4,23 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
+  keepPreviousData,
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import {
   foodsService,
   type FoodFilters,
 } from "@/services/foods.service";
+import { STALE } from "@/lib/query-config";
 import { toast } from "sonner";
 
 export function useFoods(filters?: FoodFilters) {
   return useQuery({
     queryKey: ["foods", filters],
     queryFn: () => foodsService.getFoods(filters),
-    staleTime: 5 * 60 * 1000,
+    // Catálogo casi estático; las mutaciones propias invalidan ["foods"]
+    staleTime: STALE.catalog,
+    placeholderData: keepPreviousData,
   });
 }
 

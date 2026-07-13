@@ -10,6 +10,10 @@ const mockGetUser = vi.fn();
 const mockSupabase = {
   auth: {
     getUser: mockGetUser,
+    getSession: async () => {
+      const { data } = await mockGetUser();
+      return { data: { session: data?.user ? { user: data.user } : null } };
+    },
   },
   from: vi.fn().mockImplementation(() => ({
     update: mockUpdate,

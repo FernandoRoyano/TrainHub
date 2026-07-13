@@ -60,7 +60,9 @@ export function useActiveFast() {
   return useQuery({
     queryKey: ["active-fast"],
     queryFn: () => fastingService.getActiveFast(),
-    refetchInterval: 10 * 1000,
+    // El contador visible se calcula localmente en la página; las mutaciones
+    // start/end/delete invalidan esta query
+    staleTime: 60 * 1000,
   });
 }
 

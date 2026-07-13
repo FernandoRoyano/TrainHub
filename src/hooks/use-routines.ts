@@ -11,13 +11,14 @@ import {
   type RoutineFilters,
 } from "@/services/routines.service";
 import type { RoutineFormData, AssignRoutineData } from "@/lib/validations/routine";
+import { STALE } from "@/lib/query-config";
 import { toast } from "sonner";
 
 export function useRoutines(filters?: RoutineFilters) {
   return useQuery({
     queryKey: ["routines", filters],
     queryFn: () => routinesService.getRoutines(filters),
-    staleTime: 60 * 1000,
+    staleTime: STALE.slow,
   });
 }
 
@@ -26,7 +27,7 @@ export function useRoutine(id: string) {
     queryKey: ["routines", id],
     queryFn: () => routinesService.getRoutineById(id),
     enabled: !!id,
-    staleTime: 60 * 1000,
+    staleTime: STALE.slow,
   });
 }
 

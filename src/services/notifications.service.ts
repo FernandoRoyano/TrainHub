@@ -15,7 +15,8 @@ export interface Notification {
 export const notificationsService = {
   async getNotifications(limit = 20) {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data, error } = await supabase
@@ -31,7 +32,8 @@ export const notificationsService = {
 
   async getUnreadCount() {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) return 0;
 
     const { count, error } = await supabase
@@ -55,7 +57,8 @@ export const notificationsService = {
 
   async markAllAsRead() {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { error } = await supabase

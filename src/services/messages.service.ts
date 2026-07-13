@@ -61,60 +61,49 @@ export const messagesService = {
   async getConversations() {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
+    // Embed con límite por conversación: trae solo el último mensaje de cada una
     const { data, error } = await supabase
       .from("conversations")
-      .select("*, client:clients(id, full_name, email)")
+      .select(
+        "*, client:clients(id, full_name, email), last_message:messages(id, conversation_id, sender_id, content, read, created_at)"
+      )
       .eq("trainer_id", user.id)
-      .order("last_message_at", { ascending: false });
+      .order("last_message_at", { ascending: false })
+      .order("created_at", { referencedTable: "messages", ascending: false })
+      .limit(1, { referencedTable: "messages" });
     if (error) throw error;
 
-    const conversations = data as Conversation[];
+    const conversations = (data ?? []).map((conv) => ({
+      ...conv,
+      last_message: Array.isArray(conv.last_message)
+        ? (conv.last_message[0] as Message | undefined)
+        : (conv.last_message as Message | undefined),
+    })) as Conversation[];
     if (conversations.length === 0) return conversations;
 
     const convIds = conversations.map((c) => c.id);
 
-    // Batch: 2 queries instead of 2N (N+1 fix)
-    const [unreadResult, lastMessagesResult] = await Promise.all([
-      supabase
-        .from("messages")
-        .select("conversation_id")
-        .in("conversation_id", convIds)
-        .eq("read", false)
-        .neq("sender_id", user.id),
-      supabase
-        .from("messages")
-        .select("*")
-        .in("conversation_id", convIds)
-        .order("created_at", { ascending: false }),
-    ]);
+    // Solo filas no leídas: acotado por naturaleza
+    const { data: unreadRows } = await supabase
+      .from("messages")
+      .select("conversation_id")
+      .in("conversation_id", convIds)
+      .eq("read", false)
+      .neq("sender_id", user.id);
 
-    // Build unread count map
     const unreadMap = new Map<string, number>();
-    if (unreadResult.data) {
-      for (const row of unreadResult.data) {
-        const cid = row.conversation_id;
-        unreadMap.set(cid, (unreadMap.get(cid) ?? 0) + 1);
-      }
-    }
-
-    // Build last message map (first per conversation since ordered desc)
-    const lastMsgMap = new Map<string, Message>();
-    if (lastMessagesResult.data) {
-      for (const msg of lastMessagesResult.data) {
-        const m = msg as Message;
-        if (!lastMsgMap.has(m.conversation_id)) {
-          lastMsgMap.set(m.conversation_id, m);
-        }
-      }
+    for (const row of unreadRows ?? []) {
+      const cid = row.conversation_id;
+      unreadMap.set(cid, (unreadMap.get(cid) ?? 0) + 1);
     }
 
     for (const conv of conversations) {
       conv.unread_count = unreadMap.get(conv.id) ?? 0;
-      conv.last_message = lastMsgMap.get(conv.id);
     }
 
     return conversations;
@@ -123,8 +112,9 @@ export const messagesService = {
   async getOrCreateConversation(clientId: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // Verify client belongs to this trainer
@@ -159,8 +149,9 @@ export const messagesService = {
   async getMessages(conversationId: string, page = 0) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     await verifyConversationAccess(supabase, conversationId, user.id);
@@ -182,8 +173,9 @@ export const messagesService = {
   async sendMessage(conversationId: string, content: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     await verifyConversationAccess(supabase, conversationId, user.id);
@@ -213,8 +205,9 @@ export const messagesService = {
   async markAsRead(conversationId: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) return;
 
     await verifyConversationAccess(supabase, conversationId, user.id);
@@ -233,8 +226,9 @@ export const messagesService = {
   async getClientConversation() {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // Find client record

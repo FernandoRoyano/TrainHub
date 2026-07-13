@@ -10,26 +10,32 @@ export function useMyRoutine() {
   return useQuery({
     queryKey: ["my-routine"],
     queryFn: () => clientAppService.getMyActiveRoutine(),
-    staleTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
+    // La frescura la garantiza el realtime (useMyRoutineRealtime)
+    staleTime: 60 * 1000,
   });
 }
 
-export function useMyRoutineRealtime(routineId: string | undefined, clientRoutineId: string | undefined) {
+export function useMyRoutineRealtime(
+  routineId: string | undefined,
+  clientRoutineId: string | undefined,
+  dayIds: string[] | undefined
+) {
   const queryClient = useQueryClient();
+  // Clave estable: evita resuscribir en cada render por identidad del array
+  const dayIdsKey = dayIds?.join(",") ?? "";
   useEffect(() => {
     if (!routineId || !clientRoutineId) return;
     const unsubscribe = clientAppService.subscribeToRoutineChanges(
       routineId,
       clientRoutineId,
+      dayIdsKey ? dayIdsKey.split(",") : [],
       () => {
         queryClient.invalidateQueries({ queryKey: ["my-routine"] });
         queryClient.invalidateQueries({ queryKey: ["workout-logs", clientRoutineId] });
       }
     );
     return unsubscribe;
-  }, [routineId, clientRoutineId, queryClient]);
+  }, [routineId, clientRoutineId, dayIdsKey, queryClient]);
 }
 
 export function useMyClient() {

@@ -1,8 +1,10 @@
 import { createClient } from "@/lib/supabase/client";
 import { localDateString } from "@/lib/local-date";
-import type { Routine, RoutineDay, RoutineExercise, ExerciseGroup } from "./routines.service";
+import { fetchRoutineDetail } from "./routines.service";
+import type { Routine, RoutineDay } from "./routines.service";
 import type { BodyMeasurement } from "./measurements.service";
-import type { MealPlan, MealPlanMeal, MealFood } from "./nutrition.service";
+import { fetchMealPlanDetail } from "./nutrition.service";
+import type { MealPlan } from "./nutrition.service";
 import type { ClientQuestionnaire, QuestionnaireQuestion, QuestionnaireResponse } from "./questionnaires.service";
 import type { ClientServiceTier } from "./service-tiers.service";
 
@@ -38,29 +40,39 @@ export interface ExerciseLog {
   notes: string | null;
 }
 
+// Memo por sesión: evita repetir el lookup de clients en cada hook.
+// Se auto-invalida si cambia el usuario (logout/login).
+let clientIdCache: { userId: string; clientId: string } | null = null;
+
 async function getAuthenticatedClient() {
   const supabase = createClient();
+  // getSession() lee el JWT local sin round-trip; la seguridad la aplica RLS
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
   if (!user) throw new Error("Not authenticated");
 
-  const { data: client } = await supabase
-    .from("clients")
-    .select("id")
-    .eq("user_id", user.id)
-    .single();
-  if (!client) throw new Error("No client record found");
+  if (clientIdCache?.userId !== user.id) {
+    const { data: client } = await supabase
+      .from("clients")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+    if (!client) throw new Error("No client record found");
+    clientIdCache = { userId: user.id, clientId: client.id };
+  }
 
-  return { supabase, clientId: client.id };
+  return { supabase, clientId: clientIdCache.clientId };
 }
 
 export const clientAppService = {
   async getMyClientRecord() {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data, error } = await supabase
@@ -75,8 +87,9 @@ export const clientAppService = {
   async getMyActiveRoutine() {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // Get client record
@@ -99,103 +112,24 @@ export const clientAppService = {
     if (assignError) throw assignError;
     if (!assignment) return null;
 
-    // Fetch routine + days in parallel
-    const [routineResult, daysResult] = await Promise.all([
-      supabase
-        .from("routines")
-        .select("*")
-        .eq("id", assignment.routine_id)
-        .single(),
-      supabase
-        .from("routine_days")
-        .select("*")
-        .eq("routine_id", assignment.routine_id)
-        .order("day_number"),
-    ]);
-    if (routineResult.error) throw routineResult.error;
-    const routine = routineResult.data;
-    const days = daysResult.data;
-
-    const dayIds = (days ?? []).map((d) => d.id);
-    let exercises: RoutineExercise[] = [];
-    let groups: ExerciseGroup[] = [];
-    if (dayIds.length > 0) {
-      const [exResult, groupResult] = await Promise.all([
-        supabase
-          .from("routine_exercises")
-          .select("*, exercise:exercises(*)")
-          .in("routine_day_id", dayIds)
-          .order("order_index"),
-        supabase
-          .from("exercise_groups")
-          .select("*")
-          .in("routine_day_id", dayIds)
-          .order("order_index", { ascending: true }),
-      ]);
-      exercises = (exResult.data ?? []) as RoutineExercise[];
-      groups = (groupResult.data ?? []) as ExerciseGroup[];
-    }
-
-    const assembledDays = (days ?? []).map((day) => {
-      const dayExercises = exercises.filter((e) => e.routine_day_id === day.id);
-      const dayGroups: ExerciseGroup[] = groups
-        .filter((g) => g.routine_day_id === day.id)
-        .map((g) => ({
-          ...g,
-          exercises: dayExercises
-            .filter((e) => (e as RoutineExercise & { exercise_group_id?: string }).exercise_group_id === g.id)
-            .sort((a, b) => a.order_index - b.order_index),
-        }));
-
-      // Wrap orphan exercises (missing exercise_group_id OR pointing to a
-      // non-existent group) in synthetic solo groups so nothing disappears.
-      const validGroupIds = new Set(dayGroups.map((g) => g.id));
-      const orphanExercises = dayExercises
-        .filter((e) => {
-          const gid = (e as RoutineExercise & { exercise_group_id?: string }).exercise_group_id;
-          return !gid || !validGroupIds.has(gid);
-        })
-        .sort((a, b) => a.order_index - b.order_index);
-
-      if (orphanExercises.length > 0) {
-        const maxOrderIndex = dayGroups.reduce(
-          (max, g) => Math.max(max, g.order_index ?? 0),
-          -1
-        );
-        orphanExercises.forEach((ex, i) => {
-          dayGroups.push({
-            id: `synthetic-solo-${ex.id}`,
-            routine_day_id: day.id,
-            group_type: "solo",
-            order_index: maxOrderIndex + 1 + i,
-            rounds: null,
-            time_limit_seconds: null,
-            rest_between_rounds: null,
-            label: null,
-            notes: null,
-            exercises: [ex],
-          });
-        });
-        dayGroups.sort((a, b) => a.order_index - b.order_index);
-      }
-
-      return {
-        ...day,
-        description: day.description ?? null,
-        exercises: dayExercises,
-        groups: dayGroups.length > 0 ? dayGroups : undefined,
-      };
-    });
+    // Mismo fetch batched + ensamblado que la vista del trainer
+    const routine = await fetchRoutineDetail(supabase, assignment.routine_id);
 
     return {
       ...assignment,
-      routine: { ...routine, days: assembledDays },
+      routine,
     } as ClientRoutineView;
   },
 
-  subscribeToRoutineChanges(routineId: string, clientRoutineId: string, onChange: () => void) {
+  subscribeToRoutineChanges(
+    routineId: string,
+    clientRoutineId: string,
+    dayIds: string[],
+    onChange: () => void
+  ) {
     const supabase = createClient();
-    const channel = supabase
+    const dayFilter = `routine_day_id=in.(${dayIds.join(",")})`;
+    let channel = supabase
       .channel(`my-routine:${clientRoutineId}`)
       .on(
         "postgres_changes",
@@ -209,20 +143,23 @@ export const clientAppService = {
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "routine_exercises" },
-        () => onChange()
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "exercise_groups" },
-        () => onChange()
-      )
-      .on(
-        "postgres_changes",
         { event: "*", schema: "public", table: "client_routines", filter: `id=eq.${clientRoutineId}` },
         () => onChange()
-      )
-      .subscribe();
+      );
+    if (dayIds.length > 0) {
+      channel = channel
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "routine_exercises", filter: dayFilter },
+          () => onChange()
+        )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "exercise_groups", filter: dayFilter },
+          () => onChange()
+        );
+    }
+    channel.subscribe();
 
     return () => {
       supabase.removeChannel(channel);
@@ -353,8 +290,9 @@ export const clientAppService = {
   async getMyMeasurements() {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data: client } = await supabase
@@ -376,8 +314,9 @@ export const clientAppService = {
   async addMyMeasurement(input: Omit<BodyMeasurement, "id" | "created_at" | "client_id">) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data: client } = await supabase
@@ -399,8 +338,9 @@ export const clientAppService = {
   async getMyActiveMealPlan(): Promise<MealPlan | null> {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // Get client record
@@ -423,44 +363,8 @@ export const clientAppService = {
     if (assignError) throw assignError;
     if (!assignment) return null;
 
-    // Fetch the meal plan
-    const { data: mealPlan, error: planError } = await supabase
-      .from("meal_plans")
-      .select("*")
-      .eq("id", assignment.meal_plan_id)
-      .single();
-    if (planError) throw planError;
-    if (!mealPlan) return null;
-
-    // Fetch meals
-    const { data: meals, error: mealsError } = await supabase
-      .from("meal_plan_meals")
-      .select("*")
-      .eq("meal_plan_id", mealPlan.id)
-      .order("order_index", { ascending: true });
-    if (mealsError) throw mealsError;
-
-    // Fetch foods for all meals
-    const mealIds = (meals ?? []).map((m) => m.id);
-    let foods: MealFood[] = [];
-
-    if (mealIds.length > 0) {
-      const { data: foodData, error: foodError } = await supabase
-        .from("meal_foods")
-        .select("*")
-        .in("meal_plan_meal_id", mealIds)
-        .order("order_index", { ascending: true });
-      if (foodError) throw foodError;
-      foods = (foodData ?? []) as MealFood[];
-    }
-
-    // Assemble
-    const assembledMeals: MealPlanMeal[] = (meals ?? []).map((meal) => ({
-      ...meal,
-      foods: foods.filter((f) => f.meal_plan_meal_id === meal.id),
-    }));
-
-    return { ...mealPlan, meals: assembledMeals } as MealPlan;
+    // Mismo fetch batched + ensamblado que la vista del trainer
+    return fetchMealPlanDetail(supabase, assignment.meal_plan_id);
   },
 
   async getProgressData(clientRoutineId: string) {

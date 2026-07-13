@@ -237,7 +237,11 @@ function MyRoutinePageContent() {
   const { data: routine, isLoading } = useMyRoutine();
   const { data: client } = useMyClient();
   const { data: logs } = useWorkoutLogs(routine?.id ?? "");
-  useMyRoutineRealtime(routine?.routine_id, routine?.id);
+  useMyRoutineRealtime(
+    routine?.routine_id,
+    routine?.id,
+    routine?.routine?.days?.map((d) => d.id)
+  );
   const startWorkout = useStartWorkout();
   const completeWorkout = useCompleteWorkout();
   const logExercise = useLogExercise();

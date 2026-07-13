@@ -101,7 +101,8 @@ export const cycleTrainingService = {
     config: Partial<Omit<CycleTrainingConfig, "id" | "client_id" | "trainer_id" | "created_at" | "updated_at">>
   ): Promise<CycleTrainingConfig> {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const existing = await this.getConfig(clientId);
@@ -138,7 +139,8 @@ export const cycleTrainingService = {
     todaySymptoms: string[]
   ): Promise<PhaseTrainingSuggestion | null> {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // Get client_id
@@ -206,7 +208,8 @@ export const cycleTrainingService = {
     notes?: string;
   }): Promise<CyclePerformanceLog> {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data: client } = await supabase
@@ -298,7 +301,8 @@ export const cycleTrainingService = {
 
   async getPrivacySettings(): Promise<CyclePrivacySettings> {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data: client } = await supabase
@@ -340,7 +344,8 @@ export const cycleTrainingService = {
     data: Partial<Omit<CyclePrivacySettings, "id" | "client_id" | "created_at" | "updated_at">>
   ): Promise<CyclePrivacySettings> {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data: client } = await supabase

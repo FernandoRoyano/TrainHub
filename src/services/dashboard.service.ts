@@ -60,13 +60,30 @@ function getMonday(): string {
   return monday.toISOString();
 }
 
+interface DashboardRpcPayload {
+  active_clients: number;
+  total_routines: number;
+  pending_reviews: number;
+  new_clients_week: number;
+  unread_messages: number;
+  messages_sent_week: number;
+  recent_clients: { id: string; full_name: string; created_at: string }[];
+  recent_routines: { id: string; name: string; created_at: string }[];
+  recent_assignments: {
+    id: string;
+    created_at: string;
+    client_name: string | null;
+    routine_name: string | null;
+  }[];
+  week_workouts: { client_id: string; date: string }[];
+  active_clients_list: { id: string; full_name: string }[];
+  client_routine_days: { client_id: string; days_per_week: number }[];
+  last_workouts: { client_id: string; date: string }[];
+}
+
 export const dashboardService = {
   async getStats(): Promise<DashboardStats> {
     const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("Not authenticated");
 
     const mondayISO = getMonday(); // instante UTC: solo para columnas timestamptz
     // Para columnas DATE hay que comparar con la fecha LOCAL: el lunes 00:00
@@ -74,135 +91,23 @@ export const dashboardService = {
     // anterior a "esta semana".
     const mondayDate = localWeekStartMonday();
 
-    const [
-      clientsResult,
-      routinesResult,
-      conversationsResult,
-      recentClientsResult,
-      recentRoutinesResult,
-      recentAssignmentsResult,
-      _pendingClientsResult,
-      weekWorkoutsResult,
-      pendingReviewsResult,
-      newClientsWeekResult,
-      // Analytics queries
-      activeClientsListResult,
-      activeClientRoutinesResult,
-      allRecentLogsResult,
-    ] = await Promise.all([
-      // Active clients count
-      supabase
-        .from("clients")
-        .select("*", { count: "exact", head: true })
-        .eq("trainer_id", user.id)
-        .eq("status", "active"),
-      // Total routines count
-      supabase
-        .from("routines")
-        .select("*", { count: "exact", head: true })
-        .eq("trainer_id", user.id),
-      // Conversations (for unread messages)
-      supabase
-        .from("conversations")
-        .select("id")
-        .eq("trainer_id", user.id),
-      // Recent clients
-      supabase
-        .from("clients")
-        .select("id, full_name, created_at")
-        .eq("trainer_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(5),
-      // Recent routines
-      supabase
-        .from("routines")
-        .select("id, name, created_at")
-        .eq("trainer_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(5),
-      // Recent assignments
-      supabase
-        .from("client_routines")
-        .select("id, created_at, client:clients(full_name), routine:routines(name)")
-        .order("created_at", { ascending: false })
-        .limit(5),
-      // Pending clients count
-      supabase
-        .from("clients")
-        .select("*", { count: "exact", head: true })
-        .eq("trainer_id", user.id)
-        .eq("status", "pending"),
-      // Week workout logs (all clients of this trainer) - include date for chart
-      supabase
-        .from("workout_logs")
-        .select("id, client_id, date, client_routine:client_routines!inner(trainer_id)")
-        .eq("client_routine.trainer_id" as string, user.id)
-        .gte("date", mondayDate),
-      // Pending reviews: active routines assigned > 28 days ago
-      supabase
-        .from("client_routines")
-        .select("*", { count: "exact", head: true })
-        .eq("trainer_id", user.id)
-        .eq("status", "active")
-        .lt("start_date", new Date(Date.now() - 28 * 86400000).toISOString().split("T")[0]),
-      // New clients this week
-      supabase
-        .from("clients")
-        .select("*", { count: "exact", head: true })
-        .eq("trainer_id", user.id)
-        .gte("created_at", mondayISO),
-      // Active clients with names (for compliance table)
-      supabase
-        .from("clients")
-        .select("id, full_name")
-        .eq("trainer_id", user.id)
-        .eq("status", "active"),
-      // Active client_routines with days_per_week
-      supabase
-        .from("client_routines")
-        .select("client_id, routine:routines(days_per_week)")
-        .eq("trainer_id", user.id)
-        .eq("status", "active"),
-      // All recent workout logs (last 90 days) for last workout dates
-      supabase
-        .from("workout_logs")
-        .select("client_id, date, client_routine:client_routines!inner(trainer_id)")
-        .eq("client_routine.trainer_id" as string, user.id)
-        .gte("date", new Date(Date.now() - 90 * 86400000).toISOString().split("T")[0])
-        .order("date", { ascending: false }),
-    ]);
+    // Un solo RPC en vez de 15 requests; el ensamblado sigue en JS
+    const { data, error } = await supabase.rpc("get_dashboard_stats", {
+      p_week_start: mondayDate,
+      p_week_start_ts: mondayISO,
+    });
+    if (error) throw error;
+    const stats = data as DashboardRpcPayload;
 
-    const activeClients = clientsResult.count ?? 0;
-    const totalRoutines = routinesResult.count ?? 0;
-    const pendingReviews = pendingReviewsResult.count ?? 0;
-    const newClientsWeek = newClientsWeekResult.count ?? 0;
-
-    // Unread messages
-    let unreadMessages = 0;
-    let messagesSentWeek = 0;
-    const conversations = conversationsResult.data;
-    if (conversations && conversations.length > 0) {
-      const convIds = conversations.map((c) => c.id);
-      const [unreadResult, sentResult] = await Promise.all([
-        supabase
-          .from("messages")
-          .select("*", { count: "exact", head: true })
-          .in("conversation_id", convIds)
-          .eq("read", false)
-          .neq("sender_id", user.id),
-        supabase
-          .from("messages")
-          .select("*", { count: "exact", head: true })
-          .in("conversation_id", convIds)
-          .eq("sender_id", user.id)
-          .gte("created_at", mondayISO),
-      ]);
-      unreadMessages = unreadResult.count ?? 0;
-      messagesSentWeek = sentResult.count ?? 0;
-    }
+    const activeClients = stats.active_clients ?? 0;
+    const totalRoutines = stats.total_routines ?? 0;
+    const pendingReviews = stats.pending_reviews ?? 0;
+    const newClientsWeek = stats.new_clients_week ?? 0;
+    const unreadMessages = stats.unread_messages ?? 0;
+    const messagesSentWeek = stats.messages_sent_week ?? 0;
 
     // Week workouts & tracking rate
-    const weekWorkouts = weekWorkoutsResult.data ?? [];
+    const weekWorkouts = stats.week_workouts ?? [];
     const weekSessions = weekWorkouts.length;
     const uniqueClientsThisWeek = new Set(weekWorkouts.map((w) => w.client_id)).size;
     const trackingRate = activeClients > 0
@@ -212,39 +117,31 @@ export const dashboardService = {
     // Build activity list
     const activity: ActivityItem[] = [];
 
-    if (recentClientsResult.data) {
-      for (const client of recentClientsResult.data) {
-        activity.push({
-          id: `client-${client.id}`,
-          type: "client_added",
-          description: client.full_name,
-          timestamp: client.created_at,
-        });
-      }
+    for (const client of stats.recent_clients ?? []) {
+      activity.push({
+        id: `client-${client.id}`,
+        type: "client_added",
+        description: client.full_name,
+        timestamp: client.created_at,
+      });
     }
 
-    if (recentRoutinesResult.data) {
-      for (const routine of recentRoutinesResult.data) {
-        activity.push({
-          id: `routine-${routine.id}`,
-          type: "routine_created",
-          description: routine.name,
-          timestamp: routine.created_at,
-        });
-      }
+    for (const routine of stats.recent_routines ?? []) {
+      activity.push({
+        id: `routine-${routine.id}`,
+        type: "routine_created",
+        description: routine.name,
+        timestamp: routine.created_at,
+      });
     }
 
-    if (recentAssignmentsResult.data) {
-      for (const assign of recentAssignmentsResult.data) {
-        const client = assign.client as unknown as { full_name: string } | null;
-        const routine = assign.routine as unknown as { name: string } | null;
-        activity.push({
-          id: `assign-${assign.id}`,
-          type: "routine_assigned",
-          description: `${routine?.name ?? "Routine"} → ${client?.full_name ?? "Client"}`,
-          timestamp: assign.created_at,
-        });
-      }
+    for (const assign of stats.recent_assignments ?? []) {
+      activity.push({
+        id: `assign-${assign.id}`,
+        type: "routine_assigned",
+        description: `${assign.routine_name ?? "Routine"} → ${assign.client_name ?? "Client"}`,
+        timestamp: assign.created_at,
+      });
     }
 
     activity.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
@@ -269,28 +166,27 @@ export const dashboardService = {
     }));
 
     // --- Analytics: Client Compliance ---
-    const activeClientsList = activeClientsListResult.data ?? [];
+    const activeClientsList = stats.active_clients_list ?? [];
 
     // Map client_id -> assigned days per week
     const daysPerWeekMap: Record<string, number> = {};
-    for (const cr of activeClientRoutinesResult.data ?? []) {
-      const dpw = (cr.routine as unknown as { days_per_week: number } | null)?.days_per_week ?? 0;
-      const cid = cr.client_id as string;
-      daysPerWeekMap[cid] = Math.max(daysPerWeekMap[cid] ?? 0, dpw);
+    for (const cr of stats.client_routine_days ?? []) {
+      daysPerWeekMap[cr.client_id] = Math.max(
+        daysPerWeekMap[cr.client_id] ?? 0,
+        cr.days_per_week ?? 0
+      );
     }
 
     // Map client_id -> workouts this week (from weekWorkouts already loaded)
     const weekWorkoutsPerClient: Record<string, number> = {};
     for (const log of weekWorkouts) {
-      const cid = log.client_id as string;
-      weekWorkoutsPerClient[cid] = (weekWorkoutsPerClient[cid] ?? 0) + 1;
+      weekWorkoutsPerClient[log.client_id] = (weekWorkoutsPerClient[log.client_id] ?? 0) + 1;
     }
 
-    // Map client_id -> last workout date (from allRecentLogs)
+    // Map client_id -> last workout date
     const lastWorkoutMap: Record<string, string> = {};
-    for (const log of allRecentLogsResult.data ?? []) {
-      const cid = log.client_id as string;
-      if (!lastWorkoutMap[cid]) lastWorkoutMap[cid] = log.date;
+    for (const log of stats.last_workouts ?? []) {
+      lastWorkoutMap[log.client_id] = log.date;
     }
 
     const clientCompliance: ClientComplianceRow[] = activeClientsList
@@ -347,38 +243,18 @@ export const dashboardService = {
   async getSidebarBadges(): Promise<SidebarBadges> {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return { unreadMessages: 0, pendingClients: 0 };
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.user) return { unreadMessages: 0, pendingClients: 0 };
 
-    const [conversationsResult, pendingResult] = await Promise.all([
-      supabase
-        .from("conversations")
-        .select("id")
-        .eq("trainer_id", user.id),
-      supabase
-        .from("clients")
-        .select("*", { count: "exact", head: true })
-        .eq("trainer_id", user.id)
-        .eq("status", "pending"),
-    ]);
-
-    let unreadMessages = 0;
-    const conversations = conversationsResult.data;
-    if (conversations && conversations.length > 0) {
-      const convIds = conversations.map((c) => c.id);
-      const { count } = await supabase
-        .from("messages")
-        .select("*", { count: "exact", head: true })
-        .in("conversation_id", convIds)
-        .eq("read", false)
-        .neq("sender_id", user.id);
-      unreadMessages = count ?? 0;
-    }
+    // Fuente única de unread/pending (1 RPC en vez de 3 queries)
+    const { data, error } = await supabase.rpc("get_sidebar_badges");
+    if (error) throw error;
+    const badges = data as { unread_messages: number; pending_clients: number };
 
     return {
-      unreadMessages,
-      pendingClients: pendingResult.count ?? 0,
+      unreadMessages: badges.unread_messages ?? 0,
+      pendingClients: badges.pending_clients ?? 0,
     };
   },
 };

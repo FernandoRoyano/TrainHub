@@ -138,8 +138,9 @@ export const exercisesService = {
   async createExercise(data: ExerciseFormData) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const { data: exercise, error } = await supabase
@@ -168,8 +169,9 @@ export const exercisesService = {
   async updateExercise(id: string, data: Partial<ExerciseFormData>) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // Solo coercionar a null los campos PRESENTES: un update parcial no debe
@@ -196,8 +198,9 @@ export const exercisesService = {
   async deleteExercise(id: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     // Soft delete: marca archived_at en vez de borrar la fila. Esto evita que
@@ -213,8 +216,9 @@ export const exercisesService = {
   async uploadMedia(file: File, folder: string) {
     const supabase = createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const ext = file.name.split(".").pop();

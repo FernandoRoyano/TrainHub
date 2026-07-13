@@ -16,7 +16,8 @@ export interface AnalyticsData {
 export const analyticsService = {
   async getAnalytics(days: number = 90): Promise<AnalyticsData> {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
     const cutoffDate = new Date();
@@ -29,50 +30,44 @@ export const analyticsService = {
     const startOfLastWeek = new Date(startOfThisWeek);
     startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
 
-    // Parallel queries
-    const [
-      clientsResult,
-      workoutLogsResult,
-      exerciseLogsResult,
-      clientStatusResult,
-    ] = await Promise.all([
-      // All clients with created_at
-      supabase
-        .from("clients")
-        .select("id, status, created_at")
-        .eq("trainer_id", user.id)
-        .order("created_at", { ascending: true }),
+    // Clientes primero: sus ids acotan las queries de logs en la DB
+    // (antes los logs se traían sin filtro de trainer y se filtraban en JS)
+    const { data: clientsData, error: clientsError } = await supabase
+      .from("clients")
+      .select("id, status, created_at")
+      .eq("trainer_id", user.id)
+      .order("created_at", { ascending: true });
+    if (clientsError) throw clientsError;
+    const clients = clientsData ?? [];
+    const clientIdList = clients.map((c) => c.id);
 
-      // Workout logs for the period
-      supabase
-        .from("workout_logs")
-        .select("id, client_id, date, completed, client_routine_id")
-        .gte("date", cutoff)
-        .eq("completed", true),
+    const [workoutLogsResult, exerciseLogsResult] =
+      clientIdList.length > 0
+        ? await Promise.all([
+            // Workout logs for the period (usa idx_workout_logs_client)
+            supabase
+              .from("workout_logs")
+              .select("id, client_id, date, completed, client_routine_id")
+              .in("client_id", clientIdList)
+              .gte("date", cutoff)
+              .eq("completed", true),
 
-      // Exercise logs del periodo seleccionado, con fecha y cliente del workout
-      // (antes era una muestra arbitraria de todo el histórico, sin filtro de
-      // fechas ni de trainer, y sin forma de calcular volumen por semana)
-      supabase
-        .from("exercise_logs")
-        .select(
-          "sets_completed, weight_used, workout_log:workout_logs!inner(date, client_id), routine_exercise:routine_exercises(exercise:exercises(name))"
-        )
-        .gte("workout_log.date", cutoff)
-        .limit(5000),
+            // Exercise logs del periodo seleccionado, con fecha y cliente del workout
+            supabase
+              .from("exercise_logs")
+              .select(
+                "sets_completed, weight_used, workout_log:workout_logs!inner(date, client_id), routine_exercise:routine_exercises(exercise:exercises(name))"
+              )
+              .in("workout_log.client_id", clientIdList)
+              .gte("workout_log.date", cutoff)
+              .limit(5000),
+          ])
+        : [{ data: [] }, { data: [] }];
 
-      // Client status distribution
-      supabase
-        .from("clients")
-        .select("status")
-        .eq("trainer_id", user.id),
-    ]);
-
-    const clients = clientsResult.data ?? [];
     const workoutLogs = workoutLogsResult.data ?? [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const exerciseLogs = (exerciseLogsResult.data ?? []) as any[];
-    const clientStatuses = clientStatusResult.data ?? [];
+    const clientStatuses = clients;
 
     // Filter workout logs to only this trainer's clients
     const clientIds = new Set(clients.map((c) => c.id));
