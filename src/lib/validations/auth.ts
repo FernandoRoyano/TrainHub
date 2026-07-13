@@ -32,6 +32,10 @@ export function createRegisterSchema(t: T) {
       email: z.string().email(t("invalidEmail")),
       password: createPasswordSchema(t),
       confirmPassword: z.string(),
+      // Consentimiento RGPD: obligatorio para crear cuenta
+      acceptTerms: z.boolean().refine((v) => v === true, {
+        message: t("mustAcceptTerms"),
+      }),
     })
     .refine((data) => data.password === data.confirmPassword, {
       message: t("passwordMismatch"),

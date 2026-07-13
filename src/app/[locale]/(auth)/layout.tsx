@@ -1,5 +1,6 @@
 import { Dumbbell } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 export default function AuthLayout({
   children,
@@ -23,6 +24,17 @@ export default function AuthLayout({
           </p>
         </div>
         {children}
+        <div className="flex justify-center gap-4 text-xs text-muted-foreground">
+          <Link href="/legal" className="hover:text-foreground">
+            {t("legalNoticeLink")}
+          </Link>
+          <Link href="/privacy" className="hover:text-foreground">
+            {t("privacyLink")}
+          </Link>
+          <Link href="/terms" className="hover:text-foreground">
+            {t("termsLink")}
+          </Link>
+        </div>
       </div>
     </div>
   );

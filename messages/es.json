@@ -71,7 +71,13 @@
     "resetEmailError": "Error al enviar el correo",
     "emailPlaceholder": "tu@email.com",
     "namePlaceholder": "Juan García",
-    "tagline": "Plataforma de entrenamiento personal"
+    "tagline": "Plataforma de entrenamiento personal",
+    "acceptTermsPrefix": "He leído y acepto los",
+    "termsLink": "términos y condiciones",
+    "acceptTermsMiddle": "y la",
+    "privacyLink": "política de privacidad",
+    "acceptTermsSuffix": ", incluido el tratamiento de mis datos de salud para la prestación del servicio.",
+    "legalNoticeLink": "Aviso legal"
   },
   "nav": {
     "dashboard": "Panel",
@@ -963,7 +969,8 @@
     "onlyAlphanumeric": "Solo letras, números y guiones bajos",
     "invalidName": "El nombre solo puede contener letras y espacios",
     "minAmount": "El importe mínimo es 0,01",
-    "required": "Este campo es obligatorio"
+    "required": "Este campo es obligatorio",
+    "mustAcceptTerms": "Debes aceptar los términos y la política de privacidad"
   },
   "landing": {
     "navFeatures": "Funcionalidades",
@@ -1121,7 +1128,8 @@
     "footerPrivacy": "Privacidad",
     "footerTerms": "Términos",
     "footerCookies": "Cookies",
-    "footerCopyright": "© {year} TrainHub. Todos los derechos reservados."
+    "footerCopyright": "© {year} TrainHub. Todos los derechos reservados.",
+    "footerLegalNotice": "Aviso legal"
   },
   "blocks": {
     "title": "Bloques de ejercicios",
@@ -1581,14 +1589,14 @@
     "fastingNow": "Ayunando ahora",
     "notFasting": "No estás ayunando",
     "protocols": {
-      "16_8": "16:8",
-      "18_6": "18:6",
-      "20_4": "20:4",
-      "23_1": "OMAD (23:1)",
       "24": "24 horas",
       "36": "36 horas",
       "48": "48 horas (2 días)",
       "72": "72 horas (3 días)",
+      "16_8": "16:8",
+      "18_6": "18:6",
+      "20_4": "20:4",
+      "23_1": "OMAD (23:1)",
       "custom": "Personalizado"
     },
     "hours": "horas",

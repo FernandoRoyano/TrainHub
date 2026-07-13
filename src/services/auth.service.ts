@@ -10,6 +10,10 @@ export const authService = {
         data: {
           full_name: fullName,
           role: "trainer",
+          // Registro auditable del consentimiento (RGPD): queda en
+          // auth.users.raw_user_meta_data
+          terms_accepted_at: new Date().toISOString(),
+          terms_version: "2026-07-13",
         },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
@@ -33,6 +37,9 @@ export const authService = {
           full_name: fullName,
           role: "client",
           invite_token: inviteToken,
+          // Registro auditable del consentimiento (RGPD)
+          terms_accepted_at: new Date().toISOString(),
+          terms_version: "2026-07-13",
         },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },

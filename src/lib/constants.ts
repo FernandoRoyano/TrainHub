@@ -110,7 +110,14 @@ export const PUBLIC_ROUTES = [
   "/join",
   "/reset-password",
   "/auth/callback",
+  "/privacy",
+  "/terms",
+  "/legal",
 ];
+
+// Páginas legales: públicas Y accesibles con sesión iniciada
+// (el middleware no debe redirigir a home desde ellas)
+export const LEGAL_ROUTES = ["/privacy", "/terms", "/legal"];
 
 export const MEAL_TYPES = [
   "breakfast",

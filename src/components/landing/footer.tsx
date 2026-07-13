@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Dumbbell } from "lucide-react";
 
 interface FooterLinkConfig {
   titleKey: string;
-  links: { labelKey: string; href: string }[];
+  links: { labelKey: string; href: string; localized?: boolean }[];
 }
 
 const footerLinkConfigs: FooterLinkConfig[] = [
@@ -29,15 +29,16 @@ const footerLinkConfigs: FooterLinkConfig[] = [
   {
     titleKey: "footerLegal",
     links: [
-      { labelKey: "footerPrivacy", href: "#" },
-      { labelKey: "footerTerms", href: "#" },
-      { labelKey: "footerCookies", href: "#" },
+      { labelKey: "footerPrivacy", href: "/privacy", localized: true },
+      { labelKey: "footerTerms", href: "/terms", localized: true },
+      { labelKey: "footerLegalNotice", href: "/legal", localized: true },
     ],
   },
 ];
 
 export function Footer() {
   const t = useTranslations("landing");
+  const locale = useLocale();
 
   return (
     <footer className="border-t border-border/50 bg-card/30">
@@ -66,7 +67,7 @@ export function Footer() {
                 {section.links.map((link) => (
                   <li key={link.labelKey}>
                     <Link
-                      href={link.href}
+                      href={link.localized ? `/${locale}${link.href}` : link.href}
                       className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {t(link.labelKey)}

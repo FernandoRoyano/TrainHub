@@ -10,6 +10,8 @@ import { authService } from "@/services/auth.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { TermsCheckboxLabel } from "@/components/auth/terms-checkbox-label";
 import {
   Form,
   FormControl,
@@ -42,6 +44,7 @@ export function JoinForm({ token }: JoinFormProps) {
       email: "",
       password: "",
       confirmPassword: "",
+      acceptTerms: false,
     },
   });
 
@@ -194,6 +197,26 @@ export function JoinForm({ token }: JoinFormProps) {
                   {...field}
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="acceptTerms"
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex items-start gap-2">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="mt-0.5"
+                  />
+                </FormControl>
+                <TermsCheckboxLabel />
+              </div>
               <FormMessage />
             </FormItem>
           )}

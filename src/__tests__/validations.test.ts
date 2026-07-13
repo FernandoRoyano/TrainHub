@@ -107,8 +107,20 @@ describe("Register validation schema", () => {
       email: "mary@example.com",
       password: "SecurePass123!",
       confirmPassword: "SecurePass123!",
+      acceptTerms: true,
     });
     expect(result.success).toBe(true);
+  });
+
+  it("rejects registration without accepting terms", () => {
+    const result = schema.safeParse({
+      fullName: "Mary Bornaghi",
+      email: "mary@example.com",
+      password: "SecurePass123!",
+      confirmPassword: "SecurePass123!",
+      acceptTerms: false,
+    });
+    expect(result.success).toBe(false);
   });
 
   it("rejects mismatched passwords", () => {
@@ -117,6 +129,7 @@ describe("Register validation schema", () => {
       email: "mary@example.com",
       password: "SecurePass123!",
       confirmPassword: "DifferentPass456!",
+      acceptTerms: true,
     });
     expect(result.success).toBe(false);
   });
@@ -127,6 +140,7 @@ describe("Register validation schema", () => {
       email: "not-an-email",
       password: "SecurePass123!",
       confirmPassword: "SecurePass123!",
+      acceptTerms: true,
     });
     expect(result.success).toBe(false);
   });
@@ -137,6 +151,7 @@ describe("Register validation schema", () => {
       email: "mary@example.com",
       password: "SecurePass123!",
       confirmPassword: "SecurePass123!",
+      acceptTerms: true,
     });
     expect(result.success).toBe(false);
   });

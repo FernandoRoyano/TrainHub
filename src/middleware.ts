@@ -2,7 +2,7 @@ import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
 import { updateSession } from "./lib/supabase/middleware";
-import { PUBLIC_ROUTES } from "./lib/constants";
+import { PUBLIC_ROUTES, LEGAL_ROUTES } from "./lib/constants";
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -43,8 +43,9 @@ export async function middleware(request: NextRequest) {
     routing.locales.some((locale) => pathname === `/${locale}`);
 
   const isResetPassword = pathname.includes("/reset-password");
+  const isLegalPage = LEGAL_ROUTES.some((route) => pathname.includes(route));
 
-  if (user && isPublicRoute(pathname) && !isLandingPage && !isResetPassword) {
+  if (user && isPublicRoute(pathname) && !isLandingPage && !isResetPassword && !isLegalPage) {
     const locale = routing.locales.find((l) => pathname.startsWith(`/${l}`));
     const isClient = user.user_metadata?.role === "client";
     const homeUrl = new URL(
