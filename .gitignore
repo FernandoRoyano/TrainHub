@@ -50,3 +50,7 @@ playwright-report/
 dedupe-rollback-*.json
 
 .vercel
+
+# Artefactos de scripts de mantenimiento de imágenes (salidas one-off)
+audit-image-mismatch.json
+image-fix-rollback-*.json
