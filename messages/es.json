@@ -453,7 +453,9 @@
     "pattern_pull": "Tracción",
     "pattern_hip_dominant": "Dominante de cadera",
     "pattern_knee_dominant": "Dominante de rodilla",
-    "pattern_core": "Core"
+    "pattern_core": "Core",
+    "muscle_other": "Otro",
+    "muscle_cardio": "Cardio"
   },
   "routines": {
     "title": "Rutinas",

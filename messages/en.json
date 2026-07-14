@@ -453,7 +453,9 @@
     "pattern_pull": "Pull",
     "pattern_hip_dominant": "Hip dominant",
     "pattern_knee_dominant": "Knee dominant",
-    "pattern_core": "Core"
+    "pattern_core": "Core",
+    "muscle_other": "Other",
+    "muscle_cardio": "Cardio"
   },
   "routines": {
     "title": "Routines",
