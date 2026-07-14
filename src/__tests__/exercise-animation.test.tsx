@@ -87,6 +87,16 @@ describe("ExerciseAnimation", () => {
     );
   });
 
+  it("preloads second frame for Supabase Storage URLs (mirror de imágenes)", () => {
+    const url =
+      "https://xyz.supabase.co/storage/v1/object/public/exercises/Bench_Press/0.jpg";
+    render(<ExerciseAnimation thumbnailUrl={url} />);
+
+    expect(imageSrc).toBe(
+      "https://xyz.supabase.co/storage/v1/object/public/exercises/Bench_Press/1.jpg"
+    );
+  });
+
   it("alternates frames when second image loads successfully", () => {
     const url =
       "https://cdn.example.com/exercises/Bench_Press/0.jpg";

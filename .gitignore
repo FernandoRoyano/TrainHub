@@ -56,3 +56,5 @@ audit-image-mismatch.json
 image-fix-rollback-*.json
 untranslated-*.json
 translations-rollback-*.json
+mirror-rollback-*.json
+mirror-failed-*.json
