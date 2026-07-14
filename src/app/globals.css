@@ -25,7 +25,22 @@
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 105 58% 59%;
-    --radius: 0.75rem;
+    --radius: 1rem;
+
+    /* Estados semánticos (sustituyen a emerald/amber/cyan hardcodeados) */
+    --success: 105 55% 42%;
+    --success-foreground: 0 0% 98%;
+    --warning: 38 92% 45%;
+    --warning-foreground: 222 47% 11%;
+    --info: 199 89% 42%;
+    --info-foreground: 0 0% 98%;
+
+    /* Paleta de gráficas — anclada al primary, misma energía */
+    --chart-1: 105 58% 45%;
+    --chart-2: 199 80% 45%;
+    --chart-3: 262 65% 55%;
+    --chart-4: 38 90% 50%;
+    --chart-5: 340 70% 55%;
 
     --glass-bg: 220 14% 96%;
     --glass-border: 220 13% 85%;
@@ -52,37 +67,54 @@
     --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  /* Dark mode - the default for this app */
+  /* Dark mode - the default for this app.
+     Base casi-negra neutra (menos tinte azul) + primary eléctrico:
+     un solo acento de alta energía sobre superficie profunda. */
   .dark {
-    --background: 228 50% 4%;
-    --foreground: 210 40% 98%;
-    --card: 226 45% 7%;
-    --card-foreground: 210 40% 98%;
-    --popover: 226 45% 7%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 105 58% 59%;
-    --primary-foreground: 228 50% 4%;
-    --primary-rgb: 118, 207, 93;
-    --secondary: 224 30% 12%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 224 25% 12%;
-    --muted-foreground: 215 20% 55%;
-    --accent: 224 25% 14%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 224 20% 16%;
-    --input: 224 20% 14%;
-    --ring: 105 58% 59%;
-    --radius: 0.75rem;
+    --background: 228 20% 4%;
+    --foreground: 210 20% 98%;
+    --card: 228 18% 7%;
+    --card-foreground: 210 20% 98%;
+    --popover: 228 18% 7%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 105 62% 62%;
+    --primary-foreground: 228 20% 4%;
+    --primary-rgb: 122, 216, 96;
+    --secondary: 228 14% 12%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 228 12% 12%;
+    --muted-foreground: 220 12% 58%;
+    --accent: 228 14% 14%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 228 12% 15%;
+    --input: 228 12% 13%;
+    --ring: 105 62% 62%;
+    --radius: 1rem;
 
-    --glass-bg: 226 40% 9%;
-    --glass-border: 224 25% 25%;
+    /* Estados semánticos */
+    --success: 105 62% 62%;
+    --success-foreground: 228 20% 4%;
+    --warning: 38 92% 58%;
+    --warning-foreground: 228 20% 4%;
+    --info: 199 85% 60%;
+    --info-foreground: 228 20% 4%;
+
+    /* Paleta de gráficas — brillante sobre fondo oscuro */
+    --chart-1: 105 62% 62%;
+    --chart-2: 199 85% 60%;
+    --chart-3: 262 75% 68%;
+    --chart-4: 38 92% 58%;
+    --chart-5: 340 80% 66%;
+
+    --glass-bg: 228 16% 9%;
+    --glass-border: 228 14% 24%;
     --glass-highlight: 0 0% 100%;
     --section-hue: 105;
 
     /* Solid opaque surface for overlays (sheets, dialogs, dropdowns) */
-    --surface-overlay: 226 35% 11%;
+    --surface-overlay: 228 16% 11%;
   }
 }
 
@@ -127,11 +159,11 @@
     border-radius: 3px;
   }
 
-  /* Glass card base */
+  /* Glass card base (blur contenido: firma visual sin ruido ni coste) */
   .glass {
-    background: hsl(var(--glass-bg) / 0.45);
-    backdrop-filter: blur(24px) saturate(1.8);
-    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    background: hsl(var(--glass-bg) / 0.5);
+    backdrop-filter: blur(16px) saturate(1.6);
+    -webkit-backdrop-filter: blur(16px) saturate(1.6);
     border: 1px solid hsl(var(--glass-border) / 0.4);
     box-shadow:
       0 0 0 1px hsl(var(--glass-highlight) / 0.05) inset,

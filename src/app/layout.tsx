@@ -46,7 +46,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a1122",
+  // = hsl(228 20% 4%), el --background dark; mismo valor en manifest.ts
+  themeColor: "#08090c",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,

@@ -1,7 +1,7 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { Inter } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import { QueryProvider } from "@/components/shared/query-provider";
 import { ThemeProvider } from "@/components/shared/theme-provider";
@@ -12,6 +12,13 @@ import { InstallPrompt } from "@/components/pwa/install-prompt";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+});
+
+// Display: títulos, números grandes (KPIs, timers, precios) y logo
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
 });
 
 export default async function LocaleLayout({
@@ -32,7 +39,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`${inter.variable} font-sans antialiased`}
+        className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}
       >
         <ThemeProvider>
           <NextIntlClientProvider messages={messages}>
