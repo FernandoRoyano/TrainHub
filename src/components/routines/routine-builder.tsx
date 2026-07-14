@@ -79,7 +79,15 @@ import {
   Timer,
   Zap,
   Layers,
+  Copy,
+  SlidersHorizontal,
 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { DEFAULT_EXERCISE_VALUES } from "@/stores/routine-builder-store";
 import { Link } from "@/i18n/navigation";
 import type { Exercise } from "@/services/exercises.service";
 
@@ -302,6 +310,84 @@ function DroppableGroupWrapper({
   );
 }
 
+/* ── Aplicar series/reps/descanso a todo el día ───────────── */
+function ApplyToDayPopover({
+  exerciseCount,
+  onApply,
+  t,
+}: {
+  exerciseCount: number;
+  onApply: (defaults: { sets: number; reps: string; rest_seconds: number }) => void;
+  t: ReturnType<typeof useTranslations<"routines">>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [sets, setSets] = useState(DEFAULT_EXERCISE_VALUES.sets);
+  const [reps, setReps] = useState(DEFAULT_EXERCISE_VALUES.reps);
+  const [rest, setRest] = useState(DEFAULT_EXERCISE_VALUES.rest_seconds);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="shrink-0"
+          title={t("applyToDay")}
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 space-y-3" align="end">
+        <p className="text-xs font-medium">{t("applyToDay")}</p>
+        <div className="grid grid-cols-3 gap-1.5">
+          <div>
+            <label className="text-[10px] text-muted-foreground">{t("sets")}</label>
+            <Input
+              type="number"
+              min={1}
+              max={20}
+              value={sets}
+              onChange={(e) => setSets(Number(e.target.value) || 1)}
+              className="h-8 text-xs"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-muted-foreground">{t("reps")}</label>
+            <Input
+              value={reps}
+              onChange={(e) => setReps(e.target.value)}
+              className="h-8 text-xs"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-muted-foreground">{t("rest")}</label>
+            <Input
+              type="number"
+              min={0}
+              max={600}
+              value={rest}
+              onChange={(e) => setRest(Number(e.target.value) || 0)}
+              className="h-8 text-xs"
+            />
+          </div>
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          className="w-full"
+          onClick={() => {
+            onApply({ sets, reps, rest_seconds: rest });
+            setOpen(false);
+          }}
+        >
+          {t("applyToAllInDay", { count: exerciseCount })}
+        </Button>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 /* ── Main builder ─────────────────────────────────────────── */
 export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilderProps) {
   const t = useTranslations("routines");
@@ -328,6 +414,9 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
     updateExercise,
     toggleSuperset,
     addExercisesFromBlock,
+    addExercisesBatch,
+    duplicateDay,
+    applyDefaultsToDay,
     reorderExercise,
     addGroup,
     removeGroup,
@@ -577,7 +666,12 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
             {/* Exercise sidebar - desktop only */}
             <div className="hidden lg:block w-[30%] shrink-0">
               <div className="sticky top-20">
-                <ExerciseSidebar onSelect={(exercise) => addExercise(activeDayIndex, exercise)} />
+                <ExerciseSidebar
+                  onSelect={(exercise) => addExercise(activeDayIndex, exercise)}
+                  onSelectBatch={(exercises, opts) =>
+                    addExercisesBatch(activeDayIndex, exercises, opts)
+                  }
+                />
               </div>
             </div>
 
@@ -849,6 +943,25 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                       }
                       className="flex-1"
                     />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0"
+                      title={t("duplicateDay")}
+                      onClick={() => duplicateDay(activeDayIndex)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    {activeDay.exercises.length > 0 && (
+                      <ApplyToDayPopover
+                        exerciseCount={activeDay.exercises.length}
+                        onApply={(defaults) =>
+                          applyDefaultsToDay(activeDayIndex, defaults)
+                        }
+                        t={t}
+                      />
+                    )}
                     {days.length > 1 && (
                       <Button
                         type="button"
@@ -1215,7 +1328,7 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
         </form>
       </Form>
 
-      {/* Exercise Picker Modal */}
+      {/* Exercise Picker Modal (multi-select: varios ejercicios por apertura) */}
       <ExercisePicker
         open={showPicker}
         onOpenChange={(open) => {
@@ -1229,6 +1342,14 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
             addExercise(activeDayIndex, exercise);
           }
         }}
+        multiSelect
+        targetGroupIndex={groupPickerIndex}
+        onSelectBatch={(exercises, opts) =>
+          addExercisesBatch(activeDayIndex, exercises, {
+            ...opts,
+            groupIndex: groupPickerIndex,
+          })
+        }
       />
 
       {/* Block Picker Modal */}

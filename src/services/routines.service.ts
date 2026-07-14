@@ -208,6 +208,137 @@ function mapDayForCopy(day: RoutineDay) {
   };
 }
 
+// Persiste días + grupos + ejercicios de una rutina en 3 queries batched
+// (antes: bucle con 2 inserts POR GRUPO → ~48 round-trips en una rutina 4×6).
+// Compartido por createRoutine y updateRoutine.
+async function insertDaysGroupsExercises(
+  supabase: ReturnType<typeof createClient>,
+  routineId: string,
+  days: RoutineFormData["days"]
+): Promise<void> {
+  if (days.length === 0) return;
+
+  // 1. Días (batched, ya era así)
+  const daysToInsert = days.map((day) => ({
+    routine_id: routineId,
+    day_number: day.day_number,
+    name: day.name || null,
+    notes: day.notes || null,
+    description: day.description || null,
+  }));
+  const { data: insertedDays, error: daysError } = await supabase
+    .from("routine_days")
+    .insert(daysToInsert)
+    .select("id, day_number");
+  if (daysError) throw daysError;
+  const dayIdByNumber = new Map<number, string>(
+    (insertedDays ?? []).map((d) => [d.day_number as number, d.id as string])
+  );
+
+  // 2. TODOS los grupos de todos los días en un solo insert.
+  // Guard: order_index debe ser único por día (el store reindexa 0..n-1,
+  // pero se reindexa aquí por si llega un payload externo inconsistente).
+  const allGroups: {
+    routine_day_id: string;
+    group_type: string;
+    order_index: number;
+    rounds: number | null;
+    time_limit_seconds: number | null;
+    rest_between_rounds: number | null;
+    label: string | null;
+    notes: string | null;
+  }[] = [];
+  for (const day of days) {
+    const dayId = dayIdByNumber.get(day.day_number);
+    if (!dayId || !day.groups || day.groups.length === 0) continue;
+    day.groups.forEach((group, idx) => {
+      allGroups.push({
+        routine_day_id: dayId,
+        group_type: group.group_type,
+        order_index: idx,
+        rounds: group.rounds ?? null,
+        time_limit_seconds: group.time_limit_seconds ?? null,
+        rest_between_rounds: group.rest_between_rounds ?? null,
+        label: group.label || null,
+        notes: group.notes || null,
+      });
+    });
+  }
+
+  // El id de cada grupo se resuelve por clave (routine_day_id, order_index):
+  // el orden del array devuelto por un insert batch NO está garantizado.
+  const groupIdByKey = new Map<string, string>();
+  if (allGroups.length > 0) {
+    const { data: insertedGroups, error: groupsError } = await supabase
+      .from("exercise_groups")
+      .insert(allGroups)
+      .select("id, routine_day_id, order_index");
+    if (groupsError) throw groupsError;
+    for (const g of insertedGroups ?? []) {
+      groupIdByKey.set(`${g.routine_day_id}:${g.order_index}`, g.id as string);
+    }
+  }
+
+  // 3. TODOS los ejercicios en un solo insert
+  const allExercises: {
+    routine_day_id: string;
+    exercise_group_id: string | null;
+    exercise_id: string;
+    order_index: number;
+    sets: number;
+    reps: string;
+    rest_seconds: number;
+    notes: string | null;
+    superset_group: number | null;
+  }[] = [];
+  for (const day of days) {
+    const dayId = dayIdByNumber.get(day.day_number);
+    if (!dayId) continue;
+
+    if (day.groups && day.groups.length > 0) {
+      day.groups.forEach((group, idx) => {
+        const groupId = groupIdByKey.get(`${dayId}:${idx}`) ?? null;
+        for (const ex of group.exercises) {
+          allExercises.push({
+            routine_day_id: dayId,
+            exercise_group_id: groupId,
+            exercise_id: ex.exercise_id,
+            order_index: ex.order_index,
+            sets: ex.sets,
+            reps: ex.reps,
+            rest_seconds: ex.rest_seconds,
+            notes: ex.notes || null,
+            superset_group: ex.superset_group ?? null,
+          });
+        }
+      });
+    } else {
+      // Ruta plana retrocompat: la lectura envuelve estos ejercicios en
+      // solo-groups sintéticos (fetchRoutineDetail)
+      for (const ex of day.exercises) {
+        allExercises.push({
+          routine_day_id: dayId,
+          exercise_group_id: null,
+          exercise_id: ex.exercise_id,
+          order_index: ex.order_index,
+          sets: ex.sets,
+          reps: ex.reps,
+          rest_seconds: ex.rest_seconds,
+          notes: ex.notes || null,
+          superset_group: ex.superset_group ?? null,
+        });
+      }
+    }
+  }
+
+  if (allExercises.length > 0) {
+    const { error: exError } = await supabase
+      .from("routine_exercises")
+      .insert(allExercises);
+    if (exError) throw exError;
+  }
+}
+
 export const routinesService = {
   async getRoutines(filters?: RoutineFilters) {
     const supabase = createClient();
@@ -278,87 +409,8 @@ export const routinesService = {
       .single();
     if (routineError) throw routineError;
 
-    // 2. Create days
-    if (data.days.length > 0) {
-      const daysToInsert = data.days.map((day) => ({
-        routine_id: routine.id,
-        day_number: day.day_number,
-        name: day.name || null,
-        notes: day.notes || null,
-        description: day.description || null,
-      }));
-
-      const { data: insertedDays, error: daysError } = await supabase
-        .from("routine_days")
-        .insert(daysToInsert)
-        .select();
-      if (daysError) throw daysError;
-
-      // 3. Create groups and exercises for each day
-      for (const day of data.days) {
-        const insertedDay = (insertedDays ?? []).find(
-          (d) => d.day_number === day.day_number
-        );
-        if (!insertedDay) continue;
-
-        // If day has groups, use them
-        if (day.groups && day.groups.length > 0) {
-          for (const group of day.groups) {
-            const { data: insertedGroup, error: groupError } = await supabase
-              .from("exercise_groups")
-              .insert({
-                routine_day_id: insertedDay.id,
-                group_type: group.group_type,
-                order_index: group.order_index,
-                rounds: group.rounds ?? null,
-                time_limit_seconds: group.time_limit_seconds ?? null,
-                rest_between_rounds: group.rest_between_rounds ?? null,
-                label: group.label || null,
-                notes: group.notes || null,
-              })
-              .select()
-              .single();
-            if (groupError) throw groupError;
-
-            if (group.exercises.length > 0) {
-              const exToInsert = group.exercises.map((ex) => ({
-                routine_day_id: insertedDay.id,
-                exercise_group_id: insertedGroup.id,
-                exercise_id: ex.exercise_id,
-                order_index: ex.order_index,
-                sets: ex.sets,
-                reps: ex.reps,
-                rest_seconds: ex.rest_seconds,
-                notes: ex.notes || null,
-                superset_group: ex.superset_group ?? null,
-              }));
-              const { error: exError } = await supabase
-                .from("routine_exercises")
-                .insert(exToInsert);
-              if (exError) throw exError;
-            }
-          }
-        } else {
-          // Fallback: flat exercises (backward compat)
-          const exercisesToInsert = day.exercises.map((ex) => ({
-            routine_day_id: insertedDay.id,
-            exercise_id: ex.exercise_id,
-            order_index: ex.order_index,
-            sets: ex.sets,
-            reps: ex.reps,
-            rest_seconds: ex.rest_seconds,
-            notes: ex.notes || null,
-            superset_group: ex.superset_group ?? null,
-          }));
-          if (exercisesToInsert.length > 0) {
-            const { error: exError } = await supabase
-              .from("routine_exercises")
-              .insert(exercisesToInsert);
-            if (exError) throw exError;
-          }
-        }
-      }
-    }
+    // 2-3. Días + grupos + ejercicios en 3 queries batched
+    await insertDaysGroupsExercises(supabase, routine.id, data.days);
 
     return routine as Routine;
   },
@@ -389,91 +441,17 @@ export const routinesService = {
       .eq("trainer_id", user.id);
     if (routineError) throw routineError;
 
-    // 2. Delete existing days (cascades to exercises)
+    // 2. Delete existing days (cascades to exercises).
+    // Delete-and-reinsert deliberado: si falla a mitad la rutina queda sin
+    // días (riesgo preexistente); el batching reduce la ventana de ~48 pasos a ~3.
     const { error: deleteError } = await supabase
       .from("routine_days")
       .delete()
       .eq("routine_id", id);
     if (deleteError) throw deleteError;
 
-    // 3. Re-create days, groups and exercises (same logic as create)
-    if (data.days.length > 0) {
-      const daysToInsert = data.days.map((day) => ({
-        routine_id: id,
-        day_number: day.day_number,
-        name: day.name || null,
-        notes: day.notes || null,
-        description: day.description || null,
-      }));
-
-      const { data: insertedDays, error: daysError } = await supabase
-        .from("routine_days")
-        .insert(daysToInsert)
-        .select();
-      if (daysError) throw daysError;
-
-      for (const day of data.days) {
-        const insertedDay = (insertedDays ?? []).find(
-          (d) => d.day_number === day.day_number
-        );
-        if (!insertedDay) continue;
-
-        if (day.groups && day.groups.length > 0) {
-          for (const group of day.groups) {
-            const { data: insertedGroup, error: groupError } = await supabase
-              .from("exercise_groups")
-              .insert({
-                routine_day_id: insertedDay.id,
-                group_type: group.group_type,
-                order_index: group.order_index,
-                rounds: group.rounds ?? null,
-                time_limit_seconds: group.time_limit_seconds ?? null,
-                rest_between_rounds: group.rest_between_rounds ?? null,
-                label: group.label || null,
-                notes: group.notes || null,
-              })
-              .select()
-              .single();
-            if (groupError) throw groupError;
-
-            if (group.exercises.length > 0) {
-              const exToInsert = group.exercises.map((ex) => ({
-                routine_day_id: insertedDay.id,
-                exercise_group_id: insertedGroup.id,
-                exercise_id: ex.exercise_id,
-                order_index: ex.order_index,
-                sets: ex.sets,
-                reps: ex.reps,
-                rest_seconds: ex.rest_seconds,
-                notes: ex.notes || null,
-                superset_group: ex.superset_group ?? null,
-              }));
-              const { error: exError } = await supabase
-                .from("routine_exercises")
-                .insert(exToInsert);
-              if (exError) throw exError;
-            }
-          }
-        } else {
-          const exercisesToInsert = day.exercises.map((ex) => ({
-            routine_day_id: insertedDay.id,
-            exercise_id: ex.exercise_id,
-            order_index: ex.order_index,
-            sets: ex.sets,
-            reps: ex.reps,
-            rest_seconds: ex.rest_seconds,
-            notes: ex.notes || null,
-            superset_group: ex.superset_group ?? null,
-          }));
-          if (exercisesToInsert.length > 0) {
-            const { error: exError } = await supabase
-              .from("routine_exercises")
-              .insert(exercisesToInsert);
-            if (exError) throw exError;
-          }
-        }
-      }
-    }
+    // 3. Re-create days, groups and exercises (3 queries batched)
+    await insertDaysGroupsExercises(supabase, id, data.days);
   },
 
   async deleteRoutine(id: string) {

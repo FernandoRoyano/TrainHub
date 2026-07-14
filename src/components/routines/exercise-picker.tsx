@@ -23,12 +23,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Image as ImageIcon, Filter, X } from "lucide-react";
+import { Search, Image as ImageIcon, Filter, X, Check } from "lucide-react";
+import { BatchActionsBar } from "@/components/routines/batch-actions-bar";
+import type { BatchDestination, ExerciseDefaults } from "@/stores/routine-builder-store";
 
 interface ExercisePickerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSelect: (exercise: Exercise) => void;
+  // Modo lote: seleccionar varios sin cerrar el dialog y añadirlos de una vez
+  multiSelect?: boolean;
+  // Si se añade a un grupo existente, el destino no aplica
+  targetGroupIndex?: number | null;
+  onSelectBatch?: (
+    exercises: Exercise[],
+    opts: { destination: BatchDestination; defaults: ExerciseDefaults }
+  ) => void;
 }
 
 const difficultyColors: Record<string, string> = {
@@ -58,11 +68,16 @@ export function ExercisePicker({
   open,
   onOpenChange,
   onSelect,
+  multiSelect = false,
+  targetGroupIndex = null,
+  onSelectBatch,
 }: ExercisePickerProps) {
   const t = useTranslations("exercises");
   const tc = useTranslations("common");
   const tr = useTranslations("routines");
   const locale = useLocale();
+  // Map para conservar los objetos Exercise aunque el filtro los saque de la vista
+  const [selected, setSelected] = useState<Map<string, Exercise>>(new Map());
   const [search, setSearch] = useState("");
   const [muscleGroup, setMuscleGroup] = useState<string>("all");
   const [equipmentFilter, setEquipmentFilter] = useState<string>("all");
@@ -89,8 +104,40 @@ export function ExercisePicker({
 
   const exercises = data?.data ?? [];
 
+  function resetAndClose() {
+    onOpenChange(false);
+    setSearch("");
+    clearFilters();
+    setSelected(new Map());
+  }
+
+  function toggleSelected(exercise: Exercise) {
+    setSelected((prev) => {
+      const next = new Map(prev);
+      if (next.has(exercise.id)) next.delete(exercise.id);
+      else next.set(exercise.id, exercise);
+      return next;
+    });
+  }
+
+  function handleCardClick(exercise: Exercise) {
+    if (multiSelect && onSelectBatch) {
+      // El dialog NO se cierra: seguir marcando
+      toggleSelected(exercise);
+      return;
+    }
+    onSelect(exercise);
+    resetAndClose();
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) setSelected(new Map());
+        onOpenChange(o);
+      }}
+    >
       <DialogContent className="max-w-lg max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{tr("pickExercise")}</DialogTitle>
@@ -204,18 +251,31 @@ export function ExercisePicker({
               const thumbnail = getExerciseFirstImage(exercise);
               const muscles = getDisplayMuscles(exercise);
 
+              const isSelected = selected.has(exercise.id);
+
               return (
                 <button
                   key={exercise.id}
                   type="button"
-                  className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors text-left"
-                  onClick={() => {
-                    onSelect(exercise);
-                    onOpenChange(false);
-                    setSearch("");
-                    clearFilters();
-                  }}
+                  className={`w-full flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors text-left ${
+                    isSelected ? "bg-accent ring-1 ring-primary" : ""
+                  }`}
+                  onClick={() => handleCardClick(exercise)}
                 >
+                  {multiSelect && onSelectBatch && (
+                    // Indicador visual: la tarjeta entera es el toggle
+                    // (un Checkbox real anidaría button dentro de button)
+                    <span
+                      aria-hidden="true"
+                      className={`grid h-4 w-4 shrink-0 place-content-center rounded-sm border shadow ${
+                        isSelected
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-primary"
+                      }`}
+                    >
+                      {isSelected && <Check className="h-3 w-3" />}
+                    </span>
+                  )}
                   <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center shrink-0 overflow-hidden">
                     {thumbnail ? (
                       <img
@@ -264,6 +324,18 @@ export function ExercisePicker({
             })
           )}
         </div>
+
+        {multiSelect && onSelectBatch && (
+          <BatchActionsBar
+            count={selected.size}
+            hideDestination={targetGroupIndex != null}
+            onAdd={(opts) => {
+              onSelectBatch(Array.from(selected.values()), opts);
+              resetAndClose();
+            }}
+            onClear={() => setSelected(new Map())}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

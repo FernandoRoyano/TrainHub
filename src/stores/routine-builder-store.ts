@@ -4,6 +4,22 @@ import type { BlockExercise } from "@/services/blocks.service";
 
 export type GroupType = 'solo' | 'superset' | 'triset' | 'circuit' | 'emom' | 'amrap';
 
+// Valores por defecto aplicables en lote (multi-select y "aplicar a todo el día")
+export interface ExerciseDefaults {
+  sets: number;
+  reps: string;
+  rest_seconds: number;
+}
+
+export const DEFAULT_EXERCISE_VALUES: ExerciseDefaults = {
+  sets: 3,
+  reps: "10",
+  rest_seconds: 60,
+};
+
+// Destino de una inserción en lote: sueltos, biserie/triserie o circuito
+export type BatchDestination = 'solo' | 'superset' | 'circuit';
+
 export interface BuilderExercise {
   id: string; // temp id for UI
   exercise_id: string;
@@ -67,6 +83,17 @@ interface RoutineBuilderState {
   moveExercise: (dayIndex: number, from: number, to: number) => void;
   toggleSuperset: (dayIndex: number, exerciseIndex: number) => void;
   addExercisesFromBlock: (dayIndex: number, blockExercises: BlockExercise[]) => void;
+  addExercisesBatch: (
+    dayIndex: number,
+    exercises: Exercise[],
+    options: {
+      destination: BatchDestination;
+      defaults?: ExerciseDefaults;
+      groupIndex?: number | null;
+    }
+  ) => void;
+  duplicateDay: (index: number) => void;
+  applyDefaultsToDay: (dayIndex: number, defaults: ExerciseDefaults) => void;
   reorderExercise: (dayIndex: number, oldIndex: number, newIndex: number) => void;
 
   // Group actions
@@ -464,6 +491,114 @@ export const useRoutineBuilderStore = create<RoutineBuilderState>(
         groups: newGroups,
         exercises: newExercises,
       };
+      set({ days: newDays });
+    },
+
+    addExercisesBatch: (dayIndex, exercises, options) => {
+      const { days } = get();
+      const day = days[dayIndex];
+      if (!day || exercises.length === 0) return;
+
+      const defaults = options.defaults ?? DEFAULT_EXERCISE_VALUES;
+      const toBuilderExercise = (exercise: Exercise, orderIndex: number): BuilderExercise => ({
+        id: tempId(),
+        exercise_id: exercise.id,
+        exercise,
+        order_index: orderIndex,
+        sets: defaults.sets,
+        reps: defaults.reps,
+        rest_seconds: defaults.rest_seconds,
+        notes: "",
+        superset_group: null,
+      });
+
+      let newGroups: BuilderGroup[];
+
+      if (options.groupIndex != null && day.groups[options.groupIndex]) {
+        // Append en lote a un grupo existente (caso "añadir a grupo")
+        const group = day.groups[options.groupIndex];
+        const appended = exercises.map((ex, i) =>
+          toBuilderExercise(ex, group.exercises.length + i)
+        );
+        newGroups = [...day.groups];
+        newGroups[options.groupIndex] = {
+          ...group,
+          exercises: [...group.exercises, ...appended],
+        };
+      } else if (options.destination === 'solo') {
+        // Un grupo solo por ejercicio (equivale a N × addExercise)
+        const soloGroups = exercises.map((ex, i) =>
+          createSoloGroup(toBuilderExercise(ex, 0), day.groups.length + i)
+        );
+        newGroups = [...day.groups, ...soloGroups];
+      } else {
+        // Un único grupo con todos los ejercicios seleccionados.
+        // Se construye directamente: exercisesToGroups no sabe de circuits.
+        const groupType: GroupType =
+          options.destination === 'circuit'
+            ? 'circuit'
+            : exercises.length >= 3
+              ? 'triset'
+              : 'superset';
+        const newGroup: BuilderGroup = {
+          ...createEmptyGroup(day.groups.length, groupType),
+          rounds: options.destination === 'circuit' ? 3 : null,
+          exercises: exercises.map((ex, i) => toBuilderExercise(ex, i)),
+        };
+        newGroups = [...day.groups, newGroup];
+      }
+
+      const reindexed = newGroups.map((g, i) => ({ ...g, order_index: i }));
+      const newExercises = groupsToExercises(reindexed);
+
+      const newDays = [...days];
+      newDays[dayIndex] = { ...day, groups: reindexed, exercises: newExercises };
+      set({ days: newDays });
+    },
+
+    duplicateDay: (index) => {
+      const { days } = get();
+      const day = days[index];
+      if (!day) return;
+
+      // Deep clone con ids temporales NUEVOS: ids duplicados rompen las
+      // keys de dnd-kit y removeExercise (busca por id)
+      const clonedGroups: BuilderGroup[] = day.groups.map((g) => ({
+        ...g,
+        id: tempId(),
+        exercises: g.exercises.map((e) => ({ ...e, id: tempId() })),
+      }));
+
+      const newDay: BuilderDay = {
+        ...day,
+        id: tempId(),
+        day_number: days.length + 1,
+        groups: clonedGroups,
+        exercises: groupsToExercises(clonedGroups),
+      };
+
+      set({ days: [...days, newDay], activeDayIndex: days.length });
+    },
+
+    applyDefaultsToDay: (dayIndex, defaults) => {
+      const { days } = get();
+      const day = days[dayIndex];
+      if (!day) return;
+
+      const newGroups = day.groups.map((group) => ({
+        ...group,
+        exercises: group.exercises.map((e) => ({
+          ...e,
+          sets: defaults.sets,
+          reps: defaults.reps,
+          rest_seconds: defaults.rest_seconds,
+        })),
+      }));
+
+      const newExercises = groupsToExercises(newGroups);
+
+      const newDays = [...days];
+      newDays[dayIndex] = { ...day, groups: newGroups, exercises: newExercises };
       set({ days: newDays });
     },
 

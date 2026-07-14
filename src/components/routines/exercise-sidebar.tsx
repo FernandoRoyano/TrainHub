@@ -17,10 +17,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Image as ImageIcon, Filter, X } from "lucide-react";
+import { Search, Image as ImageIcon, Filter, X, Check } from "lucide-react";
+import { BatchActionsBar } from "@/components/routines/batch-actions-bar";
+import type { BatchDestination, ExerciseDefaults } from "@/stores/routine-builder-store";
 
 interface ExerciseSidebarProps {
   onSelect: (exercise: Exercise) => void;
+  // Modo lote opcional: marcar varias tarjetas y añadirlas de una vez.
+  // El click en la tarjeta sigue añadiendo al instante (camino rápido).
+  onSelectBatch?: (
+    exercises: Exercise[],
+    opts: { destination: BatchDestination; defaults: ExerciseDefaults }
+  ) => void;
 }
 
 function getExerciseDisplayName(exercise: Exercise, locale: string): string {
@@ -40,11 +48,12 @@ function getDisplayMuscles(exercise: Exercise): string[] {
   return exercise.muscle_groups;
 }
 
-export function ExerciseSidebar({ onSelect }: ExerciseSidebarProps) {
+export function ExerciseSidebar({ onSelect, onSelectBatch }: ExerciseSidebarProps) {
   const t = useTranslations("exercises");
   const tc = useTranslations("common");
   const tr = useTranslations("routines");
   const locale = useLocale();
+  const [selected, setSelected] = useState<Map<string, Exercise>>(new Map());
   const [search, setSearch] = useState("");
   const [muscleGroup, setMuscleGroup] = useState<string>("all");
   const [equipmentFilter, setEquipmentFilter] = useState<string>("all");
@@ -70,6 +79,15 @@ export function ExerciseSidebar({ onSelect }: ExerciseSidebarProps) {
   });
 
   const exercises = data?.data ?? [];
+
+  function toggleSelected(exercise: Exercise) {
+    setSelected((prev) => {
+      const next = new Map(prev);
+      if (next.has(exercise.id)) next.delete(exercise.id);
+      else next.set(exercise.id, exercise);
+      return next;
+    });
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] border rounded-lg bg-card">
@@ -185,13 +203,41 @@ export function ExerciseSidebar({ onSelect }: ExerciseSidebarProps) {
               const thumbnail = getExerciseFirstImage(exercise);
               const muscles = getDisplayMuscles(exercise);
 
+              const isSelected = selected.has(exercise.id);
+
               return (
                 <button
                   key={exercise.id}
                   type="button"
-                  onClick={() => onSelect(exercise)}
-                  className="flex flex-col items-center gap-1 p-2 rounded-lg border hover:border-primary hover:bg-accent transition-colors text-center"
+                  onClick={() =>
+                    // Con selección activa, el click sigue el modo lote;
+                    // sin selección, añade al instante como siempre
+                    selected.size > 0 && onSelectBatch
+                      ? toggleSelected(exercise)
+                      : onSelect(exercise)
+                  }
+                  className={`relative flex flex-col items-center gap-1 p-2 rounded-lg border hover:border-primary hover:bg-accent transition-colors text-center ${
+                    isSelected ? "border-primary bg-accent ring-1 ring-primary" : ""
+                  }`}
                 >
+                  {onSelectBatch && (
+                    <span
+                      role="checkbox"
+                      aria-checked={isSelected}
+                      tabIndex={-1}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSelected(exercise);
+                      }}
+                      className={`absolute left-1.5 top-1.5 z-10 grid h-5 w-5 place-content-center rounded-sm border shadow bg-background/90 ${
+                        isSelected
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-primary/60"
+                      }`}
+                    >
+                      {isSelected && <Check className="h-3.5 w-3.5" />}
+                    </span>
+                  )}
                   <div className="w-full aspect-square rounded-md bg-muted overflow-hidden">
                     {thumbnail ? (
                       <img
@@ -223,6 +269,20 @@ export function ExerciseSidebar({ onSelect }: ExerciseSidebarProps) {
           </div>
         )}
       </div>
+
+      {/* Barra de acciones del modo lote */}
+      {onSelectBatch && selected.size > 0 && (
+        <div className="border-t p-2 shrink-0">
+          <BatchActionsBar
+            count={selected.size}
+            onAdd={(opts) => {
+              onSelectBatch(Array.from(selected.values()), opts);
+              setSelected(new Map());
+            }}
+            onClear={() => setSelected(new Map())}
+          />
+        </div>
+      )}
     </div>
   );
 }

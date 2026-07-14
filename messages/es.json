@@ -547,7 +547,16 @@
     "exerciseCount_other": "ejercicios",
     "downloadPdf": "Descargar PDF",
     "sharePdf": "Compartir",
-    "pdfError": "No se pudo generar el PDF"
+    "pdfError": "No se pudo generar el PDF",
+    "selectedCount": "{count} seleccionados",
+    "addSelected": "Añadir {count}",
+    "clearSelection": "Limpiar",
+    "destinationSolo": "Sueltos",
+    "destinationSuperset": "Biserie",
+    "destinationCircuit": "Circuito",
+    "duplicateDay": "Duplicar día",
+    "applyToDay": "Series y descanso del día",
+    "applyToAllInDay": "Aplicar a {count} ejercicios"
   },
   "nutrition": {
     "title": "Planes de nutrición",

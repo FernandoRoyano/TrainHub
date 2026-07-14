@@ -547,7 +547,16 @@
     "exerciseCount_other": "exercises",
     "downloadPdf": "Download PDF",
     "sharePdf": "Share",
-    "pdfError": "Could not generate the PDF"
+    "pdfError": "Could not generate the PDF",
+    "selectedCount": "{count} selected",
+    "addSelected": "Add {count}",
+    "clearSelection": "Clear",
+    "destinationSolo": "Individual",
+    "destinationSuperset": "Superset",
+    "destinationCircuit": "Circuit",
+    "duplicateDay": "Duplicate day",
+    "applyToDay": "Day sets & rest",
+    "applyToAllInDay": "Apply to {count} exercises"
   },
   "nutrition": {
     "title": "Meal Plans",
