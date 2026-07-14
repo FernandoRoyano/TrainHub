@@ -58,3 +58,4 @@ untranslated-*.json
 translations-rollback-*.json
 mirror-rollback-*.json
 mirror-failed-*.json
+food-images-*.json
