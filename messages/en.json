@@ -33,7 +33,8 @@
     "advanced": "Advanced",
     "completed": "Completed",
     "cancelled": "Cancelled",
-    "clearFilters": "Clear filters"
+    "clearFilters": "Clear filters",
+    "done": "Done"
   },
   "auth": {
     "login": "Log in",
@@ -683,7 +684,12 @@
     "noUsdaResults": "No results found in USDA",
     "withPhotos": "With photos",
     "spoonacularHint": "Type at least 2 characters to search foods with photos",
-    "searchingSpoonacular": "Searching foods with photos..."
+    "searchingSpoonacular": "Searching foods with photos...",
+    "addedToMeal": "{count} added to {meal}",
+    "tapToAddHint": "Tap a food to add it (you can add several)",
+    "duplicateMeal": "Duplicate meal",
+    "moveUp": "Move up",
+    "moveDown": "Move down"
   },
   "messages": {
     "title": "Messages",

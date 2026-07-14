@@ -3,6 +3,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { UtensilsCrossed } from "lucide-react";
 import type { MealPlanMeal } from "@/services/nutrition.service";
 
 interface MealCardProps {
@@ -66,7 +67,24 @@ export function MealCard({ meal, showCalories = true }: MealCardProps) {
               <tbody>
                 {meal.foods.map((food) => (
                   <tr key={food.id} className="border-b border-border/50">
-                    <td className="py-1.5 pr-3 font-medium">{(locale === "es" && food.name_es) ? food.name_es : food.name}</td>
+                    <td className="py-1.5 pr-3 font-medium">
+                      <span className="flex items-center gap-2">
+                        <span className="grid h-8 w-8 shrink-0 place-content-center overflow-hidden rounded-md bg-muted">
+                          {food.image_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={food.image_url}
+                              alt=""
+                              loading="lazy"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <UtensilsCrossed className="h-3.5 w-3.5 text-muted-foreground/40" />
+                          )}
+                        </span>
+                        {(locale === "es" && food.name_es) ? food.name_es : food.name}
+                      </span>
+                    </td>
                     <td className="py-1.5 pr-3 text-right text-muted-foreground">
                       {food.quantity}
                       {food.unit}

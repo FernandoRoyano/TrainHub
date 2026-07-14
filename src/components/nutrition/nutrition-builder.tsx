@@ -38,7 +38,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, ArrowLeft, Plus, Trash2, X, Search } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Trash2, X, Search, Copy, ChevronUp, ChevronDown } from "lucide-react";
 import Link from "next/link";
 
 interface NutritionBuilderProps {
@@ -63,10 +63,12 @@ export function NutritionBuilder({ mode, mealPlan }: NutritionBuilderProps) {
     addMeal,
     removeMeal,
     updateMeal,
+    duplicateMeal,
     setActiveMealIndex,
     addFood,
     removeFood,
     updateFood,
+    reorderFood,
     getTotalMacros,
     reset,
   } = useNutritionBuilderStore();
@@ -113,6 +115,7 @@ export function NutritionBuilder({ mode, mealPlan }: NutritionBuilderProps) {
             fat_per_100g: Math.round(food.fat * ratio * 10) / 10,
             order_index: food.order_index,
             notes: food.notes ?? "",
+            image_url: food.image_url ?? null,
           };
         }),
       }));
@@ -146,6 +149,7 @@ export function NutritionBuilder({ mode, mealPlan }: NutritionBuilderProps) {
             fat: food.fat,
             order_index: food.order_index,
             notes: food.notes,
+            image_url: food.image_url ?? null,
           })),
         })),
       };
@@ -374,20 +378,28 @@ export function NutritionBuilder({ mode, mealPlan }: NutritionBuilderProps) {
               <CardTitle className="text-lg">{t("builder")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Meal selector tabs */}
+              {/* Meal selector tabs (con kcal de cada comida) */}
               <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                {meals.map((meal, i) => (
-                  <Button
-                    key={meal.id}
-                    type="button"
-                    variant={i === activeMealIndex ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setActiveMealIndex(i)}
-                    className="shrink-0"
-                  >
-                    {meal.name || t(`meal_${meal.meal_type}` as Parameters<typeof t>[0])}
-                  </Button>
-                ))}
+                {meals.map((meal, i) => {
+                  const mealKcal = meal.foods.reduce((sum, f) => sum + f.calories, 0);
+                  return (
+                    <Button
+                      key={meal.id}
+                      type="button"
+                      variant={i === activeMealIndex ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setActiveMealIndex(i)}
+                      className="shrink-0"
+                    >
+                      {meal.name || t(`meal_${meal.meal_type}` as Parameters<typeof t>[0])}
+                      {mealKcal > 0 && (
+                        <span className="ml-1.5 text-[10px] opacity-70">
+                          {Math.round(mealKcal)} kcal
+                        </span>
+                      )}
+                    </Button>
+                  );
+                })}
                 <DropdownMealAdd
                   t={t}
                   onSelect={handleAddMealWithType}
@@ -424,6 +436,16 @@ export function NutritionBuilder({ mode, mealPlan }: NutritionBuilderProps) {
                         ))}
                       </SelectContent>
                     </Select>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0"
+                      title={t("duplicateMeal")}
+                      onClick={() => duplicateMeal(activeMealIndex)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
                     {meals.length > 1 && (
                       <Button
                         type="button"
@@ -454,7 +476,8 @@ export function NutritionBuilder({ mode, mealPlan }: NutritionBuilderProps) {
                   ) : (
                     <div className="space-y-2">
                       {/* Foods header */}
-                      <div className="hidden sm:grid sm:grid-cols-[1fr_80px_80px_70px_70px_70px_70px_32px] gap-1.5 text-xs text-muted-foreground px-1">
+                      <div className="hidden sm:grid sm:grid-cols-[24px_1fr_80px_80px_70px_70px_70px_70px_32px] gap-1.5 text-xs text-muted-foreground px-1">
+                        <span />
                         <span>{t("foodName")}</span>
                         <span>{t("quantity")}</span>
                         <span>{t("unit")}</span>
@@ -471,9 +494,11 @@ export function NutritionBuilder({ mode, mealPlan }: NutritionBuilderProps) {
                           food={food}
                           mealIndex={activeMealIndex}
                           foodIndex={foodIndex}
+                          foodsCount={activeMeal.foods.length}
                           t={t}
                           updateFood={updateFood}
                           removeFood={removeFood}
+                          reorderFood={reorderFood}
                         />
                       ))}
                     </div>
@@ -504,6 +529,10 @@ export function NutritionBuilder({ mode, mealPlan }: NutritionBuilderProps) {
                   <FoodPicker
                     open={foodPickerOpen}
                     onOpenChange={setFoodPickerOpen}
+                    mealName={
+                      activeMeal.name ||
+                      t(`meal_${activeMeal.meal_type}` as Parameters<typeof t>[0])
+                    }
                     onSelect={(food) => {
                       const displayName =
                         locale === "es" && food.name_es
@@ -568,28 +597,64 @@ function FoodRow({
   food,
   mealIndex,
   foodIndex,
+  foodsCount,
   t,
   updateFood,
   removeFood,
+  reorderFood,
 }: {
   food: BuilderFood;
   mealIndex: number;
   foodIndex: number;
+  foodsCount: number;
   t: ReturnType<typeof useTranslations>;
   updateFood: (mi: number, fi: number, data: Partial<BuilderFood>) => void;
   removeFood: (mi: number, fi: number) => void;
+  reorderFood: (mi: number, oldIndex: number, newIndex: number) => void;
 }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-[1fr_80px_80px_70px_70px_70px_70px_32px] gap-1.5 items-center border rounded-lg p-2 sm:p-1.5">
-      {/* Food name */}
-      <Input
-        placeholder={t("foodName")}
-        value={food.name}
-        onChange={(e) =>
-          updateFood(mealIndex, foodIndex, { name: e.target.value })
-        }
-        className="h-8 text-sm col-span-2 sm:col-span-1"
-      />
+    <div className="grid grid-cols-2 sm:grid-cols-[24px_1fr_80px_80px_70px_70px_70px_70px_32px] gap-1.5 items-center border rounded-lg p-2 sm:p-1.5">
+      {/* Reordenar */}
+      <div className="hidden sm:flex flex-col">
+        <button
+          type="button"
+          title={t("moveUp") as string}
+          disabled={foodIndex === 0}
+          onClick={() => reorderFood(mealIndex, foodIndex, foodIndex - 1)}
+          className="text-muted-foreground hover:text-foreground disabled:opacity-20"
+        >
+          <ChevronUp className="h-3.5 w-3.5" />
+        </button>
+        <button
+          type="button"
+          title={t("moveDown") as string}
+          disabled={foodIndex === foodsCount - 1}
+          onClick={() => reorderFood(mealIndex, foodIndex, foodIndex + 1)}
+          className="text-muted-foreground hover:text-foreground disabled:opacity-20"
+        >
+          <ChevronDown className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      {/* Food name (con miniatura si hay imagen) */}
+      <div className="flex items-center gap-1.5 col-span-2 sm:col-span-1 min-w-0">
+        {food.image_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={food.image_url}
+            alt=""
+            className="h-8 w-8 shrink-0 rounded-md object-cover bg-muted"
+          />
+        )}
+        <Input
+          placeholder={t("foodName")}
+          value={food.name}
+          onChange={(e) =>
+            updateFood(mealIndex, foodIndex, { name: e.target.value })
+          }
+          className="h-8 text-sm"
+        />
+      </div>
 
       {/* Quantity */}
       <Input

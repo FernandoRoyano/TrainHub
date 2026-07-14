@@ -36,6 +36,7 @@ interface NutritionBuilderState {
   addMeal: () => void;
   removeMeal: (index: number) => void;
   updateMeal: (index: number, data: Partial<BuilderMeal>) => void;
+  duplicateMeal: (index: number) => void;
   setActiveMealIndex: (index: number) => void;
 
   // Food actions
@@ -102,6 +103,22 @@ export const useNutritionBuilderStore = create<NutritionBuilderState>(
       set({ meals: newMeals });
     },
 
+    duplicateMeal: (index) => {
+      const { meals } = get();
+      const meal = meals[index];
+      if (!meal) return;
+
+      // Deep clone con ids temporales nuevos
+      const copy: BuilderMeal = {
+        ...meal,
+        id: tempId(),
+        order_index: meals.length,
+        foods: meal.foods.map((f) => ({ ...f, id: tempId() })),
+      };
+
+      set({ meals: [...meals, copy], activeMealIndex: meals.length });
+    },
+
     setActiveMealIndex: (index) => set({ activeMealIndex: index }),
 
     addFood: (mealIndex, food) => {
@@ -131,6 +148,7 @@ export const useNutritionBuilderStore = create<NutritionBuilderState>(
         fat_per_100g: fatPer100,
         order_index: meal.foods.length,
         notes: food?.notes ?? "",
+        image_url: food?.image_url ?? null,
       };
 
       const newMeals = [...meals];

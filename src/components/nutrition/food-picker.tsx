@@ -17,12 +17,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Database, Globe, Loader2, Camera } from "lucide-react";
+import { Search, Database, Globe, Loader2, Camera, Check } from "lucide-react";
 
 interface FoodPickerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSelect: (food: Food) => void;
+  // Nombre de la comida activa, para el contador del pie
+  mealName?: string;
 }
 
 interface UsdaFood {
@@ -126,13 +128,15 @@ function spoonToFood(spoon: SpoonFood): Food {
 
 type Tab = "local" | "usda" | "spoonacular";
 
-export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
+export function FoodPicker({ open, onOpenChange, onSelect, mealName }: FoodPickerProps) {
   const t = useTranslations("nutrition");
   const tc = useTranslations("common");
   const locale = useLocale();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string | undefined>(undefined);
   const [tab, setTab] = useState<Tab>("local");
+  // Multi-añadir: el dialog no se cierra por alimento; se marca lo ya añadido
+  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const debouncedSearch = useDebounce(search, 300);
 
   const { data, isLoading: isLoadingLocal } = useFoods({
@@ -160,13 +164,21 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
 
   function handleSelect(food: Food) {
     onSelect(food);
-    onOpenChange(false);
-    setSearch("");
-    setCategory(undefined);
+    // El dialog se queda abierto: se pueden añadir varios alimentos seguidos
+    setAddedIds((prev) => new Set(prev).add(food.id));
+  }
+
+  function handleOpenChange(o: boolean) {
+    if (!o) {
+      setSearch("");
+      setCategory(undefined);
+      setAddedIds(new Set());
+    }
+    onOpenChange(o);
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-lg max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{t("pickFood")}</DialogTitle>
@@ -281,12 +293,15 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
               const displayName = getFoodDisplayName(food, locale);
               const isUsda = food.source === "usda";
               const isSpoon = food.source === "spoonacular";
+              const wasAdded = addedIds.has(food.id);
 
               return (
                 <button
                   key={food.id}
                   type="button"
-                  className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-accent active:scale-[0.98] transition-all text-left"
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-accent active:scale-[0.98] transition-all text-left ${
+                    wasAdded ? "bg-primary/5 ring-1 ring-primary/30" : ""
+                  }`}
                   onClick={() => handleSelect(food)}
                 >
                   {/* Food image */}
@@ -302,8 +317,9 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate capitalize">
+                    <p className="text-sm font-medium truncate capitalize flex items-center gap-1.5">
                       {displayName}
+                      {wasAdded && <Check className="h-3.5 w-3.5 shrink-0 text-primary" />}
                     </p>
                     <div className="flex flex-wrap gap-1 mt-0.5">
                       {isUsda ? (
@@ -362,6 +378,18 @@ export function FoodPicker({ open, onOpenChange, onSelect }: FoodPickerProps) {
               );
             })
           )}
+        </div>
+
+        {/* Pie del modo multi-añadir */}
+        <div className="flex items-center justify-between gap-2 border-t pt-3 shrink-0">
+          <span className="text-xs text-muted-foreground">
+            {addedIds.size > 0
+              ? t("addedToMeal", { count: addedIds.size, meal: mealName || t("unnamedMeal") })
+              : t("tapToAddHint")}
+          </span>
+          <Button type="button" size="sm" onClick={() => handleOpenChange(false)}>
+            {tc("done")}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
