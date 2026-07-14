@@ -54,3 +54,5 @@ dedupe-rollback-*.json
 # Artefactos de scripts de mantenimiento de imágenes (salidas one-off)
 audit-image-mismatch.json
 image-fix-rollback-*.json
+untranslated-*.json
+translations-rollback-*.json
