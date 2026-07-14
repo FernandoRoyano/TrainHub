@@ -36,13 +36,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/use-debounce";
-
-const statusColors: Record<string, string> = {
-  active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  inactive: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
-  paused: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  pending: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-};
+import { STATUS_STYLES } from "@/lib/ui-tokens";
 
 function getComplianceDotClass(
   workoutsThisWeek: number,
@@ -52,9 +46,9 @@ function getComplianceDotClass(
     return "bg-muted-foreground/30";
   }
   const ratio = workoutsThisWeek / assignedDaysPerWeek;
-  if (ratio >= 0.8) return "bg-emerald-400";
-  if (ratio >= 0.4) return "bg-amber-400";
-  return "bg-rose-400";
+  if (ratio >= 0.8) return "bg-success";
+  if (ratio >= 0.4) return "bg-warning";
+  return "bg-destructive";
 }
 
 function getLastActiveText(
@@ -115,7 +109,7 @@ export function ClientList() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
         <div className="flex gap-2">
           {sub?.canAddClient !== false ? (
             <Button asChild>
@@ -137,8 +131,8 @@ export function ClientList() {
 
       {/* Subscription limit warning */}
       {sub && !sub.canAddClient && (
-        <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm">
-          <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+        <div className="flex items-center gap-2 rounded-lg border border-warning/30 bg-warning/5 p-3 text-sm">
+          <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
           <span className="text-muted-foreground">
             {t("clientLimit", { count: sub.activeClientCount, max: sub.clientLimit })}
             {" — "}
@@ -247,7 +241,7 @@ export function ClientList() {
                     </div>
                     <Badge
                       variant="outline"
-                      className={statusColors[client.status] || ""}
+                      className={STATUS_STYLES[client.status] || ""}
                     >
                       {tc(client.status as "active" | "inactive" | "paused" | "pending")}
                     </Badge>

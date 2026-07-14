@@ -97,14 +97,14 @@ export function TrackingTab({ clientId }: TrackingTabProps) {
         </Card>
         <Card>
           <CardContent className="pt-4 pb-4 text-center">
-            <Check className="h-5 w-5 mx-auto mb-1 text-emerald-400" />
+            <Check className="h-5 w-5 mx-auto mb-1 text-success" />
             <p className="text-2xl font-bold">{stats.completionRate}%</p>
             <p className="text-xs text-muted-foreground">{t("completionRate")}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 pb-4 text-center">
-            <Target className="h-5 w-5 mx-auto mb-1 text-blue-400" />
+            <Target className="h-5 w-5 mx-auto mb-1 text-info" />
             <p className="text-2xl font-bold">{compliance?.completedDays ?? 0}</p>
             <p className="text-xs text-muted-foreground">{t("thisWeek")}</p>
           </CardContent>
@@ -136,7 +136,7 @@ export function TrackingTab({ clientId }: TrackingTabProps) {
                     cell.day == null
                       ? ""
                       : cell.hasWorkout
-                        ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-semibold"
+                        ? "bg-success/20 border border-success/40 text-success font-semibold"
                         : cell.isToday
                           ? "bg-primary/10 border border-primary/30 font-bold"
                           : "bg-muted/30"

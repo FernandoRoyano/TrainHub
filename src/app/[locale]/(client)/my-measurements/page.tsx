@@ -105,7 +105,7 @@ function MyMeasurementsPageContent() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{tc("myMeasurements")}</h1>
+        <h1 className="font-display text-2xl font-bold">{tc("myMeasurements")}</h1>
         <Button size="sm" onClick={() => setShowForm(true)}>
           <Plus className="mr-1 h-4 w-4" />
           {t("addMeasurement")}
@@ -148,7 +148,7 @@ function MyMeasurementsPageContent() {
                 <Line
                   type="monotone"
                   dataKey="body_fat_pct"
-                  stroke="#ef4444"
+                  stroke="hsl(var(--chart-5))"
                   strokeWidth={2}
                   dot={{ r: 3 }}
                   name={t("body_fat_pct")}
@@ -157,7 +157,7 @@ function MyMeasurementsPageContent() {
                 <Line
                   type="monotone"
                   dataKey="waist_cm"
-                  stroke="#f59e0b"
+                  stroke="hsl(var(--chart-4))"
                   strokeWidth={2}
                   dot={{ r: 3 }}
                   name={t("waist_cm")}

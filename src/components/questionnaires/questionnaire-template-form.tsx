@@ -447,7 +447,7 @@ export function QuestionnaireTemplateForm({
         </Link>
       </Button>
 
-      <h1 className="text-2xl font-bold">
+      <h1 className="font-display text-2xl font-bold">
         {mode === "create" ? t("addTemplate") : t("editTemplate")}
       </h1>
 

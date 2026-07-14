@@ -20,16 +20,16 @@ interface ClientPhaseInfo {
 }
 
 const phaseColors: Record<string, string> = {
-  menstrual: "bg-red-500",
-  follicular: "bg-pink-400",
-  ovulation: "bg-purple-500",
-  luteal: "bg-blue-400",
+  menstrual: "bg-destructive",
+  follicular: "bg-chart-5",
+  ovulation: "bg-chart-3",
+  luteal: "bg-chart-2",
 };
 
 const phaseBorderColors: Record<string, string> = {
-  menstrual: "border-red-400",
-  follicular: "border-pink-300",
-  ovulation: "border-purple-400",
+  menstrual: "border-destructive",
+  follicular: "border-chart-5",
+  ovulation: "border-chart-3",
   luteal: "border-blue-300",
 };
 
@@ -171,7 +171,7 @@ export function TrainerPhaseGrid() {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
-          <Heart className="h-4 w-4 text-pink-500" />
+          <Heart className="h-4 w-4 text-chart-5" />
           {t("phaseGrid")}
         </CardTitle>
       </CardHeader>

@@ -85,8 +85,8 @@ export function LoginForm({ urlError }: LoginFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {urlError && (
-          <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm">
-            <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/5 p-3 text-sm">
+            <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
             <span className="text-muted-foreground">
               {urlError === "otp_expired"
                 ? t("invalidOrExpiredLink")
@@ -96,9 +96,9 @@ export function LoginForm({ urlError }: LoginFormProps) {
         )}
 
         {unconfirmedEmail && (
-          <div className="space-y-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm">
+          <div className="space-y-2 rounded-lg border border-warning/30 bg-warning/5 p-3 text-sm">
             <div className="flex items-start gap-2">
-              <MailWarning className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+              <MailWarning className="h-4 w-4 text-warning shrink-0 mt-0.5" />
               <span className="text-muted-foreground">
                 {t("emailNotConfirmed")}
               </span>

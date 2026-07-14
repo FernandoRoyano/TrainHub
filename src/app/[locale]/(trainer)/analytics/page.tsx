@@ -54,7 +54,7 @@ const TOOLTIP_STYLE = {
 function TrendBadge({ current, previous, label }: { current: number; previous: number; label: string }) {
   const diff = current - previous;
   const Icon = diff > 0 ? TrendingUp : diff < 0 ? TrendingDown : Minus;
-  const color = diff > 0 ? "text-green-500" : diff < 0 ? "text-red-500" : "text-muted-foreground";
+  const color = diff > 0 ? "text-success" : diff < 0 ? "text-destructive" : "text-muted-foreground";
 
   return (
     <div className="text-center">
@@ -102,7 +102,7 @@ export default function AnalyticsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
         <Select value={String(days)} onValueChange={(v) => setDays(Number(v))}>
           <SelectTrigger className="w-[160px]">
             <SelectValue />

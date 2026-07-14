@@ -17,12 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
-
-const difficultyColors: Record<string, string> = {
-  beginner: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  intermediate: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  advanced: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-};
+import { STATUS_STYLES } from "@/lib/ui-tokens";
 
 function getExerciseDisplayName(exercise: Exercise, locale: string): string {
   if (locale === "es" && exercise.name_es) return exercise.name_es;
@@ -111,7 +106,7 @@ export default function ExerciseDetailPage() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">{displayName}</h1>
+            <h1 className="font-display text-2xl font-bold">{displayName}</h1>
             {locale === "es" && exercise.name_es && (
               <p className="text-sm text-muted-foreground">{exercise.name}</p>
             )}
@@ -207,7 +202,7 @@ export default function ExerciseDetailPage() {
                 {exercise.difficulty && (
                   <Badge
                     variant="outline"
-                    className={difficultyColors[exercise.difficulty] || ""}
+                    className={STATUS_STYLES[exercise.difficulty] || ""}
                   >
                     {t(exercise.difficulty as Parameters<typeof t>[0])}
                   </Badge>

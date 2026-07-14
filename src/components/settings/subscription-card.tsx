@@ -13,8 +13,8 @@ import { toast } from "sonner";
 
 const TIER_CONFIG = {
   free: { color: "bg-muted text-muted-foreground", icon: null },
-  pro: { color: "bg-blue-500/10 text-blue-600 border-blue-500/20", icon: Crown },
-  elite: { color: "bg-purple-500/10 text-purple-600 border-purple-500/20", icon: Crown },
+  pro: { color: "bg-info/10 text-info border-info/25", icon: Crown },
+  elite: { color: "bg-chart-3/10 text-chart-3 border-chart-3/25", icon: Crown },
 } as const;
 
 interface Subscription {

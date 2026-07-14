@@ -39,7 +39,7 @@ export default function MessagesPage() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
         <div className="space-y-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 p-3">
@@ -59,7 +59,7 @@ export default function MessagesPage() {
     return (
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
           <Button onClick={() => setShowNewChat(true)}>
             <Plus className="mr-2 h-4 w-4" />
             {t("newConversation")}
@@ -92,7 +92,7 @@ export default function MessagesPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
         {availableClients.length > 0 && (
           <Button size="sm" onClick={() => setShowNewChat(true)}>
             <Plus className="mr-1 h-3.5 w-3.5" />

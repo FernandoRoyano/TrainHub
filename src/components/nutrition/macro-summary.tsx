@@ -89,8 +89,8 @@ export function MacroSummary({
       value: calories,
       target: targetCalories,
       unit: " kcal",
-      color: "bg-orange-500",
-      bgColor: "bg-orange-500/10",
+      color: "bg-chart-4",
+      bgColor: "bg-chart-4/10",
       compact,
     },
     {
@@ -98,8 +98,8 @@ export function MacroSummary({
       value: protein,
       target: targetProtein,
       unit: "g",
-      color: "bg-blue-500",
-      bgColor: "bg-blue-500/10",
+      color: "bg-chart-2",
+      bgColor: "bg-chart-2/10",
       compact,
     },
     {
@@ -107,8 +107,8 @@ export function MacroSummary({
       value: carbs,
       target: targetCarbs,
       unit: "g",
-      color: "bg-yellow-500",
-      bgColor: "bg-yellow-500/10",
+      color: "bg-chart-1",
+      bgColor: "bg-chart-1/10",
       compact,
     },
     {
@@ -116,8 +116,8 @@ export function MacroSummary({
       value: fat,
       target: targetFat,
       unit: "g",
-      color: "bg-red-500",
-      bgColor: "bg-red-500/10",
+      color: "bg-chart-5",
+      bgColor: "bg-chart-5/10",
       compact,
     },
   ];

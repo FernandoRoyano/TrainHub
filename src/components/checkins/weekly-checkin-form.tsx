@@ -74,7 +74,7 @@ export function WeeklyCheckinForm() {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
-            <ClipboardCheck className="h-4 w-4 text-green-500" />
+            <ClipboardCheck className="h-4 w-4 text-success" />
             {t("title")}
           </CardTitle>
         </CardHeader>

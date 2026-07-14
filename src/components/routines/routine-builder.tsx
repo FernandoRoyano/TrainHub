@@ -655,7 +655,7 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="text-2xl font-bold">
+        <h1 className="font-display text-2xl font-bold">
           {mode === "create" ? t("addRoutine") : t("editRoutine")}
         </h1>
       </div>
@@ -1043,19 +1043,19 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                             const isTimedGroup = group.group_type === "circuit" || group.group_type === "emom" || group.group_type === "amrap";
 
                             const groupBadgeColor: Record<string, string> = {
-                              superset: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-                              triset: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
-                              circuit: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
-                              emom: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
-                              amrap: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+                              superset: "bg-chart-3/15 text-chart-3",
+                              triset: "bg-chart-2/15 text-chart-2",
+                              circuit: "bg-chart-4/15 text-chart-4",
+                              emom: "bg-chart-5/15 text-chart-5",
+                              amrap: "bg-chart-1/15 text-chart-1",
                             };
 
                             const groupBorderColor: Record<string, string> = {
-                              superset: "border-purple-200 dark:border-purple-800",
-                              triset: "border-indigo-200 dark:border-indigo-800",
-                              circuit: "border-orange-200 dark:border-orange-800",
-                              emom: "border-rose-200 dark:border-rose-800",
-                              amrap: "border-emerald-200 dark:border-emerald-800",
+                              superset: "border-chart-3/30",
+                              triset: "border-chart-2/30",
+                              circuit: "border-chart-4/30",
+                              emom: "border-chart-5/30",
+                              amrap: "border-chart-1/30",
                             };
 
                             const groupLabel: Record<string, string> = {
@@ -1075,11 +1075,11 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                             };
 
                             const bgColor: Record<string, string> = {
-                              superset: "bg-purple-500/5",
-                              triset: "bg-indigo-500/5",
-                              circuit: "bg-orange-500/5",
-                              emom: "bg-rose-500/5",
-                              amrap: "bg-emerald-500/5",
+                              superset: "bg-chart-3/5",
+                              triset: "bg-chart-2/5",
+                              circuit: "bg-chart-4/5",
+                              emom: "bg-chart-5/5",
+                              amrap: "bg-chart-1/5",
                             };
 
                             return (
@@ -1192,7 +1192,7 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
                                 {/* Superset/triset connecting line indicator */}
                                 {isSuperset && group.exercises.length > 1 && (
                                   <div className="flex items-center gap-1 ml-2">
-                                    <div className={`w-0.5 h-3 rounded ${group.group_type === "superset" ? "bg-purple-400" : "bg-indigo-400"}`} />
+                                    <div className={`w-0.5 h-3 rounded ${group.group_type === "superset" ? "bg-chart-3" : "bg-chart-2"}`} />
                                     <span className="text-[10px] text-muted-foreground">{t("superset")}</span>
                                   </div>
                                 )}

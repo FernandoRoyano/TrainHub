@@ -10,7 +10,7 @@ export default function OfflinePage() {
           <div className="rounded-full bg-white/10 p-6 mb-6">
             <WifiOff className="h-12 w-12 text-white/60" />
           </div>
-          <h1 className="text-2xl font-bold mb-2">Sin conexion</h1>
+          <h1 className="font-display text-2xl font-bold mb-2">Sin conexion</h1>
           <p className="text-white/60 max-w-sm mb-8">
             No tienes conexion a internet. Revisa tu conexion e intentalo de
             nuevo.

@@ -21,13 +21,7 @@ import { ResetPasswordDialog } from "@/components/clients/reset-password-dialog"
 import { ArrowLeft, Pencil, Trash2, Mail, Phone, Send, Link2, KeyRound } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-
-const statusColors: Record<string, string> = {
-  active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  inactive: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
-  paused: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  pending: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-};
+import { STATUS_STYLES } from "@/lib/ui-tokens";
 
 export default function ClientDetailPage() {
   const { clientId } = useParams<{ clientId: string }>();
@@ -85,7 +79,7 @@ export default function ClientDetailPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap min-w-0">
                   <h2 className="text-lg sm:text-xl font-semibold truncate">{client.full_name}</h2>
-                  <Badge variant="outline" className={statusColors[client.status] || ""}>
+                  <Badge variant="outline" className={STATUS_STYLES[client.status] || ""}>
                     {tc(client.status as "active" | "inactive" | "paused" | "pending")}
                   </Badge>
                 </div>

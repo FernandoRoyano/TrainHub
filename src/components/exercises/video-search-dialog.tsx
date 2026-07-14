@@ -84,7 +84,7 @@ export function VideoSearchDialog({
       <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Youtube className="h-5 w-5 text-red-500" />
+            <Youtube className="h-5 w-5 text-destructive" />
             {t("searchVideoTitle")}
           </DialogTitle>
           <DialogDescription>{t("searchVideoDesc")}</DialogDescription>
@@ -105,7 +105,7 @@ export function VideoSearchDialog({
 
           {/* Channel filter input */}
           <div className="relative">
-            <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500" />
+            <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-destructive" />
             <Input
               placeholder={t("channelPlaceholder")}
               value={channelFilter}

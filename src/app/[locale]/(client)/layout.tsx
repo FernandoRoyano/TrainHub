@@ -112,8 +112,8 @@ function ClientNavBar() {
         </div>
       )}
 
-      {/* Bottom nav bar */}
-      <nav className="shrink-0 border-t border-border/50 bg-card/95 backdrop-blur-xl z-50">
+      {/* Bottom nav bar (safe-area para iPhone con notch) */}
+      <nav className="shrink-0 border-t border-border/50 bg-card/95 backdrop-blur-xl z-50 pb-[env(safe-area-inset-bottom)]">
         <div className="flex justify-around py-2 md:py-3 px-1 max-w-2xl mx-auto">
           {mainNavItems.map((item) => {
             const isActive = pathname.includes(item.href);

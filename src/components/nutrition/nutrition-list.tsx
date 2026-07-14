@@ -29,14 +29,7 @@ import {
   Flame,
 } from "lucide-react";
 import Link from "next/link";
-
-const goalColors: Record<string, string> = {
-  loss: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-  maintenance: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  gain: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  performance: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  health: "bg-violet-500/10 text-violet-400 border-violet-500/20",
-};
+import { STATUS_STYLES } from "@/lib/ui-tokens";
 
 export function NutritionList() {
   const t = useTranslations("nutrition");
@@ -58,7 +51,7 @@ export function NutritionList() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
         <Button asChild>
           <Link href="/nutrition/new">
             <Plus className="mr-2 h-4 w-4" />
@@ -171,7 +164,7 @@ export function NutritionList() {
                   {plan.goal && (
                     <Badge
                       variant="outline"
-                      className={goalColors[plan.goal] || ""}
+                      className={STATUS_STYLES[plan.goal] || ""}
                     >
                       {t(`goal_${plan.goal}` as Parameters<typeof t>[0])}
                     </Badge>
@@ -185,21 +178,21 @@ export function NutritionList() {
                 {plan.daily_calories && plan.daily_calories > 0 && (
                   <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <Flame className="h-3 w-3 text-orange-400" />
+                      <Flame className="h-3 w-3 text-chart-4" />
                       {plan.daily_calories} kcal
                     </span>
                     {plan.daily_protein && plan.daily_protein > 0 && (
-                      <span className="text-blue-400">
+                      <span className="text-chart-2">
                         P: {plan.daily_protein}g
                       </span>
                     )}
                     {plan.daily_carbs && plan.daily_carbs > 0 && (
-                      <span className="text-yellow-400">
+                      <span className="text-chart-1">
                         C: {plan.daily_carbs}g
                       </span>
                     )}
                     {plan.daily_fat && plan.daily_fat > 0 && (
-                      <span className="text-red-400">
+                      <span className="text-chart-5">
                         F: {plan.daily_fat}g
                       </span>
                     )}
@@ -211,7 +204,7 @@ export function NutritionList() {
                   <div className="flex gap-0.5 mt-2 h-1.5 rounded-full overflow-hidden bg-muted">
                     {plan.daily_protein && plan.daily_protein > 0 && (
                       <div
-                        className="bg-blue-500 h-full"
+                        className="bg-chart-2 h-full"
                         style={{
                           width: `${Math.round(((plan.daily_protein * 4) / plan.daily_calories) * 100)}%`,
                         }}
@@ -219,7 +212,7 @@ export function NutritionList() {
                     )}
                     {plan.daily_carbs && plan.daily_carbs > 0 && (
                       <div
-                        className="bg-yellow-500 h-full"
+                        className="bg-chart-1 h-full"
                         style={{
                           width: `${Math.round(((plan.daily_carbs * 4) / plan.daily_calories) * 100)}%`,
                         }}
@@ -227,7 +220,7 @@ export function NutritionList() {
                     )}
                     {plan.daily_fat && plan.daily_fat > 0 && (
                       <div
-                        className="bg-red-500 h-full"
+                        className="bg-chart-5 h-full"
                         style={{
                           width: `${Math.round(((plan.daily_fat * 9) / plan.daily_calories) * 100)}%`,
                         }}

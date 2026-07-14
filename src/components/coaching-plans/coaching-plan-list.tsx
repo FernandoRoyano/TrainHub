@@ -37,12 +37,12 @@ import {
 import Link from "next/link";
 
 const placeholderGradients = [
-  "from-blue-500/20 to-purple-500/20",
-  "from-emerald-500/20 to-teal-500/20",
-  "from-orange-500/20 to-red-500/20",
-  "from-pink-500/20 to-rose-500/20",
-  "from-indigo-500/20 to-blue-500/20",
-  "from-amber-500/20 to-yellow-500/20",
+  "from-chart-2/20 to-chart-3/20",
+  "from-chart-1/20 to-chart-2/20",
+  "from-chart-4/20 to-chart-5/20",
+  "from-chart-5/20 to-chart-3/20",
+  "from-chart-3/20 to-chart-2/20",
+  "from-chart-4/20 to-chart-1/20",
 ];
 
 export function CoachingPlanList() {
@@ -65,7 +65,7 @@ export function CoachingPlanList() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
         <Button asChild>
           <Link href="/coaching-plans/new">
             <Plus className="mr-2 h-4 w-4" />
@@ -213,7 +213,7 @@ export function CoachingPlanList() {
                     <Badge variant="secondary">{tc("inactive")}</Badge>
                   )}
                   {plan.is_published && (
-                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                    <Badge variant="outline" className="bg-success/10 text-success border-success/25">
                       {t("published")}
                     </Badge>
                   )}

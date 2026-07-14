@@ -84,21 +84,21 @@ export function FastingTab({ clientId }: FastingTabProps) {
       <div className="grid grid-cols-3 gap-3">
         <Card>
           <CardContent className="pt-4 pb-4 text-center">
-            <Flame className="h-5 w-5 mx-auto mb-1 text-orange-400" />
+            <Flame className="h-5 w-5 mx-auto mb-1 text-warning" />
             <p className="text-xl font-bold">{totalCount}</p>
             <p className="text-[10px] text-muted-foreground">{t("totalFasts")}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 pb-4 text-center">
-            <TrendingUp className="h-5 w-5 mx-auto mb-1 text-blue-400" />
+            <TrendingUp className="h-5 w-5 mx-auto mb-1 text-info" />
             <p className="text-xl font-bold">{avgHours}h</p>
             <p className="text-[10px] text-muted-foreground">{t("avgDuration")}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 pb-4 text-center">
-            <Check className="h-5 w-5 mx-auto mb-1 text-emerald-400" />
+            <Check className="h-5 w-5 mx-auto mb-1 text-success" />
             <p className="text-xl font-bold">{totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0}%</p>
             <p className="text-[10px] text-muted-foreground">{t("completionRate")}</p>
           </CardContent>

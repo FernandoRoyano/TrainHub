@@ -73,12 +73,12 @@ function ExerciseCard({
       className={cn(
         "transition-all duration-300 relative",
         isLogged
-          ? "border-2 border-emerald-500 bg-emerald-500/10 opacity-70"
+          ? "border-2 border-primary bg-primary/10 opacity-70"
           : "border border-border"
       )}
     >
       {isLogged && (
-        <div className="absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg">
+        <div className="absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
           <Check className="h-4 w-4" strokeWidth={3} />
         </div>
       )}
@@ -389,7 +389,7 @@ function MyRoutinePageContent() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t("myRoutine")}</h1>
+          <h1 className="font-display text-2xl font-bold">{t("myRoutine")}</h1>
           <p className="text-muted-foreground text-sm">{routine.routine?.name}</p>
         </div>
         <Button

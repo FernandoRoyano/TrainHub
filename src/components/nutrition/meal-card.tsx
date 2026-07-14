@@ -94,13 +94,13 @@ export function MealCard({ meal, showCalories = true }: MealCardProps) {
                         {food.calories}
                       </td>
                     )}
-                    <td className="py-1.5 pr-3 text-right text-blue-400">
+                    <td className="py-1.5 pr-3 text-right text-chart-2">
                       {food.protein}g
                     </td>
-                    <td className="py-1.5 pr-3 text-right text-yellow-400">
+                    <td className="py-1.5 pr-3 text-right text-chart-1">
                       {food.carbs}g
                     </td>
-                    <td className="py-1.5 text-right text-red-400">
+                    <td className="py-1.5 text-right text-chart-5">
                       {food.fat}g
                     </td>
                   </tr>
@@ -114,13 +114,13 @@ export function MealCard({ meal, showCalories = true }: MealCardProps) {
                       {Math.round(subtotal.calories)} kcal
                     </td>
                   )}
-                  <td className="pt-2 pr-3 text-right text-blue-400">
+                  <td className="pt-2 pr-3 text-right text-chart-2">
                     {Math.round(subtotal.protein)}g
                   </td>
-                  <td className="pt-2 pr-3 text-right text-yellow-400">
+                  <td className="pt-2 pr-3 text-right text-chart-1">
                     {Math.round(subtotal.carbs)}g
                   </td>
-                  <td className="pt-2 text-right text-red-400">
+                  <td className="pt-2 text-right text-chart-5">
                     {Math.round(subtotal.fat)}g
                   </td>
                 </tr>

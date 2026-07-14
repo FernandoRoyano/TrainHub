@@ -39,7 +39,7 @@ export function Hero() {
             {t("heroBadge")}
           </div>
 
-          <h1 className="text-fluid-6xl lg:text-fluid-7xl font-bold tracking-tight leading-[1.05]">
+          <h1 className="font-display text-fluid-6xl lg:text-fluid-7xl font-bold tracking-tight leading-[1.05]">
             {t("heroTitle")}
             <br />
             <span className="bg-gradient-to-br from-primary via-primary to-primary/70 bg-clip-text text-transparent">
@@ -94,9 +94,9 @@ export function Hero() {
             <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm shadow-2xl shadow-primary/10 overflow-hidden">
               {/* Browser chrome */}
               <div className="flex items-center gap-1.5 px-4 py-3 border-b border-border/50 bg-card">
-                <div className="h-3 w-3 rounded-full bg-red-500/60" />
-                <div className="h-3 w-3 rounded-full bg-yellow-500/60" />
-                <div className="h-3 w-3 rounded-full bg-green-500/60" />
+                <div className="h-3 w-3 rounded-full bg-destructive/60" />
+                <div className="h-3 w-3 rounded-full bg-warning/60" />
+                <div className="h-3 w-3 rounded-full bg-success/60" />
                 <span className="ml-3 text-xs text-muted-foreground">
                   trainhub.app/dashboard
                 </span>
@@ -155,36 +155,36 @@ export function Hero() {
                         value: "24",
                         label: t("previewActiveClients"),
                         trend: "+3",
-                        color: "text-blue-400",
-                        bg: "bg-blue-400/10",
-                        borderColor: "border-blue-400/20",
+                        color: "text-chart-2",
+                        bg: "bg-chart-2/10",
+                        borderColor: "border-chart-2/25",
                       },
                       {
                         icon: Dumbbell,
                         value: "156",
                         label: t("previewRoutinesCreated"),
                         trend: "+12",
-                        color: "text-emerald-400",
-                        bg: "bg-emerald-400/10",
-                        borderColor: "border-emerald-400/20",
+                        color: "text-chart-1",
+                        bg: "bg-chart-1/10",
+                        borderColor: "border-chart-1/25",
                       },
                       {
                         icon: UtensilsCrossed,
                         value: "18",
                         label: t("previewNutritionPlans"),
                         trend: "+5",
-                        color: "text-orange-400",
-                        bg: "bg-orange-400/10",
-                        borderColor: "border-orange-400/20",
+                        color: "text-chart-5",
+                        bg: "bg-chart-5/10",
+                        borderColor: "border-chart-5/25",
                       },
                       {
                         icon: CircleDollarSign,
                         value: "€2.4k",
                         label: t("previewRevenue"),
                         trend: "+18%",
-                        color: "text-amber-400",
-                        bg: "bg-amber-400/10",
-                        borderColor: "border-amber-400/20",
+                        color: "text-chart-4",
+                        bg: "bg-chart-4/10",
+                        borderColor: "border-chart-4/25",
                       },
                     ].map((stat) => {
                       const StatIcon = stat.icon;
@@ -199,7 +199,7 @@ export function Hero() {
                             >
                               <StatIcon className={`h-3.5 w-3.5 ${stat.color}`} />
                             </div>
-                            <span className="text-[10px] font-medium text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded-full">
+                            <span className="text-[10px] font-medium text-success bg-success/10 px-1.5 py-0.5 rounded-full">
                               {stat.trend}
                             </span>
                           </div>
@@ -222,7 +222,7 @@ export function Hero() {
                         <span className="text-xs font-medium text-foreground/80">
                           {t("previewWeeklyProgress")}
                         </span>
-                        <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
+                        <TrendingUp className="h-3.5 w-3.5 text-success" />
                       </div>
                       <div className="flex items-end gap-1.5 h-16 sm:h-20">
                         {[40, 55, 35, 70, 50, 85, 65].map((h, idx) => (
@@ -264,22 +264,22 @@ export function Hero() {
                             icon: Activity,
                             text: t("previewActivity1"),
                             time: "2m",
-                            color: "text-emerald-400",
-                            bg: "bg-emerald-400/10",
+                            color: "text-chart-1",
+                            bg: "bg-chart-1/10",
                           },
                           {
                             icon: CircleDollarSign,
                             text: t("previewActivity2"),
                             time: "15m",
-                            color: "text-amber-400",
-                            bg: "bg-amber-400/10",
+                            color: "text-chart-4",
+                            bg: "bg-chart-4/10",
                           },
                           {
                             icon: UtensilsCrossed,
                             text: t("previewActivity3"),
                             time: "1h",
-                            color: "text-orange-400",
-                            bg: "bg-orange-400/10",
+                            color: "text-chart-5",
+                            bg: "bg-chart-5/10",
                           },
                         ].map((item) => {
                           const ItemIcon = item.icon;

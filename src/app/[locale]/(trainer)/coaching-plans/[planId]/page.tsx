@@ -150,14 +150,14 @@ export default function CoachingPlanDetailPage() {
           </Badge>
         )}
         {plan.is_active ? (
-          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+          <Badge variant="outline" className="bg-success/10 text-success border-success/25">
             {tc("active")}
           </Badge>
         ) : (
           <Badge variant="secondary">{tc("inactive")}</Badge>
         )}
         {plan.is_published && (
-          <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20">
+          <Badge variant="outline" className="bg-info/10 text-info border-info/25">
             {t("published")}
           </Badge>
         )}

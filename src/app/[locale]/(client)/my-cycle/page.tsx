@@ -38,17 +38,17 @@ import { localDateString } from "@/lib/local-date";
 import { CyclePrivacySettings } from "@/components/cycle-training/cycle-privacy-settings";
 
 const PHASE_COLORS: Record<CyclePhase, string> = {
-  menstrual: "bg-red-500",
-  follicular: "bg-pink-400",
-  ovulation: "bg-purple-500",
-  luteal: "bg-blue-500",
+  menstrual: "bg-destructive",
+  follicular: "bg-chart-5",
+  ovulation: "bg-chart-3",
+  luteal: "bg-chart-2",
 };
 
 const PHASE_TEXT_COLORS: Record<CyclePhase, string> = {
-  menstrual: "text-red-500",
-  follicular: "text-pink-400",
-  ovulation: "text-purple-500",
-  luteal: "text-blue-500",
+  menstrual: "text-destructive",
+  follicular: "text-chart-5",
+  ovulation: "text-chart-3",
+  luteal: "text-chart-2",
 };
 
 const SYMPTOMS = [
@@ -230,8 +230,8 @@ export default function MyCyclePage() {
     <div className="space-y-6 max-w-lg mx-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Heart className="h-6 w-6 text-pink-500" />
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <Heart className="h-6 w-6 text-chart-5" />
+          <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
         </div>
         <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
           <DialogTrigger asChild>

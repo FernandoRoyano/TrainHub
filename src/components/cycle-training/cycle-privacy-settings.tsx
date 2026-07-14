@@ -85,7 +85,7 @@ export function CyclePrivacySettings() {
               control={form.control}
               name="anonymous_mode"
               render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20 p-3">
+                <FormItem className="flex items-center justify-between rounded-lg border border-warning/30 bg-warning/5 p-3">
                   <div>
                     <FormLabel className="text-sm font-medium">{t("anonymousMode")}</FormLabel>
                     <p className="text-[11px] text-muted-foreground">{t("anonymousModeDesc")}</p>

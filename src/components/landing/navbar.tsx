@@ -37,7 +37,7 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2">
             <Dumbbell className="h-6 w-6 text-primary" />
-            <span className="text-lg font-bold">
+            <span className="font-display text-lg font-bold">
               Train<span className="text-primary">Hub</span>
             </span>
           </Link>

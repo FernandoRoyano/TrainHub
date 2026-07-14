@@ -84,14 +84,14 @@ export function StreakStats({ logs }: StreakStatsProps) {
     <div className="grid grid-cols-3 gap-3">
       <Card>
         <CardContent className="pt-4 pb-4 text-center">
-          <Flame className="h-5 w-5 mx-auto mb-1 text-orange-500" />
+          <Flame className="h-5 w-5 mx-auto mb-1 text-warning" />
           <p className="text-2xl font-bold">{stats.currentStreak}</p>
           <p className="text-xs text-muted-foreground">{t("streak")}</p>
         </CardContent>
       </Card>
       <Card>
         <CardContent className="pt-4 pb-4 text-center">
-          <Zap className="h-5 w-5 mx-auto mb-1 text-yellow-500" />
+          <Zap className="h-5 w-5 mx-auto mb-1 text-warning" />
           <p className="text-2xl font-bold">{stats.bestStreak}</p>
           <p className="text-xs text-muted-foreground">{t("bestStreak")}</p>
         </CardContent>

@@ -48,7 +48,7 @@ export function Footer() {
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <Dumbbell className="h-5 w-5 text-primary" />
-              <span className="text-lg font-bold tracking-tight">
+              <span className="font-display text-lg font-bold tracking-tight">
                 Train<span className="text-primary">Hub</span>
               </span>
             </Link>

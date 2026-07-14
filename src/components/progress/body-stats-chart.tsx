@@ -71,7 +71,7 @@ export function BodyStatsChart({ measurements }: BodyStatsChartProps) {
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="hsl(var(--chart-3, var(--primary)))"
+                  stroke="hsl(var(--chart-3))"
                   strokeWidth={2}
                   dot={{ r: 3 }}
                   name={`${t("bodyWeight")} (${t("kg")})`}
@@ -100,7 +100,7 @@ export function BodyStatsChart({ measurements }: BodyStatsChartProps) {
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="hsl(var(--chart-4, var(--primary)))"
+                  stroke="hsl(var(--chart-4))"
                   strokeWidth={2}
                   dot={{ r: 3 }}
                   name={`${t("bodyFat")} (${t("pct")})`}

@@ -33,12 +33,7 @@ import {
   Clock,
 } from "lucide-react";
 import Link from "next/link";
-
-const difficultyColors: Record<string, string> = {
-  beginner: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  intermediate: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  advanced: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-};
+import { STATUS_STYLES } from "@/lib/ui-tokens";
 
 const genderLabels: Record<string, string> = {
   male: "M",
@@ -73,7 +68,7 @@ export function TemplateList() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {t("subtitle")}
           </p>
@@ -186,7 +181,7 @@ export function TemplateList() {
                   {template.difficulty && (
                     <Badge
                       variant="outline"
-                      className={difficultyColors[template.difficulty] || ""}
+                      className={STATUS_STYLES[template.difficulty] || ""}
                     >
                       {tr(template.difficulty as Parameters<typeof tr>[0])}
                     </Badge>

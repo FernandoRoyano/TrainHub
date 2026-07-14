@@ -18,10 +18,10 @@ interface CycleTabProps {
 }
 
 const phaseColors: Record<string, string> = {
-  menstrual: "bg-red-500",
-  follicular: "bg-pink-400",
-  ovulation: "bg-purple-500",
-  luteal: "bg-blue-400",
+  menstrual: "bg-destructive",
+  follicular: "bg-chart-5",
+  ovulation: "bg-chart-3",
+  luteal: "bg-chart-2",
 };
 
 const phaseLabels: Record<string, string> = {

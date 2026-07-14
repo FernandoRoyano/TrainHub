@@ -227,7 +227,7 @@ export function AssignPlanWizardDialog({
                 const Icon = featureIcons[key] ?? Check;
                 return (
                   <span key={key} className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                    <Icon className="h-3 w-3 text-emerald-400" />
+                    <Icon className="h-3 w-3 text-success" />
                     {featureLabel(key)}
                   </span>
                 );

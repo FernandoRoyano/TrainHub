@@ -31,8 +31,8 @@ const featureConfigs: FeatureConfig[] = [
       "featureRoutinesBullet3",
       "featureRoutinesBullet4",
     ],
-    color: "text-emerald-400",
-    bg: "bg-emerald-400/10",
+    color: "text-chart-1",
+    bg: "bg-chart-1/10",
   },
   {
     icon: UtensilsCrossed,
@@ -44,8 +44,8 @@ const featureConfigs: FeatureConfig[] = [
       "featureNutritionBullet3",
       "featureNutritionBullet4",
     ],
-    color: "text-orange-400",
-    bg: "bg-orange-400/10",
+    color: "text-chart-4",
+    bg: "bg-chart-4/10",
   },
   {
     icon: Smartphone,
@@ -57,8 +57,8 @@ const featureConfigs: FeatureConfig[] = [
       "featureClientAppBullet3",
       "featureClientAppBullet4",
     ],
-    color: "text-blue-400",
-    bg: "bg-blue-400/10",
+    color: "text-chart-2",
+    bg: "bg-chart-2/10",
   },
   {
     icon: CreditCard,
@@ -70,8 +70,8 @@ const featureConfigs: FeatureConfig[] = [
       "featurePaymentsBullet3",
       "featurePaymentsBullet4",
     ],
-    color: "text-amber-400",
-    bg: "bg-amber-400/10",
+    color: "text-chart-5",
+    bg: "bg-chart-5/10",
   },
   {
     icon: BarChart3,
@@ -83,8 +83,8 @@ const featureConfigs: FeatureConfig[] = [
       "featureTrackingBullet3",
       "featureTrackingBullet4",
     ],
-    color: "text-purple-400",
-    bg: "bg-purple-400/10",
+    color: "text-chart-3",
+    bg: "bg-chart-3/10",
   },
 ];
 

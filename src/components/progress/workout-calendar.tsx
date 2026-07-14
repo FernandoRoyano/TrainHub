@@ -109,9 +109,9 @@ export function WorkoutCalendar({ logs }: WorkoutCalendarProps) {
                 cell.day == null
                   ? ""
                   : cell.completed
-                    ? "bg-emerald-500/20 border-2 border-emerald-500/50 text-emerald-600 dark:text-emerald-400"
+                    ? "bg-success/20 border-2 border-success/50 text-success"
                     : cell.hasWorkout && !cell.completed
-                      ? "bg-amber-500/20 border-2 border-amber-500/50 text-amber-600 dark:text-amber-400"
+                      ? "bg-warning/20 border-2 border-warning/50 text-warning"
                       : cell.isToday
                         ? "bg-primary/10 border-2 border-primary/40 font-bold"
                         : cell.isFuture
@@ -133,11 +133,11 @@ export function WorkoutCalendar({ logs }: WorkoutCalendarProps) {
         {/* Legend */}
         <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
-            <span className="h-3 w-3 rounded bg-emerald-500/30 border border-emerald-500/50" />
+            <span className="h-3 w-3 rounded bg-success/30 border border-success/50" />
             Completado
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-3 w-3 rounded bg-amber-500/30 border border-amber-500/50" />
+            <span className="h-3 w-3 rounded bg-warning/30 border border-warning/50" />
             En progreso
           </span>
           <span className="flex items-center gap-1">

@@ -28,7 +28,7 @@ function MyNutritionPageContent() {
   if (!mealPlan) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold">{t("myMealPlan")}</h1>
+        <h1 className="font-display text-2xl font-bold">{t("myMealPlan")}</h1>
         <EmptyState
           icon={UtensilsCrossed}
           title={tc("noMealPlanAssigned")}
@@ -55,7 +55,7 @@ function MyNutritionPageContent() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold">{t("myMealPlan")}</h1>
+        <h1 className="font-display text-2xl font-bold">{t("myMealPlan")}</h1>
         <p className="text-muted-foreground">{mealPlan.name}</p>
         {mealPlan.description && (
           <p className="text-sm text-muted-foreground mt-1">

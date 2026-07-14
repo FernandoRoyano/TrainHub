@@ -9,17 +9,17 @@ import { Badge } from "@/components/ui/badge";
 import { Dumbbell, TrendingDown, TrendingUp, Minus, AlertCircle } from "lucide-react";
 
 const phaseColors: Record<string, string> = {
-  menstrual: "bg-red-500",
-  follicular: "bg-pink-400",
-  ovulation: "bg-purple-500",
-  luteal: "bg-blue-400",
+  menstrual: "bg-destructive",
+  follicular: "bg-chart-5",
+  ovulation: "bg-chart-3",
+  luteal: "bg-chart-2",
 };
 
 const phaseTextColors: Record<string, string> = {
-  menstrual: "text-red-600 dark:text-red-400",
-  follicular: "text-pink-600 dark:text-pink-400",
-  ovulation: "text-purple-600 dark:text-purple-400",
-  luteal: "text-blue-600 dark:text-blue-400",
+  menstrual: "text-destructive",
+  follicular: "text-chart-5",
+  ovulation: "text-chart-3",
+  luteal: "text-chart-2",
 };
 
 interface AdaptiveTrainingCardProps {
@@ -38,8 +38,8 @@ export function AdaptiveTrainingCard({ todaySymptoms = [] }: AdaptiveTrainingCar
 
   const intensityIcon = useMemo(() => {
     if (!suggestion) return null;
-    if (suggestion.intensityMod > 0) return <TrendingUp className="h-4 w-4 text-green-500" />;
-    if (suggestion.intensityMod < 0) return <TrendingDown className="h-4 w-4 text-amber-500" />;
+    if (suggestion.intensityMod > 0) return <TrendingUp className="h-4 w-4 text-success" />;
+    if (suggestion.intensityMod < 0) return <TrendingDown className="h-4 w-4 text-warning" />;
     return <Minus className="h-4 w-4 text-muted-foreground" />;
   }, [suggestion]);
 
@@ -83,7 +83,7 @@ export function AdaptiveTrainingCard({ todaySymptoms = [] }: AdaptiveTrainingCar
         )}
 
         {suggestion.autoSuggestions.length > 0 && (
-          <div className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+          <div className="flex items-start gap-1.5 text-xs text-warning">
             <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
             <div className="space-y-0.5">
               {suggestion.autoSuggestions.map((key) => (

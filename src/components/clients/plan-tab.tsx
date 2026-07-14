@@ -28,18 +28,11 @@ import {
   Check,
 } from "lucide-react";
 import type { ServiceTierFeatures } from "@/lib/validations/service-tier";
+import { STATUS_STYLES } from "@/lib/ui-tokens";
 
 interface PlanTabProps {
   clientId: string;
 }
-
-const statusColors: Record<string, string> = {
-  active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  completed: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  cancelled: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
-  pending: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  assigned: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-};
 
 const featureLabelKeys: Record<string, string> = {
   training: "training",
@@ -139,7 +132,7 @@ export function PlanTab({ clientId }: PlanTabProps) {
                     <p className="font-medium text-sm">
                       {coachingPlan.coaching_plan?.name ?? t("unknownPlan")}
                     </p>
-                    <Badge variant="outline" className={statusColors[coachingPlan.status] ?? ""}>
+                    <Badge variant="outline" className={STATUS_STYLES[coachingPlan.status] ?? ""}>
                       {tc(coachingPlan.status as "active" | "completed" | "cancelled")}
                     </Badge>
                     {coachingPlan.coaching_plan?.service_tier && (
@@ -175,7 +168,7 @@ export function PlanTab({ clientId }: PlanTabProps) {
                 <div className="flex flex-wrap gap-2 mt-2">
                   {enabledFeatures.map(([key]) => (
                     <span key={key} className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Check className="h-3 w-3 text-emerald-400" />
+                      <Check className="h-3 w-3 text-success" />
                       {tMyPlan(featureLabelKeys[key] ?? key)}
                     </span>
                   ))}
@@ -216,7 +209,7 @@ export function PlanTab({ clientId }: PlanTabProps) {
                     {q.due_date && (
                       <span className="text-xs text-muted-foreground">{q.due_date}</span>
                     )}
-                    <Badge variant="outline" className={statusColors[q.status] ?? ""}>
+                    <Badge variant="outline" className={STATUS_STYLES[q.status] ?? ""}>
                       {q.status}
                     </Badge>
                   </div>

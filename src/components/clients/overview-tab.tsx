@@ -34,23 +34,12 @@ import {
   X,
   Trash2,
 } from "lucide-react";
+import { STATUS_STYLES } from "@/lib/ui-tokens";
 
 interface OverviewTabProps {
   clientId: string;
   onTabChange: (tab: string) => void;
 }
-
-const routineStatusColors: Record<string, string> = {
-  active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  completed: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  cancelled: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
-};
-
-const difficultyColors: Record<string, string> = {
-  beginner: "bg-green-500/10 text-green-400 border-green-500/20",
-  intermediate: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  advanced: "bg-red-500/10 text-red-400 border-red-500/20",
-};
 
 const WEEKDAY_KEYS = [
   "weekday_mon",
@@ -67,23 +56,23 @@ const timelineConfig: Record<
   { color: string; bgColor: string; icon: React.ElementType }
 > = {
   routine_assigned: {
-    color: "text-blue-400",
-    bgColor: "bg-blue-500",
+    color: "text-chart-2",
+    bgColor: "bg-chart-2",
     icon: ClipboardList,
   },
   measurement_taken: {
-    color: "text-purple-400",
-    bgColor: "bg-purple-500",
+    color: "text-chart-3",
+    bgColor: "bg-chart-3",
     icon: Ruler,
   },
   note_added: {
-    color: "text-amber-400",
-    bgColor: "bg-amber-500",
+    color: "text-chart-4",
+    bgColor: "bg-chart-4",
     icon: FileText,
   },
   client_created: {
-    color: "text-emerald-400",
-    bgColor: "bg-emerald-500",
+    color: "text-chart-1",
+    bgColor: "bg-chart-1",
     icon: UserPlus,
   },
 };
@@ -192,7 +181,7 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
       );
     return (
       <span
-        className={`inline-flex items-center gap-0.5 text-xs ${diff > 0 ? "text-red-400" : "text-emerald-400"}`}
+        className={`inline-flex items-center gap-0.5 text-xs ${diff > 0 ? "text-destructive" : "text-success"}`}
       >
         {icon} {diff > 0 ? "+" : ""}
         {diff.toFixed(1)}
@@ -209,7 +198,7 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
         { name: "lean", value: 100 - latest!.body_fat_pct! },
       ]
     : [];
-  const DONUT_COLORS = ["#f97316", "#22c55e"];
+  const DONUT_COLORS = ["hsl(var(--chart-4))", "hsl(var(--chart-1))"];
 
   // Timeline event description
   function getTimelineDescription(event: { type: string; description: string }) {
@@ -270,7 +259,7 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
                       <Badge
                         variant="outline"
                         className={
-                          difficultyColors[cr.routine.difficulty] ?? ""
+                          STATUS_STYLES[cr.routine.difficulty] ?? ""
                         }
                       >
                         {tc(cr.routine.difficulty as "beginner" | "intermediate" | "advanced")}
@@ -278,7 +267,7 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
                     )}
                     <Badge
                       variant="outline"
-                      className={routineStatusColors[cr.status] ?? ""}
+                      className={STATUS_STYLES[cr.status] ?? ""}
                     >
                       {tc(cr.status as "active" | "completed" | "cancelled")}
                     </Badge>
@@ -480,7 +469,7 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
                 <div className="flex items-center gap-2">
                   <span
                     className="inline-block h-3 w-3 rounded-full"
-                    style={{ backgroundColor: "#f97316" }}
+                    style={{ backgroundColor: "hsl(var(--chart-4))" }}
                   />
                   <span className="text-sm">
                     {t("fatMass")} — {latest!.body_fat_pct}%
@@ -489,7 +478,7 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
                 <div className="flex items-center gap-2">
                   <span
                     className="inline-block h-3 w-3 rounded-full"
-                    style={{ backgroundColor: "#22c55e" }}
+                    style={{ backgroundColor: "hsl(var(--chart-1))" }}
                   />
                   <span className="text-sm">
                     {t("leanMass")} — {(100 - latest!.body_fat_pct!).toFixed(1)}%
@@ -521,7 +510,7 @@ export function OverviewTab({ clientId, onTabChange }: OverviewTabProps) {
                     {day.label}
                   </span>
                   {day.hasLog ? (
-                    <div className="flex items-center justify-center h-9 w-9 rounded-full bg-emerald-500/20 text-emerald-400">
+                    <div className="flex items-center justify-center h-9 w-9 rounded-full bg-success/20 text-success">
                       <Check className="h-4 w-4" />
                     </div>
                   ) : day.isFuture ? (

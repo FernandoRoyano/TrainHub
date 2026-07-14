@@ -13,7 +13,7 @@ const METRICS = ["energy", "sleep_quality", "adherence", "stress"] as const;
 const EMOJI_MAP: Record<number, string> = { 1: "😞", 2: "😕", 3: "😐", 4: "🙂", 5: "😄" };
 
 const scoreColor = (v: number) =>
-  v >= 4 ? "text-green-500" : v === 3 ? "text-yellow-500" : "text-red-500";
+  v >= 4 ? "text-success" : v === 3 ? "text-warning" : "text-destructive";
 
 interface CheckinsTabProps {
   clientId: string;

@@ -6,21 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Target } from "lucide-react";
 import type { WorkoutWithExercises } from "@/services/client-app.service";
+import { CHART_COLORS } from "@/lib/ui-tokens";
 
 interface MuscleGroupChartProps {
   workouts: WorkoutWithExercises[];
 }
 
-const COLORS = [
-  "hsl(var(--chart-1, 220 70% 50%))",
-  "hsl(var(--chart-2, 160 60% 45%))",
-  "hsl(var(--chart-3, 30 80% 55%))",
-  "hsl(var(--chart-4, 280 65% 60%))",
-  "hsl(var(--chart-5, 340 75% 55%))",
-  "hsl(var(--primary))",
-  "hsl(200 70% 50%)",
-  "hsl(100 60% 45%)",
-];
+const COLORS = [...CHART_COLORS, "hsl(var(--primary))", ...CHART_COLORS.slice(0, 2)];
 
 // Map common exercise names to muscle groups
 function inferMuscleGroup(exerciseName: string): string {

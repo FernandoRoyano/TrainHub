@@ -38,6 +38,7 @@ import {
 } from "recharts";
 import { Link } from "@/i18n/navigation";
 import { TrainerPhaseGrid } from "@/components/cycle-training/trainer-phase-grid";
+import { ACCENT_STYLES, AVATAR_GRADIENTS } from "@/lib/ui-tokens";
 
 const activityIcons = {
   client_added: UserCheck,
@@ -64,16 +65,6 @@ function getGreetingKey(): "greetingMorning" | "greetingAfternoon" | "greetingEv
   if (h < 20) return "greetingAfternoon";
   return "greetingEvening";
 }
-
-const AVATAR_GRADIENTS = [
-  "from-emerald-400 to-cyan-500",
-  "from-cyan-400 to-blue-500",
-  "from-violet-400 to-fuchsia-500",
-  "from-amber-400 to-rose-500",
-  "from-rose-400 to-pink-500",
-  "from-blue-400 to-indigo-500",
-  "from-teal-400 to-emerald-500",
-] as const;
 
 function ClientAvatar({ name, size = "sm" }: { name: string; size?: "sm" | "md" }) {
   const initials = name
@@ -134,58 +125,47 @@ export default function DashboardPage() {
     workouts: d.workouts,
   }));
 
+  // Acentos desde la paleta del sistema (ui-tokens) — un look, cinco tonos
   const kpis = [
     {
       label: t("activeClients"),
       value: stats?.activeClients ?? 0,
       icon: Users,
-      color: "text-emerald-400",
-      bg: "bg-emerald-400/15",
-      glow: "shadow-emerald-500/20 hover:shadow-emerald-500/30",
+      accent: ACCENT_STYLES[0],
     },
     {
       label: t("trackingRate"),
       value: `${stats?.trackingRate ?? 0}%`,
       subtitle: t("trackingRateDesc"),
       icon: TrendingUp,
-      color: "text-cyan-400",
-      bg: "bg-cyan-400/15",
-      glow: "shadow-cyan-500/20 hover:shadow-cyan-500/30",
+      accent: ACCENT_STYLES[1],
       progress: stats?.trackingRate ?? 0,
     },
     {
       label: t("totalRoutines"),
       value: stats?.totalRoutines ?? 0,
       icon: ClipboardList,
-      color: "text-blue-400",
-      bg: "bg-blue-400/15",
-      glow: "shadow-blue-500/20 hover:shadow-blue-500/30",
+      accent: ACCENT_STYLES[2],
     },
     {
       label: t("pendingReviews"),
       value: stats?.pendingReviews ?? 0,
       subtitle: t("pendingReviewsDesc"),
       icon: AlertCircle,
-      color: "text-rose-400",
-      bg: "bg-rose-400/15",
-      glow: "shadow-rose-500/20 hover:shadow-rose-500/30",
+      accent: ACCENT_STYLES[4],
       urgent: (stats?.pendingReviews ?? 0) > 0,
     },
     {
       label: t("weekSessions"),
       value: stats?.weekSessions ?? 0,
       icon: CalendarCheck,
-      color: "text-violet-400",
-      bg: "bg-violet-400/15",
-      glow: "shadow-violet-500/20 hover:shadow-violet-500/30",
+      accent: ACCENT_STYLES[3],
     },
     {
       label: t("unreadMessages"),
       value: stats?.unreadMessages ?? 0,
       icon: MessageSquare,
-      color: "text-amber-400",
-      bg: "bg-amber-400/15",
-      glow: "shadow-amber-500/20 hover:shadow-amber-500/30",
+      accent: ACCENT_STYLES[1],
     },
   ];
 
@@ -199,15 +179,6 @@ export default function DashboardPage() {
     month: "long",
   }).format(new Date());
 
-  const accentBorder: Record<string, string> = {
-    "text-emerald-400": "border-t-emerald-400/40",
-    "text-cyan-400": "border-t-cyan-400/40",
-    "text-blue-400": "border-t-blue-400/40",
-    "text-rose-400": "border-t-rose-400/40",
-    "text-violet-400": "border-t-violet-400/40",
-    "text-amber-400": "border-t-amber-400/40",
-  };
-
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="relative overflow-hidden rounded-2xl px-5 py-6 sm:px-6 sm:py-8 animate-fade-in-up">
@@ -216,12 +187,18 @@ export default function DashboardPage() {
           className="absolute inset-0 -z-10 opacity-60"
           style={{
             background:
-              "radial-gradient(60% 80% at 0% 0%, hsl(160 70% 45% / 0.18), transparent 60%), radial-gradient(50% 80% at 100% 0%, hsl(190 80% 50% / 0.15), transparent 60%)",
+              "radial-gradient(60% 80% at 0% 0%, hsl(var(--primary) / 0.16), transparent 60%), radial-gradient(50% 80% at 100% 0%, hsl(var(--chart-2) / 0.10), transparent 60%)",
           }}
         />
         <p className="text-xs sm:text-sm text-muted-foreground capitalize">{today}</p>
-        <h1 className="mt-1 text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
-          {greeting}{trainerName ? `, ${trainerName}` : ""} 👋
+        <h1 className="mt-1 font-display text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+          {greeting}
+          {trainerName ? (
+            <>
+              , <span className="text-primary">{trainerName}</span>
+            </>
+          ) : null}{" "}
+          👋
         </h1>
         <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
           {t("greetingSubtitle")}
@@ -231,9 +208,9 @@ export default function DashboardPage() {
       {/* Quick actions - táctiles, lo primero al alcance del pulgar */}
       <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
         {[
-          { href: "/clients/new", icon: UserPlus, label: t("addClient"), accent: "text-emerald-400 bg-emerald-400/15" },
-          { href: "/routines/new", icon: Plus, label: t("createRoutine"), accent: "text-blue-400 bg-blue-400/15" },
-          { href: "/messages", icon: Mail, label: t("viewMessages"), accent: "text-amber-400 bg-amber-400/15" },
+          { href: "/clients/new", icon: UserPlus, label: t("addClient"), accent: "text-primary bg-primary/15" },
+          { href: "/routines/new", icon: Plus, label: t("createRoutine"), accent: `${ACCENT_STYLES[1].text} ${ACCENT_STYLES[1].bg}` },
+          { href: "/messages", icon: Mail, label: t("viewMessages"), accent: `${ACCENT_STYLES[3].text} ${ACCENT_STYLES[3].bg}` },
         ].map((action) => {
           const Icon = action.icon;
           return (
@@ -259,7 +236,7 @@ export default function DashboardPage() {
             <Card
               key={kpi.label}
               style={{ animationDelay: `${idx * 80}ms` }}
-              className={`glass-elevated shadow-xl border-t-2 ${accentBorder[kpi.color] ?? "border-t-transparent"} transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-default animate-fade-in-up ${kpi.glow}`}
+              className={`glass-elevated shadow-xl border-t-2 ${kpi.accent.borderT} transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-default animate-fade-in-up ${kpi.accent.glow}`}
             >
               <CardContent className="pt-4 pb-4 sm:pt-6 sm:pb-6">
                 <div className="flex items-start justify-between gap-3">
@@ -267,7 +244,7 @@ export default function DashboardPage() {
                     <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                       {kpi.label}
                     </p>
-                    <p className={`text-3xl sm:text-5xl font-bold mt-1.5 sm:mt-2 tabular-nums tracking-tight ${kpi.urgent ? "text-rose-400 animate-pulse" : ""}`}>
+                    <p className={`font-display text-3xl sm:text-5xl font-bold mt-1.5 sm:mt-2 tabular-nums tracking-tight ${kpi.urgent ? "text-destructive animate-pulse" : ""}`}>
                       {kpi.value}
                     </p>
                     {kpi.subtitle && (
@@ -275,15 +252,15 @@ export default function DashboardPage() {
                     )}
                   </div>
                   <div
-                    className={`h-11 w-11 sm:h-14 sm:w-14 rounded-2xl ${kpi.bg} flex items-center justify-center shrink-0`}
+                    className={`h-11 w-11 sm:h-14 sm:w-14 rounded-2xl ${kpi.accent.bg} flex items-center justify-center shrink-0`}
                   >
-                    <Icon className={`h-5 w-5 sm:h-7 sm:w-7 ${kpi.color}`} />
+                    <Icon className={`h-5 w-5 sm:h-7 sm:w-7 ${kpi.accent.text}`} />
                   </div>
                 </div>
                 {kpi.progress !== undefined && (
                   <div className="mt-4 h-2 w-full rounded-full bg-muted overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-400 transition-all duration-700"
+                      className="h-full rounded-full bg-primary transition-all duration-700"
                       style={{ width: `${Math.min(kpi.progress, 100)}%` }}
                     />
                   </div>
@@ -302,20 +279,20 @@ export default function DashboardPage() {
             <Card
               key={kpi.label}
               style={{ animationDelay: `${(idx + 2) * 80}ms` }}
-              className={`glass-elevated shadow-md border-t-2 ${accentBorder[kpi.color] ?? "border-t-transparent"} transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-default animate-fade-in-up ${kpi.glow}`}
+              className={`glass-elevated shadow-md border-t-2 ${kpi.accent.borderT} transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-default animate-fade-in-up ${kpi.accent.glow}`}
             >
               <CardContent className="pt-4 pb-4">
                 <div className="flex items-center gap-3">
                   <div
-                    className={`h-10 w-10 rounded-xl ${kpi.bg} flex items-center justify-center shrink-0`}
+                    className={`h-10 w-10 rounded-xl ${kpi.accent.bg} flex items-center justify-center shrink-0`}
                   >
-                    <Icon className={`h-5 w-5 ${kpi.color}`} />
+                    <Icon className={`h-5 w-5 ${kpi.accent.text}`} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[11px] font-medium text-muted-foreground truncate uppercase tracking-wide">
                       {kpi.label}
                     </p>
-                    <p className={`text-2xl font-bold tabular-nums leading-tight ${kpi.urgent ? "text-rose-400 animate-pulse" : ""}`}>
+                    <p className={`font-display text-2xl font-bold tabular-nums leading-tight ${kpi.urgent ? "text-destructive animate-pulse" : ""}`}>
                       {kpi.value}
                     </p>
                   </div>
@@ -337,16 +314,16 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-3 rounded-lg bg-muted/50">
-                <p className="text-2xl font-bold">{summary?.workouts ?? 0}</p>
+              <div className="text-center p-3 rounded-xl bg-muted/50">
+                <p className="font-display text-2xl font-bold tabular-nums">{summary?.workouts ?? 0}</p>
                 <p className="text-xs text-muted-foreground mt-1">{t("workoutsThisWeek")}</p>
               </div>
-              <div className="text-center p-3 rounded-lg bg-muted/50">
-                <p className="text-2xl font-bold">{summary?.newClients ?? 0}</p>
+              <div className="text-center p-3 rounded-xl bg-muted/50">
+                <p className="font-display text-2xl font-bold tabular-nums">{summary?.newClients ?? 0}</p>
                 <p className="text-xs text-muted-foreground mt-1">{t("newClientsThisWeek")}</p>
               </div>
-              <div className="text-center p-3 rounded-lg bg-muted/50">
-                <p className="text-2xl font-bold">{summary?.messagesSent ?? 0}</p>
+              <div className="text-center p-3 rounded-xl bg-muted/50">
+                <p className="font-display text-2xl font-bold tabular-nums">{summary?.messagesSent ?? 0}</p>
                 <p className="text-xs text-muted-foreground mt-1">{t("messagesSentThisWeek")}</p>
               </div>
             </div>
@@ -418,8 +395,8 @@ export default function DashboardPage() {
               <BarChart data={chartData} barSize={32}>
                 <defs>
                   <linearGradient id="barFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6dbd57" stopOpacity={1} />
-                    <stop offset="100%" stopColor="#6dbd57" stopOpacity={0.25} />
+                    <stop offset="0%" stopColor="hsl(var(--chart-1))" stopOpacity={1} />
+                    <stop offset="100%" stopColor="hsl(var(--chart-1))" stopOpacity={0.25} />
                   </linearGradient>
                 </defs>
                 <XAxis
@@ -478,10 +455,10 @@ export default function DashboardPage() {
                 {stats!.clientCompliance.slice(0, 8).map((client) => {
                   const color =
                     client.compliancePercent >= 75
-                      ? "bg-emerald-400"
+                      ? "bg-success"
                       : client.compliancePercent >= 50
-                        ? "bg-amber-400"
-                        : "bg-rose-400";
+                        ? "bg-warning"
+                        : "bg-destructive";
                   return (
                     <div key={client.clientId} className="flex items-center gap-3">
                       <ClientAvatar name={client.name} />
@@ -514,7 +491,7 @@ export default function DashboardPage() {
         <Card className="border-border/50">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-400" />
+              <AlertTriangle className="h-4 w-4 text-warning" />
               {t("clientsAtRisk")}
             </CardTitle>
           </CardHeader>
@@ -529,7 +506,7 @@ export default function DashboardPage() {
                   >
                     <ClientAvatar name={client.name} />
                     <span className="font-medium truncate flex-1">{client.name}</span>
-                    <Badge variant="outline" className="text-rose-400 border-rose-500/20 shrink-0">
+                    <Badge variant="outline" className="text-destructive border-destructive/25 shrink-0">
                       {client.daysSinceLastWorkout === -1
                         ? t("neverTrained")
                         : t("daysSinceWorkout", { days: client.daysSinceLastWorkout })}
@@ -539,7 +516,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-6 text-center">
-                <CheckCircle2 className="h-8 w-8 text-emerald-400 mb-2" />
+                <CheckCircle2 className="h-8 w-8 text-success mb-2" />
                 <p className="text-sm text-muted-foreground">{t("allClientsOnTrack")}</p>
               </div>
             )}

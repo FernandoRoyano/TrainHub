@@ -25,7 +25,7 @@ function MyMessagesPageContent() {
   if (!conversation) {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-4">{t("title")}</h1>
+        <h1 className="font-display text-2xl font-bold mb-4">{t("title")}</h1>
         <EmptyState
           icon={MessageCircle}
           title={te("messagesTitle")}
@@ -37,7 +37,7 @@ function MyMessagesPageContent() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">{t("title")}</h1>
+      <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
       <div className="border rounded-lg h-[calc(100vh-12rem)] overflow-hidden">
         <MessageThread conversationId={conversation.id} />
       </div>

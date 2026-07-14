@@ -154,7 +154,7 @@ export function AssignCoachingPlanDialog({
               <div className="space-y-1.5">
                 {plan.routine_template && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
+                    <CheckCircle className="h-3.5 w-3.5 text-success" />
                     <Dumbbell className="h-3 w-3" />
                     <span>
                       {t("willAssignRoutine")}: {plan.routine_template.name}
@@ -163,7 +163,7 @@ export function AssignCoachingPlanDialog({
                 )}
                 {plan.meal_plan_template && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
+                    <CheckCircle className="h-3.5 w-3.5 text-success" />
                     <UtensilsCrossed className="h-3 w-3" />
                     <span>
                       {t("willAssignMealPlan")}: {plan.meal_plan_template.name}
@@ -172,7 +172,7 @@ export function AssignCoachingPlanDialog({
                 )}
                 {plan.service_tier && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
+                    <CheckCircle className="h-3.5 w-3.5 text-success" />
                     <Shield className="h-3 w-3" />
                     <span>
                       {t("willAssignTier")}: {plan.service_tier.name}
@@ -182,7 +182,7 @@ export function AssignCoachingPlanDialog({
                 {plan.questionnaire_template_ids &&
                   plan.questionnaire_template_ids.length > 0 && (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
+                      <CheckCircle className="h-3.5 w-3.5 text-success" />
                       <FileQuestion className="h-3 w-3" />
                       <span>
                         {t("willAssignQuestionnaires", {

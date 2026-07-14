@@ -71,16 +71,16 @@ export function WeekComparison({ workouts }: WeekComparisonProps) {
 
   const sessionColor =
     comparison.sessionsDiff > 0
-      ? "text-green-500"
+      ? "text-success"
       : comparison.sessionsDiff < 0
-        ? "text-red-500"
+        ? "text-destructive"
         : "text-muted-foreground";
 
   const volumeColor =
     comparison.volumeDiff > 0
-      ? "text-green-500"
+      ? "text-success"
       : comparison.volumeDiff < 0
-        ? "text-red-500"
+        ? "text-destructive"
         : "text-muted-foreground";
 
   return (

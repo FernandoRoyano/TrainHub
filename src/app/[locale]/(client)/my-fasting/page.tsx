@@ -76,7 +76,7 @@ function ProgressRing({
           r={normalizedRadius}
           cx={radius}
           cy={radius}
-          className={clampedProgress >= 1 ? "text-green-500" : "text-primary"}
+          className={clampedProgress >= 1 ? "text-success" : "text-primary"}
           style={{ transition: "stroke-dashoffset 0.5s ease" }}
         />
       </svg>
@@ -159,7 +159,7 @@ export default function MyFastingPage() {
     <div className="space-y-6 max-w-lg mx-auto">
       <div className="flex items-center gap-2">
         <Timer className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
       </div>
 
       {/* Timer card */}
@@ -239,28 +239,28 @@ export default function MyFastingPage() {
         <div className="grid grid-cols-2 gap-3">
           <Card>
             <CardContent className="pt-4 flex flex-col items-center">
-              <Flame className="h-5 w-5 text-orange-500 mb-1" />
+              <Flame className="h-5 w-5 text-warning mb-1" />
               <span className="text-2xl font-bold">{stats.totalFasts}</span>
               <span className="text-xs text-muted-foreground">{t("stats.totalFasts")}</span>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4 flex flex-col items-center">
-              <TrendingUp className="h-5 w-5 text-blue-500 mb-1" />
+              <TrendingUp className="h-5 w-5 text-info mb-1" />
               <span className="text-2xl font-bold">{stats.avgHours}h</span>
               <span className="text-xs text-muted-foreground">{t("stats.avgDuration")}</span>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4 flex flex-col items-center">
-              <Trophy className="h-5 w-5 text-yellow-500 mb-1" />
+              <Trophy className="h-5 w-5 text-warning mb-1" />
               <span className="text-2xl font-bold">{stats.currentStreak}</span>
               <span className="text-xs text-muted-foreground">{t("stats.streak")}</span>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4 flex flex-col items-center">
-              <Target className="h-5 w-5 text-green-500 mb-1" />
+              <Target className="h-5 w-5 text-success mb-1" />
               <span className="text-2xl font-bold">{stats.completionRate}%</span>
               <span className="text-xs text-muted-foreground">{t("stats.completionRate")}</span>
             </CardContent>

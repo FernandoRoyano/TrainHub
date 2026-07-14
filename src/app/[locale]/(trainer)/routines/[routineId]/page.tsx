@@ -30,6 +30,7 @@ import Link from "next/link";
 import type { Exercise } from "@/services/exercises.service";
 import type { ExerciseGroup } from "@/services/routines.service";
 import { ExerciseAnimation } from "@/components/workout/exercise-animation";
+import { STATUS_STYLES } from "@/lib/ui-tokens";
 
 function getExerciseDisplayName(exercise: Exercise, locale: string): string {
   if (locale === "es" && exercise.name_es) return exercise.name_es;
@@ -40,12 +41,6 @@ function getExerciseFirstImage(exercise: Exercise): string | null {
   if (exercise.images && exercise.images.length > 0) return exercise.images[0];
   return exercise.thumbnail_url;
 }
-
-const difficultyColors: Record<string, string> = {
-  beginner: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  intermediate: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  advanced: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-};
 
 export default function RoutineDetailPage() {
   const { routineId } = useParams<{ routineId: string }>();
@@ -139,7 +134,7 @@ export default function RoutineDetailPage() {
         {routine.difficulty && (
           <Badge
             variant="outline"
-            className={difficultyColors[routine.difficulty] || ""}
+            className={STATUS_STYLES[routine.difficulty] || ""}
           >
             {t(routine.difficulty as Parameters<typeof t>[0])}
           </Badge>

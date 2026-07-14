@@ -11,12 +11,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { STATUS_STYLES } from "@/lib/ui-tokens";
 
 const blockTypeColors: Record<string, string> = {
-  warmup: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-  cooldown: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  circuit: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  custom: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+  warmup: STATUS_STYLES.warmup,
+  cooldown: STATUS_STYLES.cooldown,
+  circuit: STATUS_STYLES.circuit,
+  custom: "bg-muted text-muted-foreground border-border",
 };
 
 export default function BlockDetailPage() {
@@ -56,7 +57,7 @@ export default function BlockDetailPage() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">{block.name}</h1>
+            <h1 className="font-display text-2xl font-bold">{block.name}</h1>
             {block.description && (
               <p className="text-sm text-muted-foreground">
                 {block.description}

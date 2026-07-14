@@ -200,7 +200,7 @@ export function ProgressCharts({ workouts }: ProgressChartsProps) {
                   <Line
                     type="monotone"
                     dataKey="weight"
-                    stroke="hsl(var(--chart-2, var(--primary)))"
+                    stroke="hsl(var(--chart-2))"
                     strokeWidth={2}
                     dot={{ r: 3 }}
                     name={t("weightKg")}

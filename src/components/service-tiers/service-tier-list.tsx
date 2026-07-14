@@ -42,7 +42,7 @@ export function ServiceTierList() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
         <Button asChild>
           <Link href="/service-tiers/new">
             <Plus className="mr-2 h-4 w-4" />
@@ -149,7 +149,7 @@ export function ServiceTierList() {
                         className="flex items-center gap-2 text-xs"
                       >
                         {enabled ? (
-                          <Check className="h-3 w-3 text-emerald-500" />
+                          <Check className="h-3 w-3 text-success" />
                         ) : (
                           <X className="h-3 w-3 text-muted-foreground/50" />
                         )}

@@ -114,7 +114,7 @@ export function AppSidebar() {
         className={cn(
           "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 relative",
           isActive
-            ? "bg-primary/15 text-primary"
+            ? "bg-primary/10 text-primary before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-full before:bg-primary"
             : "text-muted-foreground hover:bg-accent hover:text-foreground",
           !sidebarOpen && "justify-center px-2",
           nested && sidebarOpen && "pl-10 text-xs"
@@ -195,7 +195,7 @@ export function AppSidebar() {
         {sidebarOpen && (
           <div className="flex items-center gap-2">
             <Dumbbell className="h-6 w-6 text-primary" />
-            <h2 className="text-lg font-bold tracking-tight">
+            <h2 className="font-display text-lg font-bold tracking-tight">
               Train<span className="text-primary">Hub</span>
             </h2>
           </div>

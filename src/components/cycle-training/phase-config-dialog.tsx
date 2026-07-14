@@ -37,10 +37,10 @@ interface PhaseConfigDialogProps {
 }
 
 const PHASES: { key: CyclePhase; color: string }[] = [
-  { key: "menstrual", color: "bg-red-500" },
-  { key: "follicular", color: "bg-pink-400" },
-  { key: "ovulation", color: "bg-purple-500" },
-  { key: "luteal", color: "bg-blue-400" },
+  { key: "menstrual", color: "bg-destructive" },
+  { key: "follicular", color: "bg-chart-5" },
+  { key: "ovulation", color: "bg-chart-3" },
+  { key: "luteal", color: "bg-chart-2" },
 ];
 
 export function PhaseConfigDialog({ open, onOpenChange, clientId }: PhaseConfigDialogProps) {

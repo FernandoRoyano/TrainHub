@@ -35,11 +35,12 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es, enUS } from "date-fns/locale";
+import { STATUS_STYLES } from "@/lib/ui-tokens";
 
 const roleColors: Record<string, string> = {
   admin: "bg-primary/10 text-primary border-primary/20",
-  trainer: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  client: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  trainer: STATUS_STYLES.trainer,
+  client: STATUS_STYLES.client,
 };
 
 const roleIcons: Record<string, typeof Shield> = {
@@ -82,7 +83,7 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">{t("usersTitle")}</h1>
+      <h1 className="font-display text-2xl font-bold">{t("usersTitle")}</h1>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">

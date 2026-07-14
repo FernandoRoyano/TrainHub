@@ -32,6 +32,7 @@ import {
 import { RegisterPaymentDialog } from "./register-payment-dialog";
 import type { ClientPayment } from "@/services/payments.service";
 import type { PaymentFormData } from "@/lib/validations/payment";
+import { STATUS_STYLES } from "@/lib/ui-tokens";
 
 interface PaymentsTabProps {
   clientId: string;
@@ -47,12 +48,10 @@ const methodIcons: Record<string, React.ReactNode> = {
 };
 
 const statusColors: Record<string, string> = {
-  paid: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  pending:
-    "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
-  overdue: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  cancelled:
-    "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
+  paid: STATUS_STYLES.paid,
+  pending: STATUS_STYLES.pending,
+  overdue: STATUS_STYLES.overdue,
+  cancelled: "bg-muted text-muted-foreground border-border",
 };
 
 function formatDate(dateStr: string | null) {
@@ -210,7 +209,7 @@ export function PaymentsTab({ clientId }: PaymentsTabProps) {
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-green-100 dark:bg-green-900/30 p-2">
-                <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+                <DollarSign className="h-5 w-5 text-success" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">
@@ -230,7 +229,7 @@ export function PaymentsTab({ clientId }: PaymentsTabProps) {
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-blue-100 dark:bg-blue-900/30 p-2">
-                <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <Calendar className="h-5 w-5 text-info" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">
@@ -248,7 +247,7 @@ export function PaymentsTab({ clientId }: PaymentsTabProps) {
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-amber-100 dark:bg-amber-900/30 p-2">
-                <CalendarClock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                <CalendarClock className="h-5 w-5 text-warning" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">

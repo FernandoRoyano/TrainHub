@@ -17,21 +17,13 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
+import { STATUS_STYLES, ACCENT_STYLES, AVATAR_GRADIENTS } from "@/lib/ui-tokens";
 
 const roleColors: Record<string, string> = {
   admin: "bg-primary/10 text-primary border-primary/20",
-  trainer: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  client: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  trainer: STATUS_STYLES.trainer,
+  client: STATUS_STYLES.client,
 };
-
-const AVATAR_GRADIENTS = [
-  "from-emerald-400 to-cyan-500",
-  "from-cyan-400 to-blue-500",
-  "from-violet-400 to-fuchsia-500",
-  "from-amber-400 to-rose-500",
-  "from-rose-400 to-pink-500",
-  "from-blue-400 to-indigo-500",
-] as const;
 
 function UserAvatar({ name }: { name: string }) {
   const initials =
@@ -76,13 +68,17 @@ export default function AdminDashboardPage() {
   if (!data) return null;
 
   const stats = [
-    { label: t("totalUsers"), value: data.totalUsers, icon: Users, color: "text-cyan-400", bg: "bg-cyan-400/15" },
-    { label: t("totalTrainers"), value: data.totalTrainers, icon: UserCheck, color: "text-blue-400", bg: "bg-blue-400/15" },
-    { label: t("totalClients"), value: data.totalClients, icon: Activity, color: "text-emerald-400", bg: "bg-emerald-400/15" },
-    { label: t("totalRoutines"), value: data.totalRoutines, icon: ClipboardList, color: "text-violet-400", bg: "bg-violet-400/15" },
-    { label: t("totalExercises"), value: data.totalExercises, icon: Dumbbell, color: "text-amber-400", bg: "bg-amber-400/15" },
-    { label: t("paidSubscriptions"), value: data.paidSubscriptions, icon: CreditCard, color: "text-rose-400", bg: "bg-rose-400/15" },
-  ];
+    { label: t("totalUsers"), value: data.totalUsers, icon: Users },
+    { label: t("totalTrainers"), value: data.totalTrainers, icon: UserCheck },
+    { label: t("totalClients"), value: data.totalClients, icon: Activity },
+    { label: t("totalRoutines"), value: data.totalRoutines, icon: ClipboardList },
+    { label: t("totalExercises"), value: data.totalExercises, icon: Dumbbell },
+    { label: t("paidSubscriptions"), value: data.paidSubscriptions, icon: CreditCard },
+  ].map((stat, i) => ({
+    ...stat,
+    color: ACCENT_STYLES[i % ACCENT_STYLES.length].text,
+    bg: ACCENT_STYLES[i % ACCENT_STYLES.length].bg,
+  }));
 
   const paidRate =
     data.totalTrainers > 0
@@ -105,7 +101,7 @@ export default function AdminDashboardPage() {
               "radial-gradient(60% 80% at 0% 0%, hsl(105 58% 45% / 0.18), transparent 60%), radial-gradient(50% 80% at 100% 0%, hsl(190 80% 50% / 0.14), transparent 60%)",
           }}
         />
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary via-chart-1 to-chart-2 bg-clip-text text-transparent">
           {t("title")}
         </h1>
         <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground">
@@ -159,14 +155,14 @@ export default function AdminDashboardPage() {
             </div>
             <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-400 transition-all duration-700"
+                className="h-full rounded-full bg-gradient-to-r from-primary to-chart-1 transition-all duration-700"
                 style={{ width: `${Math.min(paidRate, 100)}%` }}
               />
             </div>
           </div>
           <div className="flex items-center gap-3 rounded-xl bg-muted/40 p-3">
-            <div className="h-10 w-10 shrink-0 rounded-lg bg-emerald-400/15 flex items-center justify-center">
-              <TrendingUp className="h-5 w-5 text-emerald-400" />
+            <div className="h-10 w-10 shrink-0 rounded-lg bg-success/15 flex items-center justify-center">
+              <TrendingUp className="h-5 w-5 text-success" />
             </div>
             <div>
               <p className="text-xl font-bold tabular-nums leading-none">{avgClients}</p>

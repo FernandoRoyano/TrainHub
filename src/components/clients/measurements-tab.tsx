@@ -260,7 +260,7 @@ export function MeasurementsTab({ clientId }: MeasurementsTabProps) {
                 <Line
                   type="monotone"
                   dataKey="body_fat_pct"
-                  stroke="#ef4444"
+                  stroke="hsl(var(--chart-5))"
                   strokeWidth={2}
                   dot={{ r: 3 }}
                   name={t("body_fat_pct")}
@@ -269,7 +269,7 @@ export function MeasurementsTab({ clientId }: MeasurementsTabProps) {
                 <Line
                   type="monotone"
                   dataKey="waist_cm"
-                  stroke="#f59e0b"
+                  stroke="hsl(var(--chart-4))"
                   strokeWidth={2}
                   dot={{ r: 3 }}
                   name={t("waist_cm")}

@@ -89,7 +89,7 @@ export function ClientForm({ mode, client }: ClientFormProps) {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="text-2xl font-bold">
+        <h1 className="font-display text-2xl font-bold">
           {mode === "create" ? t("addClient") : t("editClient")}
         </h1>
       </div>

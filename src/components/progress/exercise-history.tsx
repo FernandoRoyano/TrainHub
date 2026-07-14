@@ -84,9 +84,9 @@ export function ExerciseHistory({ workouts }: ExerciseHistoryProps) {
             ex.trend === "up" ? TrendingUp : ex.trend === "down" ? TrendingDown : Minus;
           const trendColor =
             ex.trend === "up"
-              ? "text-green-500"
+              ? "text-success"
               : ex.trend === "down"
-              ? "text-red-500"
+              ? "text-destructive"
               : "text-muted-foreground";
 
           return (

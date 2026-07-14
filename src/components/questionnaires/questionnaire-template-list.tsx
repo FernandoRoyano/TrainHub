@@ -35,14 +35,7 @@ import {
 import Link from "next/link";
 import { AssignQuestionnaireDialog } from "./assign-questionnaire-dialog";
 import type { QuestionnaireTemplate } from "@/services/questionnaires.service";
-
-const categoryColors: Record<string, string> = {
-  medical: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-  goals: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  lifestyle: "bg-sky-500/10 text-sky-400 border-sky-500/20",
-  nutrition: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  general: "bg-violet-500/10 text-violet-400 border-violet-500/20",
-};
+import { STATUS_STYLES } from "@/lib/ui-tokens";
 
 export function QuestionnaireTemplateList() {
   const t = useTranslations("questionnaires");
@@ -72,7 +65,7 @@ export function QuestionnaireTemplateList() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
         <Button asChild>
           <Link href="/questionnaires/new">
             <Plus className="mr-2 h-4 w-4" />
@@ -195,7 +188,7 @@ export function QuestionnaireTemplateList() {
                   {tpl.category && (
                     <Badge
                       variant="outline"
-                      className={categoryColors[tpl.category] || ""}
+                      className={STATUS_STYLES[tpl.category] || ""}
                     >
                       {t(`category_${tpl.category}` as Parameters<typeof t>[0])}
                     </Badge>

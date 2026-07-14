@@ -22,13 +22,9 @@ import {
   ChevronRight,
   DollarSign,
 } from "lucide-react";
+import { STATUS_STYLES } from "@/lib/ui-tokens";
 
-const statusColors: Record<string, string> = {
-  active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  completed: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  cancelled: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
-  pending: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-};
+
 
 const featureIcons: Record<string, typeof Dumbbell> = {
   training: Dumbbell,
@@ -116,7 +112,7 @@ export default function MyPlanPage() {
                     className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent transition-colors"
                   >
                     <p className="text-sm font-medium">{q.template?.name ?? t("questionnaires")}</p>
-                    <Badge variant="outline" className={statusColors[q.status] ?? ""}>{statusLabel(q.status)}</Badge>
+                    <Badge variant="outline" className={STATUS_STYLES[q.status] ?? ""}>{statusLabel(q.status)}</Badge>
                   </Link>
                 ))}
               </div>
@@ -179,7 +175,7 @@ export default function MyPlanPage() {
                 <h2 className="font-semibold text-base">
                   {plan?.name ?? t("title")}
                 </h2>
-                <Badge variant="outline" className={statusColors[planData.status] ?? ""}>
+                <Badge variant="outline" className={STATUS_STYLES[planData.status] ?? ""}>
                   {statusLabel(planData.status)}
                 </Badge>
                 {tier && (
@@ -233,8 +229,8 @@ export default function MyPlanPage() {
                     key={key}
                     className="flex items-center gap-2 rounded-lg border p-2.5"
                   >
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10">
-                      <Icon className="h-3.5 w-3.5 text-emerald-400" />
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-success/10">
+                      <Icon className="h-3.5 w-3.5 text-success" />
                     </div>
                     <span className="text-sm">
                       {t(featureLabelKeys[key] ?? key)}

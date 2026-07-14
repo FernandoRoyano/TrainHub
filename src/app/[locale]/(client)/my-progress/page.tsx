@@ -92,7 +92,7 @@ function MyProgressPageContent() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">{t("myProgress")}</h1>
+      <h1 className="font-display text-2xl font-bold">{t("myProgress")}</h1>
 
       {/* Weekly check-in */}
       <WeeklyCheckinForm />

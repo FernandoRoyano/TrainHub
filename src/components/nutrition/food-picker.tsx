@@ -325,14 +325,14 @@ export function FoodPicker({ open, onOpenChange, onSelect, mealName }: FoodPicke
                       {isUsda ? (
                         <Badge
                           variant="outline"
-                          className="text-[10px] px-1 py-0 bg-green-500/10 text-green-400 border-green-500/20"
+                          className="text-[10px] px-1 py-0 bg-success/10 text-success border-success/25"
                         >
                           USDA
                         </Badge>
                       ) : isSpoon ? (
                         <Badge
                           variant="outline"
-                          className="text-[10px] px-1 py-0 bg-purple-500/10 text-purple-400 border-purple-500/20"
+                          className="text-[10px] px-1 py-0 bg-chart-3/10 text-chart-3 border-chart-3/25"
                         >
                           Spoonacular
                         </Badge>
@@ -350,25 +350,25 @@ export function FoodPicker({ open, onOpenChange, onSelect, mealName }: FoodPicke
                       )}
                       <Badge
                         variant="outline"
-                        className="text-[10px] px-1 py-0 bg-amber-500/10 text-amber-400 border-amber-500/20"
+                        className="text-[10px] px-1 py-0 bg-chart-4/10 text-chart-4 border-chart-4/25"
                       >
                         {food.calories_per_100g} kcal
                       </Badge>
                       <Badge
                         variant="outline"
-                        className="text-[10px] px-1 py-0 bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        className="text-[10px] px-1 py-0 bg-chart-2/10 text-chart-2 border-chart-2/25"
                       >
                         P: {food.protein_per_100g}g
                       </Badge>
                       <Badge
                         variant="outline"
-                        className="text-[10px] px-1 py-0 bg-blue-500/10 text-blue-400 border-blue-500/20"
+                        className="text-[10px] px-1 py-0 bg-chart-1/10 text-chart-1 border-chart-1/25"
                       >
                         C: {food.carbs_per_100g}g
                       </Badge>
                       <Badge
                         variant="outline"
-                        className="text-[10px] px-1 py-0 bg-orange-500/10 text-orange-400 border-orange-500/20"
+                        className="text-[10px] px-1 py-0 bg-chart-5/10 text-chart-5 border-chart-5/25"
                       >
                         F: {food.fat_per_100g}g
                       </Badge>

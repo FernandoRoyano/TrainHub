@@ -32,15 +32,15 @@ export function ProblemSolution() {
         <div className="grid md:grid-cols-2 gap-12 md:gap-16">
           {/* Problems */}
           <div className="space-y-4 reveal-on-scroll">
-            <p className="text-sm font-medium text-rose-400 uppercase tracking-wider mb-6">
+            <p className="text-sm font-medium text-destructive uppercase tracking-wider mb-6">
               {t("problemLabel")}
             </p>
             {problems.map((problem, i) => (
               <div
                 key={i}
-                className="flex items-start gap-3 p-3 rounded-lg bg-rose-500/5 border border-rose-500/10"
+                className="flex items-start gap-3 p-3 rounded-lg bg-destructive/5 border border-destructive/10"
               >
-                <X className="h-5 w-5 text-rose-400 shrink-0 mt-0.5" />
+                <X className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
                 <p className="text-fluid-sm">{problem}</p>
               </div>
             ))}

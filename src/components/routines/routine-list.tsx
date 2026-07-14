@@ -29,12 +29,7 @@ import {
   Dumbbell,
 } from "lucide-react";
 import Link from "next/link";
-
-const difficultyColors: Record<string, string> = {
-  beginner: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  intermediate: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  advanced: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-};
+import { STATUS_STYLES } from "@/lib/ui-tokens";
 
 export function RoutineList() {
   const t = useTranslations("routines");
@@ -56,7 +51,7 @@ export function RoutineList() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
         <Button asChild>
           <Link href="/routines/new">
             <Plus className="mr-2 h-4 w-4" />
@@ -177,7 +172,7 @@ export function RoutineList() {
                   {routine.difficulty && (
                     <Badge
                       variant="outline"
-                      className={difficultyColors[routine.difficulty] || ""}
+                      className={STATUS_STYLES[routine.difficulty] || ""}
                     >
                       {t(routine.difficulty as Parameters<typeof t>[0])}
                     </Badge>

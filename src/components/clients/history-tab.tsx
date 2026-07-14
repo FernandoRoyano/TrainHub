@@ -26,26 +26,26 @@ const typeConfig: Record<
   { color: string; bgColor: string; icon: React.ElementType; label: string }
 > = {
   routine_assigned: {
-    color: "text-blue-400",
-    bgColor: "bg-blue-500",
+    color: "text-chart-2",
+    bgColor: "bg-chart-2",
     icon: ClipboardList,
     label: "routine",
   },
   measurement_taken: {
-    color: "text-purple-400",
-    bgColor: "bg-purple-500",
+    color: "text-chart-3",
+    bgColor: "bg-chart-3",
     icon: Ruler,
     label: "measurement",
   },
   note_added: {
-    color: "text-amber-400",
-    bgColor: "bg-amber-500",
+    color: "text-chart-4",
+    bgColor: "bg-chart-4",
     icon: FileText,
     label: "note",
   },
   client_created: {
-    color: "text-emerald-400",
-    bgColor: "bg-emerald-500",
+    color: "text-chart-1",
+    bgColor: "bg-chart-1",
     icon: UserPlus,
     label: "created",
   },

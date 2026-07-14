@@ -26,6 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Search, Image as ImageIcon, Filter, X, Check } from "lucide-react";
 import { BatchActionsBar } from "@/components/routines/batch-actions-bar";
 import type { BatchDestination, ExerciseDefaults } from "@/stores/routine-builder-store";
+import { STATUS_STYLES } from "@/lib/ui-tokens";
 
 interface ExercisePickerProps {
   open: boolean;
@@ -40,12 +41,6 @@ interface ExercisePickerProps {
     opts: { destination: BatchDestination; defaults: ExerciseDefaults }
   ) => void;
 }
-
-const difficultyColors: Record<string, string> = {
-  beginner: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  intermediate: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  advanced: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-};
 
 function getExerciseDisplayName(exercise: Exercise, locale: string): string {
   if (locale === "es" && exercise.name_es) return exercise.name_es;
@@ -295,7 +290,7 @@ export function ExercisePicker({
                       {exercise.difficulty && (
                         <Badge
                           variant="outline"
-                          className={`text-[10px] px-1 py-0 ${difficultyColors[exercise.difficulty] || ""}`}
+                          className={`text-[10px] px-1 py-0 ${STATUS_STYLES[exercise.difficulty] || ""}`}
                         >
                           {t(exercise.difficulty as Parameters<typeof t>[0])}
                         </Badge>

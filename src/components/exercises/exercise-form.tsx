@@ -188,7 +188,7 @@ export function ExerciseForm({ mode, exercise }: ExerciseFormProps) {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="text-2xl font-bold">
+        <h1 className="font-display text-2xl font-bold">
           {mode === "create" ? t("addExercise") : t("editExercise")}
         </h1>
       </div>
@@ -612,7 +612,7 @@ export function ExerciseForm({ mode, exercise }: ExerciseFormProps) {
                     className="w-full"
                     onClick={() => setVideoSearchOpen(true)}
                   >
-                    <Youtube className="mr-2 h-4 w-4 text-red-500" />
+                    <Youtube className="mr-2 h-4 w-4 text-destructive" />
                     {t("searchYouTube")}
                   </Button>
 
