@@ -231,15 +231,26 @@ export const clientsService = {
 
     if (logsError) throw logsError;
 
-    // Get last connection from clients.updated_at (updated on each client app load)
-    const { data: clientsData } = await supabase
-      .from("clients")
-      .select("id, updated_at, created_at")
-      .in("id", clientIds);
-
+    // Último acceso REAL desde clients.last_active_at (heartbeat al abrir la
+    // app). Si la columna aún no existe (migración 00048 sin aplicar), degrada
+    // al comportamiento anterior (updated_at) para no regresar la UI.
     const connectionMap: Record<string, string | null> = {};
-    for (const c of clientsData ?? []) {
-      connectionMap[c.id] = c.updated_at || c.created_at;
+    const res = await supabase
+      .from("clients")
+      .select("id, last_active_at")
+      .in("id", clientIds);
+    if (res.error?.message?.includes("last_active_at")) {
+      const fallback = await supabase
+        .from("clients")
+        .select("id, updated_at, created_at")
+        .in("id", clientIds);
+      for (const c of fallback.data ?? []) {
+        connectionMap[c.id] = c.updated_at || c.created_at;
+      }
+    } else {
+      for (const c of (res.data as { id: string; last_active_at: string | null }[]) ?? []) {
+        connectionMap[c.id] = c.last_active_at ?? null;
+      }
     }
 
     // days_per_week vive en `routines`, no en `client_routines` (la query

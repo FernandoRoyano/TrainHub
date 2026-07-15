@@ -24,6 +24,7 @@ import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { ClientFeaturesProvider, useClientFeatures } from "@/contexts/client-features-context";
 import { useMyClient } from "@/hooks/use-client-app";
+import { useHeartbeat } from "@/hooks/use-heartbeat";
 import { isFeatureEnabled } from "@/lib/feature-gate";
 import type { FeatureKey } from "@/lib/validations/service-tier";
 import { toast } from "sonner";
@@ -158,6 +159,7 @@ export default function ClientLayout({
 }: {
   children: React.ReactNode;
 }) {
+  useHeartbeat();
   return (
     <ClientFeaturesProvider>
       <div className="h-dvh flex flex-col overflow-hidden">

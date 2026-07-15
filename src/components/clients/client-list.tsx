@@ -51,31 +51,27 @@ function getComplianceDotClass(
   return "bg-destructive";
 }
 
-function getLastActiveText(
-  lastWorkoutDate: string | null,
+// Días desde el último acceso REAL del cliente (heartbeat). null = nunca entró.
+function daysSinceAccess(lastConnection: string | null): number | null {
+  if (!lastConnection) return null;
+  return Math.floor((Date.now() - new Date(lastConnection).getTime()) / 86400000);
+}
+
+// Umbral de "lleva varios días parado sin entrar"
+const INACTIVE_THRESHOLD_DAYS = 7;
+
+function getAccessText(
   lastConnection: string | null,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: (key: string, values?: any) => string
 ): string {
-  if (lastWorkoutDate) {
-    const now = new Date();
-    const last = new Date(lastWorkoutDate);
-    const diffDays = Math.floor((now.getTime() - last.getTime()) / 86400000);
-    if (diffDays === 0) return t("lastActiveToday");
-    if (diffDays === 1) return t("lastActiveYesterday");
-    return t("lastActiveDaysAgo", { days: diffDays });
-  }
-
-  if (lastConnection) {
-    const now = new Date();
-    const last = new Date(lastConnection);
-    const diffDays = Math.floor((now.getTime() - last.getTime()) / 86400000);
-    if (diffDays === 0) return t("lastConnectionToday");
-    if (diffDays === 1) return t("lastConnectionYesterday");
-    return t("lastConnectionDaysAgo", { days: diffDays });
-  }
-
-  return t("lastActiveNever");
+  const days = daysSinceAccess(lastConnection);
+  if (days === null) return `${t("lastAccessLabel")}: ${t("lastAccessNever")}`;
+  const rel =
+    days === 0 ? t("lastAccessToday")
+    : days === 1 ? t("lastAccessYesterday")
+    : t("lastAccessDaysAgo", { days });
+  return `${t("lastAccessLabel")}: ${rel}`;
 }
 
 export function ClientList() {
@@ -204,11 +200,13 @@ export function ClientList() {
               activity?.workoutsThisWeek ?? 0,
               activity?.assignedDaysPerWeek ?? null
             );
-            const lastActiveText = getLastActiveText(
-              activity?.lastWorkoutDate ?? null,
-              activity?.lastConnection ?? client.created_at ?? null,
-              t
-            );
+            // Último acceso REAL (heartbeat), NO la fecha de creación
+            const accessText = getAccessText(activity?.lastConnection ?? null, t);
+            const inactiveDays = daysSinceAccess(activity?.lastConnection ?? null);
+            // Aviso solo para clientes activos que llevan varios días sin entrar
+            const isInactive =
+              client.status === "active" &&
+              (inactiveDays === null || inactiveDays >= INACTIVE_THRESHOLD_DAYS);
 
             return (
               <Card
@@ -236,15 +234,25 @@ export function ClientList() {
                         {client.email || client.phone || "--"}
                       </p>
                       <p className="text-xs text-muted-foreground/70 mt-0.5">
-                        {lastActiveText}
+                        {accessText}
                       </p>
                     </div>
-                    <Badge
-                      variant="outline"
-                      className={STATUS_STYLES[client.status] || ""}
-                    >
-                      {tc(client.status as "active" | "inactive" | "paused" | "pending")}
-                    </Badge>
+                    <div className="flex flex-col items-end gap-1">
+                      <Badge
+                        variant="outline"
+                        className={STATUS_STYLES[client.status] || ""}
+                      >
+                        {tc(client.status as "active" | "inactive" | "paused" | "pending")}
+                      </Badge>
+                      {isInactive && (
+                        <Badge variant="warning" className="gap-1 text-[10px]">
+                          <AlertTriangle className="h-2.5 w-2.5" />
+                          {inactiveDays === null
+                            ? t("neverEntered")
+                            : t("inactiveDays", { days: inactiveDays })}
+                        </Badge>
+                      )}
+                    </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button

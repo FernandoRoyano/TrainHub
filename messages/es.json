@@ -237,7 +237,14 @@
     "historicoTab": "Histórico",
     "paymentsTab": "Cobros",
     "fastingTab": "Ayuno",
-    "cycleTab": "Ciclo"
+    "cycleTab": "Ciclo",
+    "lastAccessLabel": "Último acceso",
+    "lastAccessToday": "hoy",
+    "lastAccessYesterday": "ayer",
+    "lastAccessDaysAgo": "hace {days} días",
+    "lastAccessNever": "nunca ha entrado",
+    "inactiveDays": "{days} días sin entrar",
+    "neverEntered": "Nunca ha entrado"
   },
   "planTab": {
     "coachingPlan": "Plan de coaching",
