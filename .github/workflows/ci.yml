@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancela runs anteriores del mismo ref si llega uno nuevo
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Typecheck · Lint · Test · Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Hard gates: these must pass to merge.
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Unit tests (Vitest)
+        run: npm run test
+
+      # Non-blocking for now: there is pre-existing lint debt (~45 findings,
+      # mostly unused vars / prefer-const). Reported but not merge-blocking
+      # until the cleanup lands; tracked in docs/PRODUCTION-READINESS.md.
+      - name: Lint (report-only)
+        run: npm run lint
+        continue-on-error: true
+
+      # E2E (Playwright) NO corre aquí: necesita una instancia Supabase real y
+      # secretos. Se ejecuta en local o contra un entorno de staging.
+      - name: Build
+        run: npm run build
+        env:
+          # Valores placeholder: el build no debe depender de secretos.
+          # Los tests mockean Supabase; el bundle solo necesita que las
+          # variables públicas existan.
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          NEXT_PUBLIC_ENABLE_PAYMENTS: "false"
