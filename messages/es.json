@@ -1316,7 +1316,13 @@
     "deleteUserConfirm": "Se eliminará la cuenta de {name} y todos sus datos de forma permanente. Si es un entrenador, también se eliminarán las cuentas de sus clientes. Esta acción no se puede deshacer.",
     "userDeleted": "Usuario eliminado",
     "userDeleteError": "Error al eliminar el usuario",
-    "showingUsers": "Mostrando {from}-{to} de {total} usuarios"
+    "showingUsers": "Mostrando {from}-{to} de {total} usuarios",
+    "setClientLimit": "Fijar cupo de clientes",
+    "setClientLimitDesc": "Límite personalizado de clientes para {name}. Prevalece sobre el plan.",
+    "setClientLimitPlaceholder": "Ej. 50",
+    "setClientLimitHint": "Déjalo vacío para usar el límite de su plan (free 3, pro 25, elite ilimitado).",
+    "clientLimitUpdated": "Cupo de clientes actualizado",
+    "clientLimitError": "No se pudo actualizar el cupo"
   },
   "checkins": {
     "title": "Check-in semanal",

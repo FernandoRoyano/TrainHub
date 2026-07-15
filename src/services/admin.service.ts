@@ -20,6 +20,7 @@ export interface AdminUser {
   email: string;
   role: string;
   subscription_tier: string | null;
+  client_limit_override: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -59,6 +60,18 @@ export const adminService = {
     if (!res.ok) {
       const data = await res.json();
       throw new Error(data.error || "Failed to update role");
+    }
+  },
+
+  async setClientLimit(userId: string, limit: number | null): Promise<void> {
+    const res = await fetch("/api/admin/users", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, clientLimitOverride: limit }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Failed to set client limit");
     }
   },
 

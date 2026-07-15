@@ -31,7 +31,7 @@ export function useSubscription() {
           .maybeSingle(),
         supabase
           .from("users")
-          .select("role")
+          .select("role, client_limit_override")
           .eq("id", user.id)
           .maybeSingle(),
         supabase
@@ -54,7 +54,10 @@ export function useSubscription() {
           ? rawTier
           : "free";
       const activeClientCount = clientResult.count ?? 0;
-      const clientLimit = TIER_LIMITS[tier];
+      // Prioridad: admin (ilimitado) > cupo personalizado del admin > límite del tier
+      const override = roleResult.data?.client_limit_override as number | null | undefined;
+      const clientLimit =
+        override != null && !isAdmin ? override : TIER_LIMITS[tier];
       const canAddClient = activeClientCount < clientLimit;
 
       return {

@@ -32,28 +32,27 @@ export async function GET(request: NextRequest) {
   const from = page * pageSize;
   const to = from + pageSize - 1;
 
-  let query = admin
-    .from("users")
-    .select("id, full_name, email, role, subscription_tier, created_at, updated_at", {
-      count: "exact",
-    })
-    .order("created_at", { ascending: false })
-    .range(from, to);
-
-  if (search) {
-    // Sanea el término: coma/paréntesis/asterisco tienen significado en la
-    // gramática de filtros de PostgREST y permitirían inyectar condiciones
-    const safeSearch = search.replace(/[,()*]/g, " ").trim();
-    if (safeSearch) {
-      query = query.or(`full_name.ilike.%${safeSearch}%,email.ilike.%${safeSearch}%`);
+  // client_limit_override puede no existir aún (migración 00047 pendiente):
+  // se degrada al set de columnas base para no romper la página.
+  const baseCols = "id, full_name, email, role, subscription_tier, created_at, updated_at";
+  const buildQuery = (cols: string) => {
+    let q = admin
+      .from("users")
+      .select(cols, { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(from, to);
+    if (search) {
+      const safeSearch = search.replace(/[,()*]/g, " ").trim();
+      if (safeSearch) q = q.or(`full_name.ilike.%${safeSearch}%,email.ilike.%${safeSearch}%`);
     }
-  }
+    if (role) q = q.eq("role", role);
+    return q;
+  };
 
-  if (role) {
-    query = query.eq("role", role);
+  let { data, count, error } = await buildQuery(`${baseCols}, client_limit_override`);
+  if (error?.message?.includes("client_limit_override")) {
+    ({ data, count, error } = await buildQuery(baseCols));
   }
-
-  const { data, count, error } = await query;
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -83,10 +82,36 @@ export async function PATCH(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { userId, role: newRole } = body;
+  const { userId } = body;
 
-  if (!userId || !newRole) {
-    return NextResponse.json({ error: "Missing userId or role" }, { status: 400 });
+  if (!userId) {
+    return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+  }
+
+  // Rama: fijar cupo de clientes personalizado (null = usar límite del plan)
+  if ("clientLimitOverride" in body) {
+    const val = body.clientLimitOverride;
+    if (
+      val !== null &&
+      (typeof val !== "number" || !Number.isInteger(val) || val < 0 || val > 100000)
+    ) {
+      return NextResponse.json({ error: "Invalid client limit" }, { status: 400 });
+    }
+    const { error } = await admin
+      .from("users")
+      .update({ client_limit_override: val })
+      .eq("id", userId);
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ success: true });
+  }
+
+  // Rama: cambio de rol
+  const { role: newRole } = body;
+
+  if (!newRole) {
+    return NextResponse.json({ error: "Missing role" }, { status: 400 });
   }
 
   if (!["admin", "trainer", "client"].includes(newRole)) {

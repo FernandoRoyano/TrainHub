@@ -1316,7 +1316,13 @@
     "deleteUserConfirm": "{name}'s account and all their data will be permanently deleted. If they are a trainer, their clients' accounts will also be deleted. This action cannot be undone.",
     "userDeleted": "User deleted",
     "userDeleteError": "Error deleting user",
-    "showingUsers": "Showing {from}-{to} of {total} users"
+    "showingUsers": "Showing {from}-{to} of {total} users",
+    "setClientLimit": "Set client limit",
+    "setClientLimitDesc": "Custom client limit for {name}. Overrides their plan.",
+    "setClientLimitPlaceholder": "e.g. 50",
+    "setClientLimitHint": "Leave empty to use their plan limit (free 3, pro 25, elite unlimited).",
+    "clientLimitUpdated": "Client limit updated",
+    "clientLimitError": "Could not update client limit"
   },
   "checkins": {
     "title": "Weekly check-in",

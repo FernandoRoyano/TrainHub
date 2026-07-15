@@ -37,6 +37,22 @@ export function useDeleteUser() {
   });
 }
 
+export function useSetClientLimit() {
+  const queryClient = useQueryClient();
+  const t = useTranslations("admin");
+  return useMutation({
+    mutationFn: ({ userId, limit }: { userId: string; limit: number | null }) =>
+      adminService.setClientLimit(userId, limit),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast.success(t("clientLimitUpdated"));
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || t("clientLimitError"));
+    },
+  });
+}
+
 export function useUpdateUserRole() {
   const queryClient = useQueryClient();
   const t = useTranslations("admin");

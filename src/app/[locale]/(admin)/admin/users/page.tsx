@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useAdminUsers, useUpdateUserRole, useDeleteUser } from "@/hooks/use-admin";
+import { useAdminUsers, useUpdateUserRole, useDeleteUser, useSetClientLimit } from "@/hooks/use-admin";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,14 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
   Search,
   MoreVertical,
   Shield,
@@ -32,6 +40,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
+  Users,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es, enUS } from "date-fns/locale";
@@ -66,6 +75,12 @@ export default function AdminUsersPage() {
     userId: string;
     name: string;
   } | null>(null);
+  const [limitEdit, setLimitEdit] = useState<{
+    userId: string;
+    name: string;
+    current: number | null;
+  } | null>(null);
+  const [limitValue, setLimitValue] = useState("");
 
   const debouncedSearch = useDebounce(search, 300);
   const { data, isLoading } = useAdminUsers({
@@ -75,6 +90,7 @@ export default function AdminUsersPage() {
   });
   const updateRole = useUpdateUserRole();
   const deleteUser = useDeleteUser();
+  const setClientLimit = useSetClientLimit();
 
   const users = data?.users ?? [];
   const totalCount = data?.count ?? 0;
@@ -167,7 +183,7 @@ export default function AdminUsersPage() {
                           {user.role}
                         </Badge>
                       </div>
-                      <div>
+                      <div className="flex flex-wrap items-center gap-1">
                         {user.subscription_tier && user.subscription_tier !== "free" ? (
                           <Badge variant="secondary" className="capitalize">
                             {user.subscription_tier}
@@ -176,6 +192,12 @@ export default function AdminUsersPage() {
                           <span className="text-xs text-muted-foreground">
                             Free
                           </span>
+                        )}
+                        {user.client_limit_override != null && (
+                          <Badge variant="info" className="gap-1">
+                            <Users className="h-3 w-3" />
+                            {user.client_limit_override}
+                          </Badge>
                         )}
                       </div>
                       <div className="text-xs text-muted-foreground">
@@ -208,6 +230,25 @@ export default function AdminUsersPage() {
                                   {t("changeRoleTo", { role: newRole })}
                                 </DropdownMenuItem>
                               ))}
+                            {user.role === "trainer" && (
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setLimitValue(
+                                    user.client_limit_override != null
+                                      ? String(user.client_limit_override)
+                                      : ""
+                                  );
+                                  setLimitEdit({
+                                    userId: user.id,
+                                    name: user.full_name || user.email,
+                                    current: user.client_limit_override,
+                                  });
+                                }}
+                              >
+                                <Users className="mr-2 h-4 w-4" />
+                                {t("setClientLimit")}
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem
                               className="text-destructive focus:text-destructive"
                               onClick={() =>
@@ -284,6 +325,51 @@ export default function AdminUsersPage() {
           }
         }}
       />
+
+      {/* Client limit override */}
+      <Dialog open={!!limitEdit} onOpenChange={(o) => !o && setLimitEdit(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("setClientLimit")}</DialogTitle>
+            <DialogDescription>
+              {t("setClientLimitDesc", { name: limitEdit?.name ?? "" })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Input
+              type="number"
+              min={0}
+              inputMode="numeric"
+              placeholder={t("setClientLimitPlaceholder")}
+              value={limitValue}
+              onChange={(e) => setLimitValue(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              {t("setClientLimitHint")}
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLimitEdit(null)}>
+              {tc("cancel")}
+            </Button>
+            <Button
+              disabled={setClientLimit.isPending}
+              onClick={() => {
+                if (!limitEdit) return;
+                const trimmed = limitValue.trim();
+                const limit = trimmed === "" ? null : parseInt(trimmed, 10);
+                if (limit !== null && (isNaN(limit) || limit < 0)) return;
+                setClientLimit.mutate(
+                  { userId: limitEdit.userId, limit },
+                  { onSuccess: () => setLimitEdit(null) }
+                );
+              }}
+            >
+              {tc("save")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete user confirmation */}
       <ConfirmDialog
