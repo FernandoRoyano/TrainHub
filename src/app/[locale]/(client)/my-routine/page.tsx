@@ -1,10 +1,14 @@
 "use client";
 
+// Esta vista maneja datos de entrenamiento con forma dinámica (logs por serie,
+// feedback ad-hoc del cliente); tipar cada estructura no aporta seguridad real
+// aquí, así que se permite `any` de forma acotada a este archivo.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FeatureGate } from "@/components/shared/feature-gate";
 import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import type { Exercise } from "@/services/exercises.service";
-import type { ExerciseGroup, RoutineExercise } from "@/services/routines.service";
+import type { ExerciseGroup } from "@/services/routines.service";
 import { ExerciseDetailDialog } from "@/components/workout/exercise-detail-dialog";
 import { ExerciseAnimation } from "@/components/workout/exercise-animation";
 import { useMyRoutine, useMyRoutineRealtime, useMyClient, useWorkoutLogs, useStartWorkout, useCompleteWorkout, useLogExercise } from "@/hooks/use-client-app";
@@ -24,7 +28,6 @@ import { cn } from "@/lib/utils";
 import { localDateString } from "@/lib/local-date";
 import { AdaptiveTrainingCard } from "@/components/cycle-training/adaptive-training-card";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 function ExerciseCard({
   ex,
   exerciseData,
@@ -39,7 +42,6 @@ function ExerciseCard({
   setSelectedExercise,
   locale,
   t,
-  te,
 }: {
   ex: any;
   exerciseData: Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string; note: string }[] }>;
@@ -54,7 +56,6 @@ function ExerciseCard({
   setSelectedExercise: (e: Exercise | null) => void;
   locale: string;
   t: any;
-  te: any;
 }) {
   const totalSets = ex.sets || 3;
   const exData = exerciseData[ex.id] ?? {
@@ -226,11 +227,9 @@ function ExerciseCard({
     </Card>
   );
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 function MyRoutinePageContent() {
   const t = useTranslations("clientApp");
-  const te = useTranslations("exercises");
   const tr = useTranslations("routines");
   const locale = useLocale();
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
@@ -622,7 +621,6 @@ function MyRoutinePageContent() {
                         setSelectedExercise={setSelectedExercise}
                         locale={locale}
                         t={t}
-                        te={te}
                       />
                     ));
                   }
@@ -658,7 +656,6 @@ function MyRoutinePageContent() {
                           setSelectedExercise={setSelectedExercise}
                           locale={locale}
                           t={t}
-                          te={te}
                         />
                       ))}
                     </div>
@@ -680,7 +677,6 @@ function MyRoutinePageContent() {
                     setSelectedExercise={setSelectedExercise}
                     locale={locale}
                     t={t}
-                    te={te}
                   />
                 ))}
           </div>

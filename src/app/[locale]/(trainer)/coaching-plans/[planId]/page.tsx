@@ -27,7 +27,6 @@ import {
   Shield,
   FileQuestion,
   Tag,
-  Briefcase,
 } from "lucide-react";
 import Link from "next/link";
 

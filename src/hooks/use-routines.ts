@@ -153,11 +153,9 @@ export function useCancelClientRoutine() {
     mutationFn: (id: string) => routinesService.cancelClientRoutine(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["client-routines"] });
-      const { toast } = require("sonner");
       toast.success(t("routineCancelled"));
     },
     onError: () => {
-      const { toast } = require("sonner");
       toast.error(t("routineCancelError"));
     },
   });
@@ -170,11 +168,9 @@ export function useDeleteClientRoutine() {
     mutationFn: (id: string) => routinesService.deleteClientRoutine(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["client-routines"] });
-      const { toast } = require("sonner");
       toast.success(t("routineDeleted"));
     },
     onError: () => {
-      const { toast } = require("sonner");
       toast.error(t("routineDeleteError"));
     },
   });

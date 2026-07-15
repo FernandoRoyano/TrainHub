@@ -36,7 +36,6 @@ import {
 import {
   ArrowLeft,
   Loader2,
-  Upload,
   X,
   Image as ImageIcon,
 } from "lucide-react";

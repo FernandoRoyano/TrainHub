@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { useCoachingPlans } from "@/hooks/use-coaching-plans";
-import { useServiceTiers } from "@/hooks/use-service-tiers";
 import { useRoutines } from "@/hooks/use-routines";
 import { useMealPlans } from "@/hooks/use-nutrition";
 import { useQuestionnaireTemplates } from "@/hooks/use-questionnaires";
@@ -71,7 +70,6 @@ export function AssignPlanWizardDialog({
   const queryClient = useQueryClient();
 
   const { data: plansData } = useCoachingPlans({ is_active: true });
-  const { data: tiers } = useServiceTiers();
   const { data: routinesData } = useRoutines({ is_template: true } as never);
   const { data: mealPlansData } = useMealPlans({ is_template: true } as never);
   const { data: questionnaireTemplates } = useQuestionnaireTemplates();

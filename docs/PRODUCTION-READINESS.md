@@ -17,7 +17,7 @@ Legend: ✅ solid · 🟡 risk / tech-debt · 🔴 blocker before a real paying 
 | Payments | ✅ | Idempotent webhook; multi-currency; **tested E2E in test mode** |
 | Migrations workflow | 🔴 | Applied by hand in the SQL editor — not CI-driven |
 | Secrets management | 🔴 | Keys were exposed during setup; env vars had `\r\n`; Stripe account shared |
-| CI/CD | 🔴→🟡 | Being added now (this doc's companion `ci.yml`); previously none |
+| CI/CD | ✅ | GitHub Actions: typecheck + lint + tests + build, all merge-blocking |
 | Observability | 🔴 | No error tracking, structured logging or uptime monitoring |
 | Backups / DR | 🔴 | Supabase free tier has no automated backups |
 | Environments | 🟡 | Local + prod only; no staging |
@@ -59,9 +59,6 @@ document a restore procedure.
   mirroring prod would de-risk migrations and Stripe.
 - **Solo Git flow** — direct commits to `main`. In a team: feature branches, PRs, required CI
   checks, review. The CI added here is the first step.
-- **Lint debt** — ~45 pre-existing ESLint findings (unused vars, `prefer-const`, a few `any`).
-  CI runs lint **report-only** (non-blocking) until the cleanup lands; typecheck, tests and
-  build are the hard gates. Tracked as a one-pass cleanup task.
 - **Rate limiting** uses an in-memory `Map` (`src/lib/simple-rate-limit.ts`) — fine for one
   instance, leaks across many; move to Upstash/Redis if it scales.
 - **CSP** still uses `'unsafe-inline'` for Next.js compatibility; tightening with nonces is a

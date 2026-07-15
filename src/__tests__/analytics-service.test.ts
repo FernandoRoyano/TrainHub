@@ -33,14 +33,14 @@ mockFrom.mockReturnValue({
           limit: mockLimit.mockReturnValue(
             Promise.resolve({ data: [], error: null })
           ),
-          then: (fn: Function) => fn({ data: [], error: null }),
+          then: (fn: (v: unknown) => void) => fn({ data: [], error: null }),
         }),
-        then: (fn: Function) => fn({ data: [], error: null }),
+        then: (fn: (v: unknown) => void) => fn({ data: [], error: null }),
       }),
-      then: (fn: Function) => fn({ data: [], error: null }),
+      then: (fn: (v: unknown) => void) => fn({ data: [], error: null }),
     }),
     gte: mockGte,
-    then: (fn: Function) => fn({ data: [], error: null }),
+    then: (fn: (v: unknown) => void) => fn({ data: [], error: null }),
   }),
 });
 

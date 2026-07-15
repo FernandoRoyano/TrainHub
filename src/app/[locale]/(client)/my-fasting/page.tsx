@@ -97,7 +97,6 @@ function formatHoursMinutes(totalHours: number): string {
 export default function MyFastingPage() {
   const t = useTranslations("fasting");
   const locale = useLocale();
-  const tc = useTranslations("common");
 
   const { data: activeFast, isLoading: fastLoading } = useActiveFast();
   const { data: settings, isLoading: settingsLoading } = useFastingSettings();

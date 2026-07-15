@@ -89,7 +89,7 @@ export function WeeklyCheckinForm() {
             ))}
           </div>
           {current?.notes && (
-            <p className="mt-3 text-sm text-muted-foreground italic">"{current.notes}"</p>
+            <p className="mt-3 text-sm text-muted-foreground italic">&ldquo;{current.notes}&rdquo;</p>
           )}
         </CardContent>
       </Card>

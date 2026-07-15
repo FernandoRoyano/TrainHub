@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dumbbell, ChevronLeft, ChevronRight, Check, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, Clock } from "lucide-react";
 import type { WorkoutLog } from "@/services/client-app.service";
 
 interface WorkoutCalendarProps {
@@ -15,7 +15,7 @@ const WEEKDAYS_ES = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 export function WorkoutCalendar({ logs }: WorkoutCalendarProps) {
   const [monthOffset, setMonthOffset] = useState(0);
 
-  const { year, month, monthName, grid } = useMemo(() => {
+  const { monthName, grid } = useMemo(() => {
     const now = new Date();
     const target = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
     const y = target.getFullYear();
@@ -29,7 +29,7 @@ export function WorkoutCalendar({ logs }: WorkoutCalendarProps) {
       if (!logDates.has(key) || log.completed) {
         logDates.set(key, {
           completed: log.completed,
-          duration: (log as any).duration_minutes ?? undefined,
+          duration: (log as WorkoutLog & { duration_minutes?: number }).duration_minutes ?? undefined,
         });
       }
     }

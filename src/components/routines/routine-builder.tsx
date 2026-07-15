@@ -31,7 +31,6 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
-  arrayMove,
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -417,7 +416,6 @@ export function RoutineBuilder({ mode, routine, defaultTemplate }: RoutineBuilde
     addExercisesBatch,
     duplicateDay,
     applyDefaultsToDay,
-    reorderExercise,
     addGroup,
     removeGroup,
     updateGroup,

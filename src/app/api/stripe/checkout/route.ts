@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     }
 
     // Get or create Stripe customer
-    let { data: subscription } = await admin
+    const { data: subscription } = await admin
       .from("subscriptions")
       .select("stripe_customer_id")
       .eq("user_id", user.id)

@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl";
 import {
   createServiceTierSchema,
   FEATURE_KEYS,
-  BILLING_INTERVALS,
   type ServiceTierFormData,
 } from "@/lib/validations/service-tier";
 import {
@@ -19,13 +18,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Form,
   FormControl,

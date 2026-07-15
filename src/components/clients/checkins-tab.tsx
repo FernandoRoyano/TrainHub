@@ -60,7 +60,7 @@ export function CheckinsTab({ clientId }: CheckinsTabProps) {
               ))}
             </div>
             {c.notes && (
-              <p className="mt-3 text-sm text-muted-foreground italic border-t pt-2">"{c.notes}"</p>
+              <p className="mt-3 text-sm text-muted-foreground italic border-t pt-2">&ldquo;{c.notes}&rdquo;</p>
             )}
           </CardContent>
         </Card>

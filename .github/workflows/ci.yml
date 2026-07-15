@@ -32,19 +32,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Hard gates: these must pass to merge.
+      # Hard gates: all must pass to merge.
       - name: Typecheck
         run: npx tsc --noEmit
 
+      - name: Lint
+        run: npm run lint
+
       - name: Unit tests (Vitest)
         run: npm run test
-
-      # Non-blocking for now: there is pre-existing lint debt (~45 findings,
-      # mostly unused vars / prefer-const). Reported but not merge-blocking
-      # until the cleanup lands; tracked in docs/PRODUCTION-READINESS.md.
-      - name: Lint (report-only)
-        run: npm run lint
-        continue-on-error: true
 
       # E2E (Playwright) NO corre aquí: necesita una instancia Supabase real y
       # secretos. Se ejecuta en local o contra un entorno de staging.
