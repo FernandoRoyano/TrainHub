@@ -21,6 +21,25 @@ export function useAdminUsers(filters?: AdminUserFilters) {
   });
 }
 
+export function useAdminSubscriptions() {
+  return useQuery({
+    queryKey: ["admin-subscriptions"],
+    queryFn: () => adminService.getSubscriptions(),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useStripeHealth() {
+  return useQuery({
+    queryKey: ["admin-stripe-health"],
+    queryFn: () => adminService.getStripeHealth(),
+    // Chequeo en vivo: no cachear mucho, y refetch manual con el botón.
+    staleTime: 10 * 1000,
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
+}
+
 export function useDeleteUser() {
   const queryClient = useQueryClient();
   const t = useTranslations("admin");

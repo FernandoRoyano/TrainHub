@@ -14,11 +14,13 @@ import {
   LogOut,
   Dumbbell,
   Shield,
+  CreditCard,
 } from "lucide-react";
 
 const adminNavItems = [
   { key: "dashboard", href: "/admin", icon: LayoutDashboard },
   { key: "users", href: "/admin/users", icon: Users },
+  { key: "billing", href: "/admin/billing", icon: CreditCard },
 ];
 
 export default function AdminLayout({

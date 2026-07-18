@@ -39,7 +39,14 @@ export async function GET() {
     admin.from("clients").select("*", { count: "exact", head: true }),
     admin.from("routines").select("*", { count: "exact", head: true }),
     admin.from("exercises").select("*", { count: "exact", head: true }),
-    admin.from("subscriptions").select("*", { count: "exact", head: true }).neq("tier", "free"),
+    // "Pagados" = tier de pago Y estado activo/prueba (mismo criterio que
+    // use-subscription.ts y la página de facturación). Antes contaba también
+    // past_due/cancelados, inflando el número.
+    admin
+      .from("subscriptions")
+      .select("*", { count: "exact", head: true })
+      .neq("tier", "free")
+      .in("status", ["active", "trialing"]),
     admin
       .from("users")
       .select("id, full_name, email, role, created_at")
