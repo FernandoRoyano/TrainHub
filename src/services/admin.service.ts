@@ -46,11 +46,21 @@ export interface AdminSubscription {
   cancel_at_period_end: boolean;
   stripe_customer_id: string | null;
   billingClass: BillingClass;
+  clientCount: number;
+  revenueThisMonth: number;
+  revenueTotal: number;
 }
 
 export interface AdminSubscriptionsResponse {
   trainers: AdminSubscription[];
-  summary: { total: number; paid: number; free: number; problem: number };
+  summary: {
+    total: number;
+    paid: number;
+    free: number;
+    problem: number;
+    revenueThisMonth: number;
+    revenueTotal: number;
+  };
 }
 
 export interface StripeHealthCheck {

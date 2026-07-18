@@ -32,6 +32,14 @@ const statusVariant: Record<string, "success" | "info" | "warning" | "secondary"
   canceled: "secondary",
 };
 
+function formatCurrency(amount: number, currency = "EUR"): string {
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
 export default function AdminBillingPage() {
   const t = useTranslations("admin");
   const locale = useLocale();
@@ -241,6 +249,16 @@ export default function AdminBillingPage() {
         </div>
       </div>
 
+      {/* Platform revenue line */}
+      {summary && (summary.revenueTotal > 0 || summary.revenueThisMonth > 0) && (
+        <p className="text-sm text-muted-foreground">
+          {t("platformRevenue", {
+            month: formatCurrency(summary.revenueThisMonth),
+            total: formatCurrency(summary.revenueTotal),
+          })}
+        </p>
+      )}
+
       {/* Trainers table */}
       {subs.isLoading ? (
         <div className="space-y-2">
@@ -252,11 +270,11 @@ export default function AdminBillingPage() {
         <Card>
           <CardContent className="p-0">
             <div className="divide-y divide-border/50">
-              <div className="hidden md:grid grid-cols-[1fr_100px_130px_160px_90px] gap-4 px-4 py-3 text-xs font-medium text-muted-foreground uppercase">
+              <div className="hidden md:grid grid-cols-[1fr_80px_150px_150px_70px] gap-4 px-4 py-3 text-xs font-medium text-muted-foreground uppercase">
                 <span>{t("colTrainer")}</span>
-                <span>{t("colPlan")}</span>
-                <span>{t("colStatus")}</span>
-                <span>{t("colRenewal")}</span>
+                <span>{t("colClients")}</span>
+                <span>{t("colSubscription")}</span>
+                <span>{t("colRevenue")}</span>
                 <span>{t("colStripe")}</span>
               </div>
 
@@ -268,33 +286,33 @@ export default function AdminBillingPage() {
                 filtered.map((tr) => (
                   <div
                     key={tr.id}
-                    className="grid grid-cols-1 md:grid-cols-[1fr_100px_130px_160px_90px] gap-2 md:gap-4 px-4 py-3 items-center"
+                    className="grid grid-cols-1 md:grid-cols-[1fr_80px_150px_150px_70px] gap-2 md:gap-4 px-4 py-3 items-center"
                   >
                     <div className="min-w-0">
                       <p className="text-sm font-medium truncate">{tr.full_name || "---"}</p>
                       <p className="text-xs text-muted-foreground truncate">{tr.email}</p>
                     </div>
-                    <div>
-                      {tr.tier && tr.tier !== "free" ? (
-                        <Badge variant="secondary" className="capitalize">
-                          {tr.tier}
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">Free</span>
-                      )}
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="tabular-nums font-medium">{tr.clientCount}</span>
                     </div>
-                    <div>
-                      {tr.status ? (
-                        <Badge variant={statusVariant[tr.status] ?? "secondary"}>
-                          {statusLabel(tr.status)}
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {tr.current_period_end ? (
-                        <>
+                    <div className="flex flex-col gap-1 items-start">
+                      <div className="flex flex-wrap items-center gap-1">
+                        {tr.tier && tr.tier !== "free" ? (
+                          <Badge variant="secondary" className="capitalize">
+                            {tr.tier}
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Free</span>
+                        )}
+                        {tr.status && (
+                          <Badge variant={statusVariant[tr.status] ?? "secondary"}>
+                            {statusLabel(tr.status)}
+                          </Badge>
+                        )}
+                      </div>
+                      {tr.current_period_end && (
+                        <span className="text-[11px] text-muted-foreground">
                           {tr.cancel_at_period_end
                             ? t("cancelsOn", {
                                 date: format(new Date(tr.current_period_end), "d MMM yyyy", {
@@ -306,9 +324,24 @@ export default function AdminBillingPage() {
                                   locale: dfLocale,
                                 }),
                               })}
+                        </span>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      {tr.revenueTotal > 0 ? (
+                        <>
+                          <p className="text-sm font-semibold tabular-nums">
+                            {formatCurrency(tr.revenueThisMonth)}{" "}
+                            <span className="text-[11px] font-normal text-muted-foreground">
+                              {t("thisMonth")}
+                            </span>
+                          </p>
+                          <p className="text-[11px] text-muted-foreground tabular-nums">
+                            {formatCurrency(tr.revenueTotal)} {t("totalLabel")}
+                          </p>
                         </>
                       ) : (
-                        "—"
+                        <span className="text-xs text-muted-foreground">{t("noRevenue")}</span>
                       )}
                     </div>
                     <div>
