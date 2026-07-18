@@ -5,6 +5,7 @@ import { OnboardingDialog } from "@/components/shared/onboarding-dialog";
 import { SectionBackground } from "@/components/shared/section-background";
 import { NavigationProgress } from "@/components/shared/navigation-progress";
 import { PageTransition } from "@/components/shared/page-transition";
+import { InstallPrompt } from "@/components/shared/install-prompt";
 
 export default function TrainerLayout({
   children,
@@ -18,6 +19,9 @@ export default function TrainerLayout({
       <SectionBackground>
         <TopBar />
         <main className="flex-1 p-3 sm:p-6 pb-24 md:pb-6 overflow-x-hidden overflow-y-auto scrollbar-thin">
+          <div className="mb-3 md:hidden">
+            <InstallPrompt />
+          </div>
           <PageTransition>{children}</PageTransition>
         </main>
       </SectionBackground>

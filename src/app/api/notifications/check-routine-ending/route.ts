@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createNotification } from "@/lib/notifications/create";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -41,7 +42,7 @@ export async function GET(request: Request) {
     if (count && count > 0) continue;
 
     // Create notification for trainer
-    await admin.from("notifications").insert({
+    await createNotification(admin, {
       user_id: cr.trainer_id,
       type: "routine_ending",
       title: `La rutina de ${clientName} termina en 2 días`,
@@ -77,7 +78,7 @@ export async function GET(request: Request) {
       if (count && count > 0) continue;
 
       // Notify trainer
-      await admin.from("notifications").insert({
+      await createNotification(admin, {
         user_id: cr.trainer_id,
         type: "review_reminder",
         title: `Hoy es la revisión de ${clientName}`,
@@ -88,7 +89,7 @@ export async function GET(request: Request) {
 
       // Notify client
       if (clientUserId) {
-        await admin.from("notifications").insert({
+        await createNotification(admin, {
           user_id: clientUserId,
           type: "review_reminder",
           title: "Hoy tienes revisión con tu entrenador",

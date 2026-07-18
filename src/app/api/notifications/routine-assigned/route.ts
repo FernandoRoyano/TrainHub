@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createNotification } from "@/lib/notifications/create";
 import { sendEmail } from "@/lib/email/send-email";
 import { RoutineAssignedEmail } from "@/lib/email/templates/routine-assigned";
 import { getEmailTranslations, getLocaleForEmail } from "@/lib/email/translations";
@@ -60,6 +61,16 @@ export async function POST(request: Request) {
         appUrl: `${appUrl}/${locale}`,
         t,
       }),
+    });
+
+    // Notificación in-app + push para el cliente
+    await createNotification(admin, {
+      user_id: client.user_id,
+      type: "routine_assigned",
+      title: "Tu entrenador te ha asignado una rutina",
+      body: routine?.name || "Tienes una nueva rutina disponible.",
+      link: "/my-routine",
+      metadata: { routine_id: routineId },
     });
 
     return NextResponse.json({ success: true });

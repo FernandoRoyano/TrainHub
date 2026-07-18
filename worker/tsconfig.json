@@ -1,0 +1,14 @@
+{
+  "comment": "El custom worker de next-pwa corre en contexto ServiceWorker, no DOM. Se excluye del tsconfig raíz y se typechequea aquí con la lib webworker.",
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["webworker", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "isolatedModules": true
+  },
+  "include": ["index.ts"]
+}

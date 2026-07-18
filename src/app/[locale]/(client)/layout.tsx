@@ -22,6 +22,7 @@ import { NavigationProgress } from "@/components/shared/navigation-progress";
 import { PageTransition } from "@/components/shared/page-transition";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { NotificationBell } from "@/components/shared/notification-bell";
+import { InstallPrompt } from "@/components/shared/install-prompt";
 import { ClientFeaturesProvider, useClientFeatures } from "@/contexts/client-features-context";
 import { useMyClient } from "@/hooks/use-client-app";
 import { useHeartbeat } from "@/hooks/use-heartbeat";
@@ -170,6 +171,9 @@ export default function ClientLayout({
         </header>
         <main className="flex-1 min-h-0 overflow-y-auto px-4 pt-4 pb-8 md:px-8 md:pt-6 md:pb-10">
           <div className="max-w-4xl mx-auto w-full">
+            <div className="mb-3">
+              <InstallPrompt />
+            </div>
             <PageTransition>{children}</PageTransition>
           </div>
         </main>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createNotification } from "@/lib/notifications/create";
 import { sendEmail } from "@/lib/email/send-email";
 import { UnreadMessageEmail } from "@/lib/email/templates/unread-message";
 import { getEmailTranslations, getLocaleForEmail } from "@/lib/email/translations";
@@ -46,8 +47,8 @@ export async function POST(request: Request) {
       .single();
 
     if (isTrainerSender && client?.user_id) {
-      // Notify client in-app
-      await admin.from("notifications").insert({
+      // Notify client in-app + push
+      await createNotification(admin, {
         user_id: client.user_id,
         type: "message",
         title: `Nuevo mensaje de ${trainer?.full_name || "tu entrenador"}`,
@@ -56,8 +57,8 @@ export async function POST(request: Request) {
         metadata: { conversation_id: conversationId },
       });
     } else if (!isTrainerSender) {
-      // Notify trainer in-app
-      await admin.from("notifications").insert({
+      // Notify trainer in-app + push
+      await createNotification(admin, {
         user_id: conversation.trainer_id,
         type: "message",
         title: `Nuevo mensaje de ${client?.full_name || "un cliente"}`,

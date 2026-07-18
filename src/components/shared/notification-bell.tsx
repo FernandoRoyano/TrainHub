@@ -1,16 +1,18 @@
 "use client";
 
 import { useNotifications, useUnreadCount, useMarkAsRead, useMarkAllAsRead } from "@/hooks/use-notifications";
+import { usePushSubscription } from "@/hooks/use-push-subscription";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Bell, CheckCheck } from "lucide-react";
+import { Bell, BellRing, CheckCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { useLocale } from "next-intl";
@@ -31,6 +33,7 @@ export function NotificationBell() {
   const { data: unreadCount = 0 } = useUnreadCount();
   const markAsRead = useMarkAsRead();
   const markAllAsRead = useMarkAllAsRead();
+  const push = usePushSubscription();
 
   return (
     <Popover>
@@ -97,6 +100,29 @@ export function NotificationBell() {
             ))
           )}
         </div>
+        {push.supported && (
+          <div className="border-t p-3">
+            {push.needsInstallFirst ? (
+              <p className="text-xs text-muted-foreground">{t("pushInstallFirst")}</p>
+            ) : push.permission === "denied" ? (
+              <p className="text-xs text-muted-foreground">{t("pushBlocked")}</p>
+            ) : (
+              <label className="flex items-center justify-between gap-2 cursor-pointer">
+                <span className="flex items-center gap-2 text-sm">
+                  <BellRing className="h-4 w-4 text-muted-foreground" />
+                  {t("pushEnable")}
+                </span>
+                <Switch
+                  checked={push.isSubscribed}
+                  disabled={push.loading}
+                  onCheckedChange={(checked) =>
+                    checked ? push.subscribe() : push.unsubscribe()
+                  }
+                />
+              </label>
+            )}
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   );

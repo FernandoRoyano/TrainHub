@@ -1351,7 +1351,17 @@
   "notifications": {
     "title": "Notifications",
     "empty": "No notifications",
-    "markAllRead": "Mark all as read"
+    "markAllRead": "Mark all as read",
+    "pushEnable": "Push notifications",
+    "pushBlocked": "Notifications are blocked in your browser settings.",
+    "pushInstallFirst": "Add the app to your home screen to enable push notifications."
+  },
+  "install": {
+    "title": "Install TrainHub",
+    "installButton": "Install app",
+    "iosStep1": "Tap",
+    "iosStep2": "then \"Add to Home Screen\"",
+    "dismiss": "Dismiss"
   },
   "questionnaires": {
     "title": "Questionnaires",

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createNotification } from "@/lib/notifications/create";
 import { sendEmail } from "@/lib/email/send-email";
 import { MealPlanAssignedEmail } from "@/lib/email/templates/meal-plan-assigned";
 import { getEmailTranslations, getLocaleForEmail } from "@/lib/email/translations";
@@ -59,6 +60,17 @@ export async function POST(request: Request) {
         appUrl: `${appUrl}/${locale}`,
         t,
       }),
+    });
+
+    // Notificación in-app + push para el cliente. Tipo "general": el CHECK de
+    // la tabla notifications (00022) no incluye un tipo para nutrición.
+    await createNotification(admin, {
+      user_id: client.user_id,
+      type: "general",
+      title: "Tu entrenador te ha asignado un plan de nutrición",
+      body: mealPlan?.name || "Tienes un nuevo plan de nutrición disponible.",
+      link: "/my-nutrition",
+      metadata: { meal_plan_id: mealPlanId },
     });
 
     return NextResponse.json({ success: true });
