@@ -29,10 +29,14 @@ ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
 
 -- El usuario solo ve y borra sus propias suscripciones. La inserción/borrado
 -- efectivos los hace el service role desde /api/push/*, que ignora RLS.
+-- DROP previo: Postgres no soporta CREATE POLICY IF NOT EXISTS, así que se
+-- hace idempotente para poder re-ejecutar la migración sin error 42710.
+DROP POLICY IF EXISTS "Users view own push subscriptions" ON public.push_subscriptions;
 CREATE POLICY "Users view own push subscriptions"
   ON public.push_subscriptions FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users delete own push subscriptions" ON public.push_subscriptions;
 CREATE POLICY "Users delete own push subscriptions"
   ON public.push_subscriptions FOR DELETE
   USING (auth.uid() = user_id);
