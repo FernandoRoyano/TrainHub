@@ -82,6 +82,7 @@
   },
   "nav": {
     "dashboard": "Panel",
+    "actionCenter": "Centro de acción",
     "clients": "Clientes",
     "exercises": "Ejercicios",
     "blocks": "Bloques",
@@ -1409,6 +1410,23 @@
     "pushEnable": "Notificaciones push",
     "pushBlocked": "Las notificaciones están bloqueadas en los ajustes del navegador.",
     "pushInstallFirst": "Añade la app a tu pantalla de inicio para activar las notificaciones push."
+  },
+  "actionCenter": {
+    "title": "Centro de acción",
+    "subtitle": "{count} cosas requieren tu atención",
+    "subtitleClear": "Todo al día, nada pendiente",
+    "dashboardSummary": "{count} cosas requieren tu atención",
+    "empty": "No hay nada pendiente. ¡Buen trabajo!",
+    "payments": "Pagos",
+    "overdue": "Vencido",
+    "dueOn": "Vence {date}",
+    "inactive": "Clientes inactivos",
+    "neverEntered": "Nunca ha entrado",
+    "inactiveDays": "{days} días sin entrar",
+    "reviews": "Revisiones",
+    "reviewDue": "Revisión {date}",
+    "routinesEnding": "Rutinas terminando",
+    "endsOn": "Termina {date}"
   },
   "install": {
     "title": "Instalar TrainHub",

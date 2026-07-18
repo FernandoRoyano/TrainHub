@@ -25,6 +25,7 @@ import {
   Shield,
   Briefcase,
   HelpCircle,
+  ListChecks,
 } from "lucide-react";
 import { useUIStore } from "@/stores/ui-store";
 
@@ -49,6 +50,7 @@ function isGroup(entry: NavEntry): entry is NavGroup {
 
 const navEntries: NavEntry[] = [
   { key: "dashboard", href: "/dashboard", icon: LayoutDashboard, badgeKey: null },
+  { key: "actionCenter", href: "/action-center", icon: ListChecks, badgeKey: null },
   { key: "clients", href: "/clients", icon: Users, badgeKey: "pendingClients" },
   { key: "messages", href: "/messages", icon: MessageSquare, badgeKey: "unreadMessages" },
   {

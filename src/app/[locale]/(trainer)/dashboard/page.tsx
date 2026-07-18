@@ -27,6 +27,8 @@ import {
   BarChart3,
   CheckCircle2,
   Inbox,
+  ListChecks,
+  ChevronRight,
 } from "lucide-react";
 import {
   BarChart,
@@ -38,6 +40,7 @@ import {
 } from "recharts";
 import { Link } from "@/i18n/navigation";
 import { TrainerPhaseGrid } from "@/components/cycle-training/trainer-phase-grid";
+import { useActionItems } from "@/hooks/use-action-center";
 import { ACCENT_STYLES, AVATAR_GRADIENTS } from "@/lib/ui-tokens";
 
 const activityIcons = {
@@ -89,9 +92,11 @@ function ClientAvatar({ name, size = "sm" }: { name: string; size?: "sm" | "md" 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
   const tCal = useTranslations("calendar");
+  const tAction = useTranslations("actionCenter");
   const locale = useLocale();
   const { profile } = useAuth();
   const { data: stats, isLoading } = useDashboardStats();
+  const { data: actionItems } = useActionItems();
 
   if (isLoading) {
     return (
@@ -227,6 +232,26 @@ export default function DashboardPage() {
           );
         })}
       </div>
+
+      {/* Centro de acción - solo si hay algo que atender */}
+      {actionItems && actionItems.total > 0 && (
+        <Link href="/action-center" className="block">
+          <Card className="border-warning/30 bg-warning/5 transition-colors hover:bg-warning/10">
+            <CardContent className="flex items-center gap-3 p-4">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning/15 text-warning">
+                <ListChecks className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold">{tAction("title")}</p>
+                <p className="text-xs text-muted-foreground">
+                  {tAction("dashboardSummary", { count: actionItems.total })}
+                </p>
+              </div>
+              <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
+            </CardContent>
+          </Card>
+        </Link>
+      )}
 
       {/* Hero KPIs - 2 prominentes */}
       <div className="grid gap-3 sm:gap-4 grid-cols-2">

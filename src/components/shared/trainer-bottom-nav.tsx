@@ -22,6 +22,7 @@ import {
   LayoutTemplate,
   Puzzle,
   ClipboardList,
+  ListChecks,
   Shield,
   LogOut,
   X,
@@ -64,6 +65,7 @@ const moreSections: { titleKey: string; items: NavItem[] }[] = [
   {
     titleKey: "more",
     items: [
+      { href: "/action-center", icon: ListChecks, labelKey: "actionCenter" },
       { href: "/calendar", icon: CalendarDays, labelKey: "calendar" },
       { href: "/analytics", icon: BarChart3, labelKey: "analytics" },
       { href: "/settings", icon: Settings, labelKey: "settings" },
