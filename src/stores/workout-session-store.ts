@@ -1,13 +1,15 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-interface SetDetail {
+export interface SetDetail {
   reps: string;
   weight: string;
   note: string;
+  rir: string;
+  rest: string;
 }
 
-interface ExerciseEntry {
+export interface ExerciseEntry {
   sets: number;
   weight: string;
   reps: string;

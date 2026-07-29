@@ -30,6 +30,15 @@ export interface WorkoutLog {
   created_at: string;
 }
 
+export interface SetLog {
+  set: number;
+  reps: string;
+  weight: number | null;
+  rir: number | null;
+  rest_seconds: number | null;
+  note: string;
+}
+
 export interface ExerciseLog {
   id: string;
   workout_log_id: string;
@@ -38,6 +47,8 @@ export interface ExerciseLog {
   weight_used: number | null;
   reps_completed: string | null;
   notes: string | null;
+  feedback: string | null;
+  set_logs: SetLog[] | null;
 }
 
 // Memo por sesión: evita repetir el lookup de clients en cada hook.
@@ -255,7 +266,13 @@ export const clientAppService = {
   async logExercise(
     workoutLogId: string,
     routineExerciseId: string,
-    data: { sets_completed: number; weight_used?: number; reps_completed?: string; feedback?: string }
+    data: {
+      sets_completed: number;
+      weight_used?: number;
+      reps_completed?: string;
+      feedback?: string;
+      set_logs?: SetLog[];
+    }
   ) {
     const { supabase, clientId } = await getAuthenticatedClient();
 
@@ -271,18 +288,24 @@ export const clientAppService = {
     // Respaldado por uq_exercise_logs_workout_exercise (migración 00037).
     // El fallback a insert que había aquí creaba un duplicado en cada guardado
     // porque la constraint del onConflict no existía y el upsert fallaba siempre.
-    const { data: log, error } = await supabase
-      .from("exercise_logs")
-      .upsert(
-        {
-          workout_log_id: workoutLogId,
-          routine_exercise_id: routineExerciseId,
-          ...data,
-        },
-        { onConflict: "workout_log_id,routine_exercise_id", ignoreDuplicates: false }
-      )
-      .select()
-      .single();
+    const doUpsert = (payload: Record<string, unknown>) =>
+      supabase
+        .from("exercise_logs")
+        .upsert(
+          { workout_log_id: workoutLogId, routine_exercise_id: routineExerciseId, ...payload },
+          { onConflict: "workout_log_id,routine_exercise_id", ignoreDuplicates: false }
+        )
+        .select()
+        .single();
+
+    let { data: log, error } = await doUpsert(data);
+    // Degradación: si la columna set_logs aún no existe (migración 00050 sin
+    // aplicar), reintenta sin ella para no perder el registro agregado.
+    if (error?.message?.includes("set_logs")) {
+      const { set_logs, ...rest } = data;
+      void set_logs;
+      ({ data: log, error } = await doUpsert(rest));
+    }
     if (error) throw error;
     return log as ExerciseLog;
   },

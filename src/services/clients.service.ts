@@ -59,6 +59,14 @@ export interface ClientWorkoutHistoryItem {
     sets_completed: number;
     weight_used: number | null;
     reps_completed: string | null;
+    set_logs: {
+      set: number;
+      reps: string;
+      weight: number | null;
+      rir: number | null;
+      rest_seconds: number | null;
+      note: string;
+    }[] | null;
     routine_exercise: {
       id: string;
       sets: number;
@@ -399,14 +407,23 @@ export const clientsService = {
       .single();
     if (!client) throw new Error("Not authorized");
 
-    const { data, error } = await supabase
-      .from("workout_logs")
-      .select(
-        "id, date, completed, completed_at, notes, routine_day_id, exercise_logs:exercise_logs(id, sets_completed, weight_used, reps_completed, routine_exercise:routine_exercises(id, sets, reps, exercise:exercises(name)))"
-      )
-      .eq("client_id", clientId)
-      .order("date", { ascending: false })
-      .limit(30);
+    const runQuery = (cols: string) =>
+      supabase
+        .from("workout_logs")
+        .select(cols)
+        .eq("client_id", clientId)
+        .order("date", { ascending: false })
+        .limit(30);
+
+    const exerciseCols = (setLogs: boolean) =>
+      `id, date, completed, completed_at, notes, routine_day_id, exercise_logs:exercise_logs(id, sets_completed, weight_used, reps_completed${setLogs ? ", set_logs" : ""}, routine_exercise:routine_exercises(id, sets, reps, exercise:exercises(name)))`;
+
+    // Degradación: si set_logs aún no existe (migración 00050 sin aplicar),
+    // se reintenta sin esa columna para no romper el historial.
+    let { data, error } = await runQuery(exerciseCols(true));
+    if (error?.message?.includes("set_logs")) {
+      ({ data, error } = await runQuery(exerciseCols(false)));
+    }
 
     if (error) throw error;
     return data as unknown as ClientWorkoutHistoryItem[];

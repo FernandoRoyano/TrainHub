@@ -19,11 +19,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
-import { Dumbbell, Check, Play, Timer, Loader2, MessageSquare } from "lucide-react";
+import { Dumbbell, Check, Play, Timer, Loader2, MessageSquare, Plus, X } from "lucide-react";
 import { RestTimer } from "@/components/workout/rest-timer";
 import { WorkoutTimer } from "@/components/workout/workout-timer";
 import { useRestTimerStore } from "@/stores/rest-timer-store";
-import { useWorkoutSessionStore } from "@/stores/workout-session-store";
+import { useWorkoutSessionStore, type SetDetail, type ExerciseEntry } from "@/stores/workout-session-store";
 import { cn } from "@/lib/utils";
 import { localDateString } from "@/lib/local-date";
 import { AdaptiveTrainingCard } from "@/components/cycle-training/adaptive-training-card";
@@ -44,8 +44,8 @@ function ExerciseCard({
   t,
 }: {
   ex: any;
-  exerciseData: Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string; note: string }[] }>;
-  setExerciseData: React.Dispatch<React.SetStateAction<Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string; note: string }[] }>>>;
+  exerciseData: Record<string, ExerciseEntry>;
+  setExerciseData: React.Dispatch<React.SetStateAction<Record<string, ExerciseEntry>>>;
   activeWorkoutId: string | null;
   todayLog: any;
   lastExerciseLog: any;
@@ -58,15 +58,31 @@ function ExerciseCard({
   t: any;
 }) {
   const totalSets = ex.sets || 3;
-  const exData = exerciseData[ex.id] ?? {
+  const emptySet = (): SetDetail => ({ reps: "", weight: "", note: "", rir: "", rest: "" });
+  const exData: ExerciseEntry = exerciseData[ex.id] ?? {
     sets: totalSets,
     weight: "",
     reps: ex.reps ?? "",
     feedback: "",
-    setDetails: Array.from({ length: totalSets }, () => ({ reps: "", weight: "", note: "" })),
+    setDetails: Array.from({ length: totalSets }, emptySet),
   };
   // Ensure setDetails exists and has correct length
-  const setDetails: { reps: string; weight: string; note: string }[] = exData.setDetails ?? Array.from({ length: totalSets }, () => ({ reps: "", weight: "", note: "" }));
+  const setDetails: SetDetail[] = exData.setDetails ?? Array.from({ length: totalSets }, emptySet);
+
+  const commitSets = (nd: SetDetail[]) =>
+    setExerciseData((prev) => ({
+      ...prev,
+      [ex.id]: {
+        ...exData,
+        setDetails: nd,
+        sets: nd.length,
+        reps: nd.map((s) => s.reps).filter(Boolean).join("/") || exData.reps,
+        weight: nd.filter((s) => s.weight).pop()?.weight || exData.weight,
+      },
+    }));
+
+  const addSet = () => commitSets([...setDetails, emptySet()]);
+  const removeSet = (idx: number) => commitSets(setDetails.filter((_, i) => i !== idx));
 
   return (
     <Card
@@ -133,70 +149,93 @@ function ExerciseCard({
         {/* Row 2: Per-set inputs (only during active workout) */}
         {(activeWorkoutId || (todayLog && !todayLog.completed)) && (
           <div className="space-y-2">
-            <div className="flex gap-2 text-xs text-muted-foreground px-1 font-medium">
-              <span className="w-8 text-center">#</span>
+            <div className="flex gap-1.5 text-[11px] text-muted-foreground px-1 font-medium">
+              <span className="w-6 text-center">#</span>
               <span className="flex-1 text-center">{t("repsShort")}</span>
-              <span className="flex-1 text-center">{t("weightShort")} (kg)</span>
+              <span className="flex-1 text-center">{t("weightShort")}</span>
+              <span className="w-12 text-center">{t("rirShort")}</span>
+              <span className="w-14 text-center">{t("restShort")}</span>
+              <span className="w-6" />
             </div>
-            {setDetails.map((set, si) => (
-              <div key={si} className="space-y-1 rounded-lg bg-muted/30 p-1.5">
-                <div className="flex items-center gap-2">
-                  <span className="w-8 text-center text-xs font-bold text-muted-foreground bg-muted rounded-md py-1">{si + 1}</span>
-                  <Input
-                    type="number"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={set.reps}
-                    onChange={(e) => {
-                      const nd = [...setDetails];
-                      nd[si] = { ...nd[si], reps: e.target.value };
-                      setExerciseData((prev) => ({
-                        ...prev,
-                        [ex.id]: { ...exData, setDetails: nd, sets: totalSets, reps: nd.map((s) => s.reps).filter(Boolean).join("/") || exData.reps },
-                      }));
-                    }}
-                    className="h-11 text-base text-center flex-1 font-semibold"
-                    placeholder={ex.reps ?? ""}
-                  />
-                  <Input
-                    type="number"
-                    inputMode="decimal"
-                    step="0.5"
-                    value={set.weight}
-                    onChange={(e) => {
-                      const nd = [...setDetails];
-                      nd[si] = { ...nd[si], weight: e.target.value };
-                      setExerciseData((prev) => ({
-                        ...prev,
-                        [ex.id]: { ...exData, setDetails: nd, sets: totalSets, weight: nd.filter((s) => s.weight).pop()?.weight || exData.weight },
-                      }));
-                    }}
-                    className="h-11 text-base text-center flex-1 font-semibold"
-                    placeholder="kg"
-                  />
+            {setDetails.map((set, si) => {
+              const updateField = (field: keyof SetDetail, value: string) => {
+                const nd = [...setDetails];
+                nd[si] = { ...nd[si], [field]: value };
+                commitSets(nd);
+              };
+              return (
+                <div key={si} className="space-y-1 rounded-lg bg-muted/30 p-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-6 text-center text-xs font-bold text-muted-foreground bg-muted rounded-md py-1">{si + 1}</span>
+                    <Input
+                      type="number"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={set.reps}
+                      onChange={(e) => updateField("reps", e.target.value)}
+                      className="h-11 text-base text-center flex-1 font-semibold px-1"
+                      placeholder={ex.reps ?? ""}
+                    />
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      step="0.5"
+                      value={set.weight}
+                      onChange={(e) => updateField("weight", e.target.value)}
+                      className="h-11 text-base text-center flex-1 font-semibold px-1"
+                      placeholder="kg"
+                    />
+                    <Input
+                      type="number"
+                      inputMode="numeric"
+                      value={set.rir}
+                      onChange={(e) => updateField("rir", e.target.value)}
+                      className="h-11 text-base text-center w-12 font-semibold px-1"
+                      placeholder="RIR"
+                    />
+                    <Input
+                      type="number"
+                      inputMode="numeric"
+                      value={set.rest}
+                      onChange={(e) => updateField("rest", e.target.value)}
+                      className="h-11 text-base text-center w-14 font-semibold px-1"
+                      placeholder={ex.rest_seconds > 0 ? String(ex.rest_seconds) : "s"}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeSet(si)}
+                      disabled={setDetails.length <= 1}
+                      className="w-6 flex items-center justify-center text-muted-foreground hover:text-destructive disabled:opacity-30 disabled:cursor-not-allowed"
+                      title={t("removeSet")}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="pl-[30px] pr-8">
+                    <Input
+                      type="text"
+                      value={set.note}
+                      onChange={(e) => updateField("note", e.target.value)}
+                      className="h-8 text-xs text-muted-foreground"
+                      placeholder={t("setNotePlaceholder")}
+                    />
+                  </div>
                 </div>
-                <div className="pl-10">
-                  <Input
-                    type="text"
-                    value={set.note}
-                    onChange={(e) => {
-                      const nd = [...setDetails];
-                      nd[si] = { ...nd[si], note: e.target.value };
-                      setExerciseData((prev) => ({
-                        ...prev,
-                        [ex.id]: { ...exData, setDetails: nd },
-                      }));
-                    }}
-                    className="h-8 text-xs text-muted-foreground"
-                    placeholder={t("setNotePlaceholder")}
-                  />
-                </div>
-              </div>
-            ))}
+              );
+            })}
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full h-9"
+              onClick={addSet}
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
+              {t("addSet")}
+            </Button>
             <Button
               size="sm"
               variant="default"
-              className="w-full mt-2 h-9 active:scale-[0.98] transition-all"
+              className="w-full mt-1 h-9 active:scale-[0.98] transition-all"
               disabled={logExercise.isPending}
               onClick={() => handleLogExercise(ex.id)}
             >
@@ -213,7 +252,7 @@ function ExerciseCard({
             <Input
               value={exData.feedback}
               onChange={(e) =>
-                setExerciseData((prev: Record<string, { sets: number; weight: string; reps: string; feedback: string; setDetails?: { reps: string; weight: string; note: string }[] }>) => ({
+                setExerciseData((prev: Record<string, ExerciseEntry>) => ({
                   ...prev,
                   [ex.id]: { ...exData, feedback: e.target.value },
                 }))
@@ -357,13 +396,26 @@ function MyRoutinePageContent() {
     const workoutId = activeWorkoutId ?? todayLog?.id;
     if (!workoutId) return;
     const data = exerciseData[routineExerciseId];
-    const details = data?.setDetails?.filter((s) => s.reps || s.weight) ?? [];
+    const details = data?.setDetails?.filter((s) => s.reps || s.weight || s.rir || s.rest) ?? [];
     const repsStr = details.length > 0
-      ? details.map((s) => `${s.reps || "?"}@${s.weight || "?"}kg${s.note ? ` (${s.note})` : ""}`).join(" / ")
+      ? details.map((s) => `${s.reps || "?"}@${s.weight || "?"}kg${s.rir ? ` RIR${s.rir}` : ""}${s.note ? ` (${s.note})` : ""}`).join(" / ")
       : data?.reps || undefined;
-    const avgWeight = details.length > 0
-      ? details.reduce((sum, s) => sum + (parseFloat(s.weight) || 0), 0) / details.filter((s) => s.weight).length
+    const weighted = details.filter((s) => s.weight);
+    const avgWeight = weighted.length > 0
+      ? weighted.reduce((sum, s) => sum + (parseFloat(s.weight) || 0), 0) / weighted.length
       : data?.weight ? parseFloat(data.weight) : undefined;
+
+    // Detalle estructurado por serie (RIR/descanso/series extra). Se guarda en
+    // set_logs (JSONB); num/null para que sea consultable a futuro.
+    const num = (v: string) => (v.trim() === "" ? null : Number(v));
+    const setLogs = details.map((s, i) => ({
+      set: i + 1,
+      reps: s.reps,
+      weight: num(s.weight),
+      rir: num(s.rir),
+      rest_seconds: num(s.rest),
+      note: s.note,
+    }));
 
     logExercise.mutate(
       {
@@ -374,6 +426,7 @@ function MyRoutinePageContent() {
           weight_used: avgWeight || undefined,
           reps_completed: repsStr,
           feedback: data?.feedback || undefined,
+          set_logs: setLogs,
         },
       },
       {

@@ -106,7 +106,13 @@ export function useLogExercise() {
     }: {
       workoutLogId: string;
       routineExerciseId: string;
-      data: { sets_completed: number; weight_used?: number; reps_completed?: string; feedback?: string };
+      data: {
+        sets_completed: number;
+        weight_used?: number;
+        reps_completed?: string;
+        feedback?: string;
+        set_logs?: import("@/services/client-app.service").SetLog[];
+      };
     }) =>
       clientAppService.logExercise(workoutLogId, routineExerciseId, data),
     onSuccess: () => {
