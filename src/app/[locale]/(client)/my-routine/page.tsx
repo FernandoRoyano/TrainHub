@@ -152,10 +152,8 @@ function ExerciseCard({
             <div className="flex gap-1.5 text-[11px] text-muted-foreground px-1 font-medium">
               <span className="w-6 text-center">#</span>
               <span className="flex-1 text-center">{t("repsShort")}</span>
-              <span className="flex-1 text-center">{t("weightShort")}</span>
-              <span className="w-12 text-center">{t("rirShort")}</span>
-              <span className="w-14 text-center">{t("restShort")}</span>
-              <span className="w-6" />
+              <span className="flex-1 text-center">{t("weightShort")} (kg)</span>
+              <span className="w-7" />
             </div>
             {setDetails.map((set, si) => {
               const updateField = (field: keyof SetDetail, value: string) => {
@@ -164,7 +162,8 @@ function ExerciseCard({
                 commitSets(nd);
               };
               return (
-                <div key={si} className="space-y-1 rounded-lg bg-muted/30 p-1.5">
+                <div key={si} className="space-y-1.5 rounded-lg bg-muted/30 p-2">
+                  {/* Línea 1: nº + reps + peso + quitar */}
                   <div className="flex items-center gap-1.5">
                     <span className="w-6 text-center text-xs font-bold text-muted-foreground bg-muted rounded-md py-1">{si + 1}</span>
                     <Input
@@ -185,32 +184,42 @@ function ExerciseCard({
                       className="h-11 text-base text-center flex-1 font-semibold px-1"
                       placeholder="kg"
                     />
-                    <Input
-                      type="number"
-                      inputMode="numeric"
-                      value={set.rir}
-                      onChange={(e) => updateField("rir", e.target.value)}
-                      className="h-11 text-base text-center w-12 font-semibold px-1"
-                      placeholder="RIR"
-                    />
-                    <Input
-                      type="number"
-                      inputMode="numeric"
-                      value={set.rest}
-                      onChange={(e) => updateField("rest", e.target.value)}
-                      className="h-11 text-base text-center w-14 font-semibold px-1"
-                      placeholder={ex.rest_seconds > 0 ? String(ex.rest_seconds) : "s"}
-                    />
                     <button
                       type="button"
                       onClick={() => removeSet(si)}
                       disabled={setDetails.length <= 1}
-                      className="w-6 flex items-center justify-center text-muted-foreground hover:text-destructive disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="w-7 flex items-center justify-center text-muted-foreground hover:text-destructive disabled:opacity-30 disabled:cursor-not-allowed"
                       title={t("removeSet")}
                     >
                       <X className="h-4 w-4" />
                     </button>
                   </div>
+                  {/* Línea 2: RIR + descanso con etiqueta */}
+                  <div className="flex items-center gap-2 pl-[30px] pr-8">
+                    <div className="flex items-center gap-1.5 flex-1">
+                      <span className="text-[11px] text-muted-foreground shrink-0">{t("rirShort")}</span>
+                      <Input
+                        type="number"
+                        inputMode="numeric"
+                        value={set.rir}
+                        onChange={(e) => updateField("rir", e.target.value)}
+                        className="h-9 text-sm text-center flex-1 px-1"
+                        placeholder="—"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-1">
+                      <span className="text-[11px] text-muted-foreground shrink-0">{t("restShort")}</span>
+                      <Input
+                        type="number"
+                        inputMode="numeric"
+                        value={set.rest}
+                        onChange={(e) => updateField("rest", e.target.value)}
+                        className="h-9 text-sm text-center flex-1 px-1"
+                        placeholder={ex.rest_seconds > 0 ? String(ex.rest_seconds) : "s"}
+                      />
+                    </div>
+                  </div>
+                  {/* Nota */}
                   <div className="pl-[30px] pr-8">
                     <Input
                       type="text"
