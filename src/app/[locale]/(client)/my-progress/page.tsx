@@ -3,7 +3,7 @@
 import { FeatureGate } from "@/components/shared/feature-gate";
 import { useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useMyRoutine, useWorkoutLogs, useProgressData, useMyMeasurements } from "@/hooks/use-client-app";
+import { useMyRoutine, useAllWorkoutLogs, useProgressData, useMyMeasurements } from "@/hooks/use-client-app";
 import { localDateString } from "@/lib/local-date";
 import type { WorkoutLog, WorkoutWithExercises } from "@/services/client-app.service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,8 +25,8 @@ function MyProgressPageContent() {
   const t = useTranslations("clientApp");
   const locale = useLocale();
   const { data: routine, isLoading: routineLoading } = useMyRoutine();
-  const { data: logs, isLoading: logsLoading } = useWorkoutLogs(routine?.id ?? "");
-  const { data: progressWorkouts } = useProgressData(routine?.id ?? "");
+  const { data: logs, isLoading: logsLoading } = useAllWorkoutLogs();
+  const { data: progressWorkouts } = useProgressData();
   const { data: measurements } = useMyMeasurements();
 
   const isLoading = routineLoading || logsLoading;

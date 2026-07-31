@@ -55,6 +55,14 @@ export function useWorkoutLogs(clientRoutineId: string) {
   });
 }
 
+export function useAllWorkoutLogs() {
+  return useQuery({
+    queryKey: ["workout-logs", "all"],
+    queryFn: () => clientAppService.getAllWorkoutLogs(),
+    staleTime: 30 * 1000,
+  });
+}
+
 export function useStartWorkout() {
   const queryClient = useQueryClient();
   const t = useTranslations("clientApp");
@@ -150,11 +158,10 @@ export function useAddMyMeasurement() {
   });
 }
 
-export function useProgressData(clientRoutineId: string) {
+export function useProgressData() {
   return useQuery({
-    queryKey: ["progress-data", clientRoutineId],
-    queryFn: () => clientAppService.getProgressData(clientRoutineId),
-    enabled: !!clientRoutineId,
+    queryKey: ["progress-data", "all"],
+    queryFn: () => clientAppService.getProgressData(),
     staleTime: 2 * 60 * 1000,
   });
 }

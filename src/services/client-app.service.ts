@@ -189,6 +189,19 @@ export const clientAppService = {
     return data as (WorkoutLog & { exercise_logs?: ExerciseLog[] })[];
   },
 
+  // Todo el historial del cliente, independiente de la rutina asignada: así los
+  // entrenamientos previos no "desaparecen" al asignar una rutina nueva.
+  async getAllWorkoutLogs() {
+    const { supabase, clientId } = await getAuthenticatedClient();
+    const { data, error } = await supabase
+      .from("workout_logs")
+      .select("*, exercise_logs(*)")
+      .eq("client_id", clientId)
+      .order("date", { ascending: false });
+    if (error) throw error;
+    return data as (WorkoutLog & { exercise_logs?: ExerciseLog[] })[];
+  },
+
   async getExerciseLogs(workoutLogId: string) {
     const { supabase, clientId } = await getAuthenticatedClient();
 
@@ -390,13 +403,15 @@ export const clientAppService = {
     return fetchMealPlanDetail(supabase, assignment.meal_plan_id);
   },
 
-  async getProgressData(clientRoutineId: string) {
+  // Progreso sobre TODO el historial del cliente (todas sus rutinas). La
+  // progresión por ejercicio se agrupa por nombre, así que combinar rutinas es
+  // justo lo deseado y evita que el histórico se pierda al reasignar.
+  async getProgressData() {
     const { supabase, clientId } = await getAuthenticatedClient();
 
     const { data: workouts, error } = await supabase
       .from("workout_logs")
       .select("*, exercise_logs:exercise_logs(*, routine_exercise:routine_exercises(*, exercise:exercises(name, name_es)))")
-      .eq("client_routine_id", clientRoutineId)
       .eq("client_id", clientId)
       .eq("completed", true)
       .order("date", { ascending: true });

@@ -512,6 +512,42 @@ export const routinesService = {
     const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
+    // Una sola rutina activa por cliente: cerrar las demás activas. El histórico
+    // (workout_logs) queda ligado a su client_routine_id, no se pierde.
+    await supabase
+      .from("client_routines")
+      .update({ status: "completed" })
+      .eq("client_id", data.client_id)
+      .eq("trainer_id", user.id)
+      .eq("status", "active");
+
+    // Si esta misma rutina ya se le asignó antes, reactivar esa asignación en vez
+    // de crear otra: así conserva su histórico de entrenamientos ligado.
+    const { data: existing } = await supabase
+      .from("client_routines")
+      .select("id")
+      .eq("client_id", data.client_id)
+      .eq("routine_id", data.routine_id)
+      .eq("trainer_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      const { data: reactivated, error: reErr } = await supabase
+        .from("client_routines")
+        .update({
+          status: "active",
+          start_date: data.start_date,
+          notes: data.notes || null,
+        })
+        .eq("id", existing.id)
+        .select()
+        .single();
+      if (reErr) throw reErr;
+      return reactivated as ClientRoutine;
+    }
+
     const { data: assignment, error } = await supabase
       .from("client_routines")
       .insert({
