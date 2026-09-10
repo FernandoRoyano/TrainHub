@@ -27,6 +27,8 @@ import { useWorkoutSessionStore, type SetDetail, type ExerciseEntry } from "@/st
 import { cn } from "@/lib/utils";
 import { localDateString } from "@/lib/local-date";
 import { AdaptiveTrainingCard } from "@/components/cycle-training/adaptive-training-card";
+import { useWeightUnit } from "@/hooks/use-weight-unit";
+import type { WeightUnit } from "@/lib/weight-units";
 
 function ExerciseCard({
   ex,
@@ -42,6 +44,8 @@ function ExerciseCard({
   setSelectedExercise,
   locale,
   t,
+  unit,
+  format,
 }: {
   ex: any;
   exerciseData: Record<string, ExerciseEntry>;
@@ -56,6 +60,8 @@ function ExerciseCard({
   setSelectedExercise: (e: Exercise | null) => void;
   locale: string;
   t: any;
+  unit: WeightUnit;
+  format: (kg: number | null | undefined) => string;
 }) {
   const totalSets = ex.sets || 3;
   const emptySet = (): SetDetail => ({ reps: "", weight: "", note: "", rir: "", rest: "" });
@@ -140,7 +146,7 @@ function ExerciseCard({
             </div>
             {lastExerciseLog && (
               <p className="text-xs md:text-xs text-primary/70 mt-0.5 truncate">
-                {t("lastTime")}: {lastExerciseLog.sets_completed}x{lastExerciseLog.reps_completed || "?"} · {lastExerciseLog.weight_used ? `${lastExerciseLog.weight_used}kg` : "—"}
+                {t("lastTime")}: {lastExerciseLog.sets_completed}x{lastExerciseLog.reps_completed || "?"} · {lastExerciseLog.weight_used ? format(lastExerciseLog.weight_used) : "—"}
               </p>
             )}
           </div>
@@ -152,7 +158,7 @@ function ExerciseCard({
             <div className="flex gap-1.5 text-[11px] text-muted-foreground px-1 font-medium">
               <span className="w-6 text-center">#</span>
               <span className="flex-1 text-center">{t("repsShort")}</span>
-              <span className="flex-1 text-center">{t("weightShort")} (kg)</span>
+              <span className="flex-1 text-center">{t("weightShort")} ({unit})</span>
               <span className="w-7" />
             </div>
             {setDetails.map((set, si) => {
@@ -182,7 +188,7 @@ function ExerciseCard({
                       value={set.weight}
                       onChange={(e) => updateField("weight", e.target.value)}
                       className="h-11 text-base text-center flex-1 font-semibold px-1"
-                      placeholder="kg"
+                      placeholder={unit}
                     />
                     <button
                       type="button"
@@ -292,6 +298,7 @@ function MyRoutinePageContent() {
   const startWorkout = useStartWorkout();
   const completeWorkout = useCompleteWorkout();
   const logExercise = useLogExercise();
+  const { unit, toStoredKg, format } = useWeightUnit();
 
   const startCountdown = useRestTimerStore((s) => s.startCountdown);
 
@@ -406,13 +413,20 @@ function MyRoutinePageContent() {
     if (!workoutId) return;
     const data = exerciseData[routineExerciseId];
     const details = data?.setDetails?.filter((s) => s.reps || s.weight || s.rir || s.rest) ?? [];
+
+    // s.weight llega en la unidad seleccionada por el usuario (kg o lb); se
+    // convierte a kg una sola vez aquí, antes de derivar repsStr/avgWeight/
+    // setLogs, para que lo persistido sea siempre kg (almacenamiento canónico).
+    const weightKgOf = (raw: string) => (raw ? toStoredKg(raw) : null);
+
     const repsStr = details.length > 0
-      ? details.map((s) => `${s.reps || "?"}@${s.weight || "?"}kg${s.rir ? ` RIR${s.rir}` : ""}${s.note ? ` (${s.note})` : ""}`).join(" / ")
+      ? details.map((s) => `${s.reps || "?"}@${weightKgOf(s.weight) ?? "?"}kg${s.rir ? ` RIR${s.rir}` : ""}${s.note ? ` (${s.note})` : ""}`).join(" / ")
       : data?.reps || undefined;
     const weighted = details.filter((s) => s.weight);
+    const weightedKg = weighted.map((s) => weightKgOf(s.weight) ?? 0);
     const avgWeight = weighted.length > 0
-      ? weighted.reduce((sum, s) => sum + (parseFloat(s.weight) || 0), 0) / weighted.length
-      : data?.weight ? parseFloat(data.weight) : undefined;
+      ? weightedKg.reduce((sum, w) => sum + w, 0) / weighted.length
+      : data?.weight ? weightKgOf(data.weight) ?? undefined : undefined;
 
     // Detalle estructurado por serie (RIR/descanso/series extra). Se guarda en
     // set_logs (JSONB); num/null para que sea consultable a futuro.
@@ -420,7 +434,7 @@ function MyRoutinePageContent() {
     const setLogs = details.map((s, i) => ({
       set: i + 1,
       reps: s.reps,
-      weight: num(s.weight),
+      weight: weightKgOf(s.weight),
       rir: num(s.rir),
       rest_seconds: num(s.rest),
       note: s.note,
@@ -564,7 +578,7 @@ function MyRoutinePageContent() {
                     <th className="text-left p-2 font-medium">{t("exercise")}</th>
                     <th className="text-center p-2 font-medium w-14">{t("setsShort")}</th>
                     <th className="text-center p-2 font-medium w-14">{t("repsShort")}</th>
-                    <th className="text-center p-2 font-medium w-16">{t("weightShort")}</th>
+                    <th className="text-center p-2 font-medium w-16">{t("weightShort")} ({unit})</th>
                     {(activeWorkoutId || (todayLog && !todayLog.completed)) && (
                       <th className="text-center p-2 font-medium w-10">✓</th>
                     )}
@@ -583,7 +597,7 @@ function MyRoutinePageContent() {
                           <p className="font-medium text-xs leading-tight">{name}</p>
                           <p className="text-xs text-muted-foreground">{ex.sets}x{ex.reps}{ex.rest_seconds > 0 ? ` · ${ex.rest_seconds}s` : ""}</p>
                           {lastExLog && (
-                            <p className="text-xs text-primary/70">{t("lastTime")}: {lastExLog.weight_used ? `${lastExLog.weight_used}kg` : "—"}</p>
+                            <p className="text-xs text-primary/70">{t("lastTime")}: {lastExLog.weight_used ? format(lastExLog.weight_used) : "—"}</p>
                           )}
                         </td>
                         <td className="p-1 text-center">
@@ -621,7 +635,7 @@ function MyRoutinePageContent() {
                               value={exData.weight}
                               onChange={(e) => setExerciseData((prev) => ({ ...prev, [ex.id]: { ...exData, weight: e.target.value } }))}
                               className="h-8 w-full text-xs text-center"
-                              placeholder="kg"
+                              placeholder={unit}
                             />
                           ) : (
                             <span className="text-xs text-muted-foreground">—</span>
@@ -683,6 +697,8 @@ function MyRoutinePageContent() {
                         setSelectedExercise={setSelectedExercise}
                         locale={locale}
                         t={t}
+                        unit={unit}
+                        format={format}
                       />
                     ));
                   }
@@ -718,6 +734,8 @@ function MyRoutinePageContent() {
                           setSelectedExercise={setSelectedExercise}
                           locale={locale}
                           t={t}
+                          unit={unit}
+                          format={format}
                         />
                       ))}
                     </div>
@@ -739,6 +757,8 @@ function MyRoutinePageContent() {
                     setSelectedExercise={setSelectedExercise}
                     locale={locale}
                     t={t}
+                    unit={unit}
+                    format={format}
                   />
                 ))}
           </div>

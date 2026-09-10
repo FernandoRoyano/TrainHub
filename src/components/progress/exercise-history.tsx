@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp, Dumbbell } from "lucide-react";
 import type { WorkoutWithExercises } from "@/services/client-app.service";
+import { useWeightUnit } from "@/hooks/use-weight-unit";
 
 interface ExerciseHistoryProps {
   workouts: WorkoutWithExercises[];
@@ -32,6 +33,7 @@ interface ExerciseSummary {
 export function ExerciseHistory({ workouts }: ExerciseHistoryProps) {
   const t = useTranslations("progress");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const { unit, toDisplay, format } = useWeightUnit();
 
   const exercises = useMemo<ExerciseSummary[]>(() => {
     const map = new Map<string, { name: string; entries: { date: string; weight: number; sets: number }[] }>();
@@ -104,11 +106,11 @@ export function ExerciseHistory({ workouts }: ExerciseHistoryProps) {
                 <div className="flex items-center gap-3 shrink-0">
                   <div className="text-right hidden sm:block">
                     <p className="text-xs text-muted-foreground">{t("lastWeight")}</p>
-                    <p className="text-sm font-semibold">{ex.lastWeight} kg</p>
+                    <p className="text-sm font-semibold">{format(ex.lastWeight)}</p>
                   </div>
                   <div className="text-right hidden sm:block">
                     <p className="text-xs text-muted-foreground">{t("bestWeight")}</p>
-                    <p className="text-sm font-semibold">{ex.bestWeight} kg</p>
+                    <p className="text-sm font-semibold">{format(ex.bestWeight)}</p>
                   </div>
                   <TrendIcon className={`h-4 w-4 ${trendColor}`} />
                   {isExpanded ? (
@@ -123,11 +125,11 @@ export function ExerciseHistory({ workouts }: ExerciseHistoryProps) {
               <div className="flex gap-4 px-3 pb-2 sm:hidden">
                 <div>
                   <p className="text-xs text-muted-foreground">{t("lastWeight")}</p>
-                  <p className="text-sm font-semibold">{ex.lastWeight} kg</p>
+                  <p className="text-sm font-semibold">{format(ex.lastWeight)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">{t("bestWeight")}</p>
-                  <p className="text-sm font-semibold">{ex.bestWeight} kg</p>
+                  <p className="text-sm font-semibold">{format(ex.bestWeight)}</p>
                 </div>
               </div>
 
@@ -135,7 +137,7 @@ export function ExerciseHistory({ workouts }: ExerciseHistoryProps) {
                 <div className="px-3 pb-3 pt-1 border-t">
                   {ex.entries.length > 1 ? (
                     <ResponsiveContainer width="100%" height={160}>
-                      <LineChart data={ex.entries}>
+                      <LineChart data={ex.entries.map((e) => ({ ...e, weight: toDisplay(e.weight) }))}>
                         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                         <XAxis
                           dataKey="date"
@@ -155,7 +157,7 @@ export function ExerciseHistory({ workouts }: ExerciseHistoryProps) {
                             borderRadius: "8px",
                             fontSize: 12,
                           }}
-                          formatter={(value) => [`${value} kg`, t("weightKg")]}
+                          formatter={(value) => [`${value}${unit}`, t("weightLabel")]}
                           labelFormatter={(label) => label}
                         />
                         <Line

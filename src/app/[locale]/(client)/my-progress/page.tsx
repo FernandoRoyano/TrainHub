@@ -20,6 +20,7 @@ import { ExerciseHistory } from "@/components/progress/exercise-history";
 import { WeeklyCheckinForm } from "@/components/checkins/weekly-checkin-form";
 import { WorkoutCalendar } from "@/components/progress/workout-calendar";
 import { BarChart3, Calendar, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { useWeightUnit } from "@/hooks/use-weight-unit";
 
 function MyProgressPageContent() {
   const t = useTranslations("clientApp");
@@ -225,6 +226,7 @@ function WorkoutHistory({
   locale: string;
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const { format } = useWeightUnit();
 
   const workoutMap = useMemo(() => {
     const map = new Map<string, WorkoutWithExercises>();
@@ -283,7 +285,7 @@ function WorkoutHistory({
                       <span>
                         {el.sets_completed}s
                         {el.reps_completed ? ` x ${el.reps_completed}` : ""}
-                        {el.weight_used ? ` @ ${el.weight_used}kg` : ""}
+                        {el.weight_used ? ` @ ${format(el.weight_used)}` : ""}
                       </span>
                     </div>
                   ))}

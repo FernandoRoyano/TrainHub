@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Dumbbell, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { useWeightUnit } from "@/hooks/use-weight-unit";
 
 interface WorkoutsTabProps {
   clientId: string;
@@ -18,6 +19,7 @@ export function WorkoutsTab({ clientId }: WorkoutsTabProps) {
   const tc = useTranslations("clientApp");
   const { data: history, isLoading } = useClientWorkoutHistory(clientId);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const { format } = useWeightUnit();
 
   if (isLoading) {
     return (
@@ -105,9 +107,7 @@ export function WorkoutsTab({ clientId }: WorkoutsTabProps) {
                             </span>
                           )}
                           {!el.set_logs?.length && el.weight_used != null && (
-                            <span>
-                              {el.weight_used} {t("weightLabel")}
-                            </span>
+                            <span>{format(el.weight_used)}</span>
                           )}
                         </div>
                       </div>
@@ -123,7 +123,7 @@ export function WorkoutsTab({ clientId }: WorkoutsTabProps) {
                               </span>
                               <span className="tabular-nums">
                                 {s.reps || "?"}
-                                {s.weight != null ? ` × ${s.weight}kg` : ""}
+                                {s.weight != null ? ` × ${format(s.weight)}` : ""}
                               </span>
                               {s.rir != null && (
                                 <span className="tabular-nums">{tc("rirShort")} {s.rir}</span>

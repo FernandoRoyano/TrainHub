@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut, Globe, Loader2, Pencil, Check, X } from "lucide-react";
 import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { TextSizeSelector } from "@/components/shared/text-size-selector";
+import { WeightUnitSelector } from "@/components/shared/weight-unit-selector";
 
 export default function MyProfilePage() {
   const t = useTranslations("clientApp");
@@ -149,6 +150,8 @@ export default function MyProfilePage() {
       </Card>
 
       <TextSizeSelector />
+
+      <WeightUnitSelector />
 
       <Button
         variant="outline"

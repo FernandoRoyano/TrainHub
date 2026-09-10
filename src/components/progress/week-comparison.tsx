@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import type { WorkoutWithExercises } from "@/services/client-app.service";
+import { useWeightUnit } from "@/hooks/use-weight-unit";
 
 interface WeekComparisonProps {
   workouts: WorkoutWithExercises[];
@@ -12,6 +13,7 @@ interface WeekComparisonProps {
 
 export function WeekComparison({ workouts }: WeekComparisonProps) {
   const t = useTranslations("progress");
+  const { unit, toDisplay } = useWeightUnit();
 
   const comparison = useMemo(() => {
     const now = new Date();
@@ -32,7 +34,7 @@ export function WeekComparison({ workouts }: WeekComparisonProps) {
     for (const w of workouts) {
       const d = new Date(w.date + "T00:00:00");
       const volume = w.exercise_logs.reduce(
-        (acc, el) => acc + el.sets_completed * (el.weight_used ?? 0),
+        (acc, el) => acc + el.sets_completed * (toDisplay(el.weight_used) ?? 0),
         0
       );
 
@@ -53,7 +55,7 @@ export function WeekComparison({ workouts }: WeekComparisonProps) {
       sessionsDiff: thisWeekSessions - lastWeekSessions,
       volumeDiff: thisWeekVolume - lastWeekVolume,
     };
-  }, [workouts]);
+  }, [workouts, toDisplay]);
 
   const SessionIcon =
     comparison.sessionsDiff > 0
@@ -117,13 +119,13 @@ export function WeekComparison({ workouts }: WeekComparisonProps) {
             <span className="text-2xl font-bold">
               {comparison.thisWeekVolume.toLocaleString()}
             </span>
-            <span className="text-xs text-muted-foreground">kg</span>
+            <span className="text-xs text-muted-foreground">{unit}</span>
           </div>
           <p className={`text-xs mt-1 ${volumeColor}`}>
             {comparison.volumeDiff > 0
-              ? `+${comparison.volumeDiff.toLocaleString()}kg ${t("volumeUp")}`
+              ? `+${comparison.volumeDiff.toLocaleString()}${unit} ${t("volumeUp")}`
               : comparison.volumeDiff < 0
-                ? `${comparison.volumeDiff.toLocaleString()}kg ${t("volumeDown")}`
+                ? `${comparison.volumeDiff.toLocaleString()}${unit} ${t("volumeDown")}`
                 : t("volumeSame")}
           </p>
         </CardContent>

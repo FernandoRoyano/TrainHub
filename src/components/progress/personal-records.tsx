@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy } from "lucide-react";
 import type { WorkoutWithExercises } from "@/services/client-app.service";
+import { useWeightUnit } from "@/hooks/use-weight-unit";
 
 interface PersonalRecordsProps {
   workouts: WorkoutWithExercises[];
@@ -18,6 +19,7 @@ interface PR {
 
 export function PersonalRecords({ workouts }: PersonalRecordsProps) {
   const t = useTranslations("progress");
+  const { unit, toDisplay } = useWeightUnit();
 
   const records = useMemo(() => {
     const prMap = new Map<string, PR>();
@@ -65,8 +67,8 @@ export function PersonalRecords({ workouts }: PersonalRecordsProps) {
                 <p className="text-xs text-muted-foreground">{pr.date}</p>
               </div>
               <div className="ml-2 text-right">
-                <p className="text-lg font-bold text-primary">{pr.weight}</p>
-                <p className="text-xs text-muted-foreground">kg</p>
+                <p className="text-lg font-bold text-primary">{toDisplay(pr.weight)}</p>
+                <p className="text-xs text-muted-foreground">{unit}</p>
               </div>
             </div>
           ))}

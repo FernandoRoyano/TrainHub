@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { TrendingUp, Weight, BarChart3 } from "lucide-react";
 import type { WorkoutWithExercises } from "@/services/client-app.service";
+import { useWeightUnit } from "@/hooks/use-weight-unit";
 
 interface ProgressChartsProps {
   workouts: WorkoutWithExercises[];
@@ -31,6 +32,7 @@ interface ProgressChartsProps {
 export function ProgressCharts({ workouts }: ProgressChartsProps) {
   const t = useTranslations("progress");
   const [selectedExercise, setSelectedExercise] = useState<string>("all");
+  const { unit, toDisplay } = useWeightUnit();
 
   // Get unique exercises
   const exercises = useMemo(() => {
@@ -56,7 +58,7 @@ export function ProgressCharts({ workouts }: ProgressChartsProps) {
             : w.exercise_logs.filter((el) => el.routine_exercise_id === selectedExercise);
 
         const totalVolume = logs.reduce((acc, el) => {
-          return acc + el.sets_completed * (el.weight_used ?? 0);
+          return acc + el.sets_completed * (toDisplay(el.weight_used) ?? 0);
         }, 0);
 
         const totalSets = logs.reduce((acc, el) => acc + el.sets_completed, 0);
@@ -67,7 +69,7 @@ export function ProgressCharts({ workouts }: ProgressChartsProps) {
           sets: totalSets,
         };
       });
-  }, [workouts, selectedExercise]);
+  }, [workouts, selectedExercise, toDisplay]);
 
   // Weight progression per exercise
   const weightData = useMemo(() => {
@@ -81,12 +83,12 @@ export function ProgressCharts({ workouts }: ProgressChartsProps) {
         if (!log || !log.weight_used) return null;
         return {
           date: w.date,
-          weight: log.weight_used,
+          weight: toDisplay(log.weight_used),
           sets: log.sets_completed,
         };
       })
       .filter(Boolean) as { date: string; weight: number; sets: number }[];
-  }, [workouts, selectedExercise]);
+  }, [workouts, selectedExercise, toDisplay]);
 
   // Weekly frequency
   const frequencyData = useMemo(() => {
@@ -130,7 +132,7 @@ export function ProgressCharts({ workouts }: ProgressChartsProps) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              {t("totalVolume")}
+              {t("totalVolume")} ({unit})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -203,7 +205,7 @@ export function ProgressCharts({ workouts }: ProgressChartsProps) {
                     stroke="hsl(var(--chart-2))"
                     strokeWidth={2}
                     dot={{ r: 3 }}
-                    name={t("weightKg")}
+                    name={`${t("weightLabel")} (${unit})`}
                   />
                 </LineChart>
               </ResponsiveContainer>

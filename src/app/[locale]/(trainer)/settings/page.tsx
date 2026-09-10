@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LocaleSwitcher } from "@/components/shared/locale-switcher";
+import { WeightUnitSelector } from "@/components/shared/weight-unit-selector";
 import { toast } from "sonner";
 import { User, Languages, Lock } from "lucide-react";
 import { SubscriptionCard } from "@/components/settings/subscription-card";
@@ -180,6 +181,9 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Weight unit */}
+      <WeightUnitSelector />
 
       {/* Change Password */}
       <Card>
