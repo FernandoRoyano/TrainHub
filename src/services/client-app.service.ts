@@ -286,12 +286,25 @@ export const clientAppService = {
     if (customDate) {
       updateData.date = customDate;
     }
-    const { error } = await supabase
-      .from("workout_logs")
-      .update(updateData)
-      .eq("id", workoutLogId)
-      .eq("client_id", clientId);
-    if (error) throw error;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15_000);
+
+    try {
+      const { data, error } = await supabase
+        .from("workout_logs")
+        .update(updateData)
+        .eq("id", workoutLogId)
+        .eq("client_id", clientId)
+        .abortSignal(controller.signal)
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      if (!data) throw new Error("Workout completion returned no data");
+      return data as WorkoutLog;
+    } finally {
+      clearTimeout(timeoutId);
+    }
   },
 
   async logExercise(

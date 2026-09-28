@@ -92,7 +92,20 @@ export function useCompleteWorkout() {
   return useMutation({
     mutationFn: ({ id, notes, customDate }: { id: string; notes?: string; customDate?: string }) =>
       clientAppService.completeWorkout(id, notes, customDate),
-    onSuccess: () => {
+    onSuccess: (completedWorkout) => {
+      // Update every workout-log cache immediately so the completion panel
+      // closes without waiting for a network refetch (important on mobile/PWA).
+      queryClient.setQueriesData(
+        { queryKey: ["workout-logs"] },
+        (current: unknown) =>
+          Array.isArray(current)
+            ? current.map((workout) =>
+                workout && typeof workout === "object" && "id" in workout && workout.id === completedWorkout.id
+                  ? { ...workout, ...completedWorkout }
+                  : workout
+              )
+            : current
+      );
       queryClient.invalidateQueries({ queryKey: ["workout-logs"] });
       queryClient.invalidateQueries({ queryKey: ["progress-data"] });
       toast.success(t("workoutCompletedToast"));
