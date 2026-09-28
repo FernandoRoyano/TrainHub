@@ -27,7 +27,7 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        "fixed top-0 left-0 right-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-300",
         scrolled || mobileOpen
           ? "bg-background/95 backdrop-blur-xl border-b border-border/50"
           : "bg-transparent"
@@ -35,7 +35,7 @@ export function Navbar() {
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex min-h-11 items-center gap-2">
             <Dumbbell className="h-6 w-6 text-primary" />
             <span className="font-display text-lg font-bold">
               Train<span className="text-primary">Hub</span>
@@ -64,8 +64,11 @@ export function Navbar() {
           </div>
 
           <button
-            className="md:hidden p-2"
+            type="button"
+            className="grid h-11 w-11 place-items-center rounded-lg md:hidden"
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? t("navCloseMenu") : t("navOpenMenu")}
+            aria-expanded={mobileOpen}
           >
             {mobileOpen ? (
               <X className="h-5 w-5" />
@@ -83,16 +86,16 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="text-sm text-muted-foreground hover:text-foreground px-2 py-1"
+                  className="flex min-h-11 items-center rounded-lg px-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
                 >
                   {link.label}
                 </a>
               ))}
               <div className="flex gap-2 mt-2">
-                <Button variant="outline" size="sm" className="flex-1" asChild>
+                <Button variant="outline" size="sm" className="min-h-11 flex-1" asChild>
                   <Link href="/login">{t("login")}</Link>
                 </Button>
-                <Button size="sm" className="flex-1" asChild>
+                <Button size="sm" className="min-h-11 flex-1" asChild>
                   <Link href="/register">{t("startFree")}</Link>
                 </Button>
               </div>

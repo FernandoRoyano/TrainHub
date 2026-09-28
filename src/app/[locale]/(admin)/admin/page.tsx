@@ -4,6 +4,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { useAdminStats } from "@/hooks/use-admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/shared/query-error-state";
 import {
   Users,
   UserCheck,
@@ -48,7 +49,7 @@ function UserAvatar({ name }: { name: string }) {
 export default function AdminDashboardPage() {
   const t = useTranslations("admin");
   const locale = useLocale();
-  const { data, isLoading } = useAdminStats();
+  const { data, isLoading, isError, refetch, isRefetching } = useAdminStats();
 
   if (isLoading) {
     return (
@@ -65,7 +66,9 @@ export default function AdminDashboardPage() {
     );
   }
 
-  if (!data) return null;
+  if (isError || !data) {
+    return <QueryErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
+  }
 
   const stats = [
     { label: t("totalUsers"), value: data.totalUsers, icon: Users },

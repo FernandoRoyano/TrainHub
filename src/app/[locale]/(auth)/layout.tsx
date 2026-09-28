@@ -1,6 +1,7 @@
 import { Dumbbell } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { EcosystemSignature } from "@/components/shared/ecosystem-signature";
 
 export default function AuthLayout({
   children,
@@ -8,6 +9,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   const t = useTranslations("auth");
+  const locale = useLocale();
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4">
@@ -34,6 +36,9 @@ export default function AuthLayout({
           <Link href="/terms" className="hover:text-foreground">
             {t("termsLink")}
           </Link>
+        </div>
+        <div className="flex justify-center">
+          <EcosystemSignature locale={locale === "en" ? "en" : "es"} compact />
         </div>
       </div>
     </div>

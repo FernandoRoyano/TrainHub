@@ -193,8 +193,8 @@ export function TrainerBottomNav() {
       )}
 
       {/* Bottom bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/50 bg-card/95 backdrop-blur-xl md:hidden pb-[env(safe-area-inset-bottom)]">
-        <div className="mx-auto flex max-w-2xl items-stretch justify-around px-1">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/40 bg-background/90 backdrop-blur-2xl md:hidden pb-[env(safe-area-inset-bottom)]">
+        <div className="mx-auto flex max-w-2xl items-stretch justify-around px-2 py-1">
           {mainNavItems.map((item) => {
             const active = isActive(item.href);
             const Icon = item.icon;
@@ -205,7 +205,7 @@ export function TrainerBottomNav() {
                 href={item.href}
                 className={cn(
                   "relative flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1.5 transition active:scale-95",
-                  active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <span className="relative">
@@ -225,7 +225,7 @@ export function TrainerBottomNav() {
             onClick={() => setMoreOpen(true)}
             className={cn(
               "relative flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1.5 transition active:scale-95",
-              moreOpen || isMoreActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+              moreOpen || isMoreActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground",
             )}
           >
             <MoreHorizontal className="h-[22px] w-[22px]" />

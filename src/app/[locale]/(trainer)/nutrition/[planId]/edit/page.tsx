@@ -1,13 +1,16 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useMealPlan } from "@/hooks/use-nutrition";
 import { NutritionBuilder } from "@/components/nutrition/nutrition-builder";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/shared/query-error-state";
 
 export default function EditMealPlanPage() {
   const { planId } = useParams<{ planId: string }>();
-  const { data: mealPlan, isLoading } = useMealPlan(planId);
+  const tc = useTranslations("common");
+  const { data: mealPlan, isLoading, isError, refetch, isRefetching } = useMealPlan(planId);
 
   if (isLoading) {
     return (
@@ -18,7 +21,13 @@ export default function EditMealPlanPage() {
     );
   }
 
-  if (!mealPlan) return null;
+  if (isError) {
+    return <QueryErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
+  }
+
+  if (!mealPlan) {
+    return <p className="text-muted-foreground">{tc("notFound")}</p>;
+  }
 
   return <NutritionBuilder mode="edit" mealPlan={mealPlan} />;
 }

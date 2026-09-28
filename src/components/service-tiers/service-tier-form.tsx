@@ -39,7 +39,7 @@ const DEFAULT_FEATURES: ServiceTierFormData["features"] = {
   training: true,
   nutrition: false,
   messaging: false,
-  progress_tracking: false,
+  progress_tracking: true,
   measurements: false,
   checkins: false,
   questionnaires: false,

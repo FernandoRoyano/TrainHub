@@ -5,11 +5,12 @@ import { useTranslations } from "next-intl";
 import { useCoachingPlan } from "@/hooks/use-coaching-plans";
 import { CoachingPlanForm } from "@/components/coaching-plans/coaching-plan-form";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/shared/query-error-state";
 
 export default function EditCoachingPlanPage() {
   const { planId } = useParams<{ planId: string }>();
   const tc = useTranslations("common");
-  const { data: plan, isLoading } = useCoachingPlan(planId);
+  const { data: plan, isLoading, isError, refetch, isRefetching } = useCoachingPlan(planId);
 
   if (isLoading) {
     return (
@@ -18,6 +19,10 @@ export default function EditCoachingPlanPage() {
         <Skeleton className="h-96 w-full" />
       </div>
     );
+  }
+
+  if (isError) {
+    return <QueryErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
   }
 
   if (!plan) {

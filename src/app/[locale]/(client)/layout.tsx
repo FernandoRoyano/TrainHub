@@ -5,10 +5,10 @@ import { usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import {
+  House,
   Dumbbell,
   UtensilsCrossed,
   MessageCircle,
-  ClipboardList,
   MoreHorizontal,
   BarChart3,
   Ruler,
@@ -29,6 +29,7 @@ import { useHeartbeat } from "@/hooks/use-heartbeat";
 import { isFeatureEnabled } from "@/lib/feature-gate";
 import type { FeatureKey } from "@/lib/validations/service-tier";
 import { toast } from "sonner";
+import { TrainerBrand } from "@/components/shared/trainer-brand";
 
 interface NavItem {
   href: string;
@@ -38,15 +39,15 @@ interface NavItem {
 }
 
 const mainNavItems: NavItem[] = [
-  { href: "/my-plan", icon: ClipboardList, labelKey: "myPlan" },
+  { href: "/today", icon: House, labelKey: "today" },
   { href: "/my-routine", icon: Dumbbell, labelKey: "myRoutine", featureKey: "training" },
-  { href: "/my-nutrition", icon: UtensilsCrossed, labelKey: "myNutrition", featureKey: "nutrition" },
+  { href: "/my-progress", icon: BarChart3, labelKey: "myProgress", featureKey: "progress_tracking" },
   { href: "/my-messages", icon: MessageCircle, labelKey: "myMessages", featureKey: "messaging" },
-  { href: "/my-fasting", icon: Timer, labelKey: "myFasting" },
 ];
 
 const moreNavItems: NavItem[] = [
-  { href: "/my-progress", icon: BarChart3, labelKey: "myProgress", featureKey: "progress_tracking" },
+  { href: "/my-nutrition", icon: UtensilsCrossed, labelKey: "myNutrition", featureKey: "nutrition" },
+  { href: "/my-fasting", icon: Timer, labelKey: "myFasting" },
   { href: "/my-measurements", icon: Ruler, labelKey: "myMeasurements", featureKey: "measurements" },
   { href: "/my-cycle", icon: Heart, labelKey: "myCycle" },
   { href: "/my-profile", icon: User, labelKey: "myProfile" },
@@ -56,6 +57,7 @@ const moreNavItems: NavItem[] = [
 function ClientNavBar() {
   const t = useTranslations("nav");
   const tClient = useTranslations("clientApp");
+  const tCommon = useTranslations("common");
   const pathname = usePathname();
   const { features } = useClientFeatures();
   const { data: myClient } = useMyClient();
@@ -77,10 +79,17 @@ function ClientNavBar() {
     <>
       {/* More menu overlay */}
       {moreOpen && (
-        <div className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setMoreOpen(false)}>
+        <div className="fixed inset-0 z-40">
+          <button
+            type="button"
+            className="absolute inset-0 bg-background/60 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={() => setMoreOpen(false)}
+            aria-label={tCommon("close")}
+          />
           <div
-            className="absolute bottom-16 md:bottom-20 left-0 right-0 bg-card border-t border-border/50 shadow-xl px-1 py-2.5 animate-in slide-in-from-bottom-4 duration-200"
-            onClick={(e) => e.stopPropagation()}
+            className="absolute bottom-16 left-0 right-0 bg-card border-t border-border/50 shadow-xl px-1 py-2.5 animate-in slide-in-from-bottom-4 duration-200 md:bottom-20"
+            role="dialog"
+            aria-label={t("more")}
           >
             <div className="flex justify-around max-w-2xl mx-auto">
               {filteredMoreNavItems.map((item) => {
@@ -99,8 +108,8 @@ function ClientNavBar() {
                       setMoreOpen(false);
                     }}
                     className={cn(
-                      "flex flex-col items-center gap-1 py-1.5 px-3 md:px-5 rounded-lg transition-all active:scale-95",
-                      isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-accent",
+                      "flex min-h-11 flex-col items-center gap-1 rounded-lg px-3 py-1.5 transition-[color,background-color,transform] active:scale-95 md:px-5",
+                      isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent",
                       !enabled && "opacity-40 cursor-not-allowed"
                     )}
                   >
@@ -115,7 +124,7 @@ function ClientNavBar() {
       )}
 
       {/* Bottom nav bar (safe-area para iPhone con notch) */}
-      <nav className="shrink-0 border-t border-border/50 bg-card/95 backdrop-blur-xl z-50 pb-[env(safe-area-inset-bottom)]">
+      <nav className="shrink-0 border-t border-border/40 bg-background/90 backdrop-blur-2xl z-50 pb-[env(safe-area-inset-bottom)]">
         <div className="flex justify-around py-2 md:py-3 px-1 max-w-2xl mx-auto">
           {mainNavItems.map((item) => {
             const isActive = pathname.includes(item.href);
@@ -127,8 +136,8 @@ function ClientNavBar() {
                 href={item.href}
                 onClick={!enabled ? handleDisabledClick : undefined}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-1.5 px-3 md:px-5 rounded-lg transition-all active:scale-95",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  "flex min-h-11 flex-col items-center gap-1 rounded-lg px-3 py-1.5 transition-[color,background-color,transform] active:scale-95 md:px-5",
+                  isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground",
                   !enabled && "opacity-40 cursor-not-allowed"
                 )}
               >
@@ -142,8 +151,8 @@ function ClientNavBar() {
           <button
             onClick={() => setMoreOpen(!moreOpen)}
             className={cn(
-              "flex flex-col items-center gap-1 py-1.5 px-3 md:px-5 rounded-lg transition-all active:scale-95",
-              moreOpen || isMoreActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+              "flex min-h-11 flex-col items-center gap-1 rounded-lg px-3 py-1.5 transition-[color,background-color,transform] active:scale-95 md:px-5",
+              moreOpen || isMoreActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
             )}
           >
             <MoreHorizontal className={cn("h-5 w-5 md:h-6 md:w-6 transition-transform", moreOpen && "rotate-90")} />
@@ -160,14 +169,26 @@ export default function ClientLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const t = useTranslations("nav");
+  const { data: myClient } = useMyClient();
   useHeartbeat();
   return (
     <ClientFeaturesProvider>
       <div className="h-dvh flex flex-col overflow-hidden">
         <NavigationProgress />
-        <header className="shrink-0 z-40 flex items-center justify-end h-12 md:h-14 px-4 md:px-8 gap-2">
-          <NotificationBell />
-          <ThemeToggle />
+        <header className="shrink-0 z-40 flex items-center justify-between h-14 px-4 md:px-8 gap-2 border-b border-border/30 bg-background/80 backdrop-blur-xl">
+          <Link href="/today" aria-label="TrainHub">
+            <TrainerBrand
+              trainerName={myClient?.trainer?.full_name}
+              avatarUrl={myClient?.trainer?.avatar_url}
+              settings={myClient?.trainer?.settings}
+              signature={t("poweredByTrainHub")}
+            />
+          </Link>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <ThemeToggle />
+          </div>
         </header>
         <main className="flex-1 min-h-0 overflow-y-auto px-4 pt-4 pb-8 md:px-8 md:pt-6 md:pb-10">
           <div className="max-w-4xl mx-auto w-full">

@@ -21,9 +21,11 @@ import { WeeklyCheckinForm } from "@/components/checkins/weekly-checkin-form";
 import { WorkoutCalendar } from "@/components/progress/workout-calendar";
 import { BarChart3, Calendar, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { useWeightUnit } from "@/hooks/use-weight-unit";
+import { ClientSectionHeader } from "@/components/shared/client-section-header";
 
 function MyProgressPageContent() {
   const t = useTranslations("clientApp");
+  const tx = useTranslations("clientExperience");
   const locale = useLocale();
   const { data: routine, isLoading: routineLoading } = useMyRoutine();
   const { data: logs, isLoading: logsLoading } = useAllWorkoutLogs();
@@ -93,7 +95,14 @@ function MyProgressPageContent() {
 
   return (
     <div className="space-y-4">
-      <h1 className="font-display text-2xl font-bold">{t("myProgress")}</h1>
+      <ClientSectionHeader
+        icon={BarChart3}
+        eyebrow={tx("progressEyebrow")}
+        title={t("myProgress")}
+        description={tx("progressDescription")}
+        metric={weeklyStats ? `${weeklyStats.percentage}%` : undefined}
+        metricLabel={weeklyStats ? tx("weeklyGoal") : undefined}
+      />
 
       {/* Weekly check-in */}
       <WeeklyCheckinForm />
@@ -111,7 +120,7 @@ function MyProgressPageContent() {
 
       {/* Weekly ring */}
       {weeklyStats ? (
-        <Card>
+        <Card className="border-primary/15 bg-gradient-to-br from-primary/5 via-card to-card shadow-none">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">{t("weeklyProgress")}</CardTitle>
           </CardHeader>

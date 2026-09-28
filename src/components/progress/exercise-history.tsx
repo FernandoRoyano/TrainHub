@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp, Dumbbell } from "lucide-react";
 import type { WorkoutWithExercises } from "@/services/client-app.service";
 import { useWeightUnit } from "@/hooks/use-weight-unit";
+import { exerciseKey, topSetWeightKg } from "@/lib/exercise-log-metrics";
 
 interface ExerciseHistoryProps {
   workouts: WorkoutWithExercises[];
@@ -41,13 +42,14 @@ export function ExerciseHistory({ workouts }: ExerciseHistoryProps) {
     for (const w of workouts) {
       for (const el of w.exercise_logs) {
         const name = el.routine_exercise?.exercise?.name;
-        const id = el.routine_exercise_id;
-        if (!name || !id || !el.weight_used) continue;
+        const id = exerciseKey(el);
+        const top = topSetWeightKg(el);
+        if (!name || !id || !top) continue;
 
         if (!map.has(id)) map.set(id, { name, entries: [] });
         map.get(id)!.entries.push({
           date: w.date,
-          weight: el.weight_used,
+          weight: top,
           sets: el.sets_completed,
         });
       }

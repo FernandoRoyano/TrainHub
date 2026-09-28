@@ -62,7 +62,12 @@ export const analyticsService = {
               .gte("workout_log.date", cutoff)
               .limit(5000),
           ])
-        : [{ data: [] }, { data: [] }];
+        : [{ data: [], error: null }, { data: [], error: null }];
+
+    // Sin esto, un fallo de consulta pintaba volumen y retención a cero como
+    // si fuera un dato real.
+    if (workoutLogsResult.error) throw workoutLogsResult.error;
+    if (exerciseLogsResult.error) throw exerciseLogsResult.error;
 
     const workoutLogs = workoutLogsResult.data ?? [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

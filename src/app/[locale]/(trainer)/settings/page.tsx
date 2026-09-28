@@ -16,9 +16,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { WeightUnitSelector } from "@/components/shared/weight-unit-selector";
 import { toast } from "sonner";
-import { User, Languages, Lock } from "lucide-react";
+import { User, Languages, Lock, Palette } from "lucide-react";
 import { SubscriptionCard } from "@/components/settings/subscription-card";
 import { DangerZoneCard } from "@/components/settings/danger-zone-card";
+import { TrainerBrand } from "@/components/shared/trainer-brand";
+import { TRAINER_BRAND_ACCENTS, type TrainerBrandAccent } from "@/lib/ui-tokens";
 
 export default function SettingsPage() {
   const t = useTranslations("settings");
@@ -30,6 +32,10 @@ export default function SettingsPage() {
     full_name: "",
     bio: "",
     specialty: "",
+    professional_name: "",
+    welcome_message: "",
+    brand_logo_url: "",
+    brand_accent: "green" as TrainerBrandAccent,
   });
   const [saving, setSaving] = useState(false);
 
@@ -46,6 +52,13 @@ export default function SettingsPage() {
         full_name: profile.full_name || "",
         bio: profile.bio || "",
         specialty: (settings.specialty as string) || "",
+        professional_name: (settings.professional_name as string) || "",
+        welcome_message: (settings.welcome_message as string) || "",
+        brand_logo_url: (settings.brand_logo_url as string) || "",
+        brand_accent:
+          typeof settings.brand_accent === "string" && settings.brand_accent in TRAINER_BRAND_ACCENTS
+            ? (settings.brand_accent as TrainerBrandAccent)
+            : "green",
       });
     }
   }, [profile]);
@@ -62,6 +75,10 @@ export default function SettingsPage() {
       await authService.updateSettings({
         ...currentSettings,
         specialty: profileForm.specialty || null,
+        professional_name: profileForm.professional_name || null,
+        welcome_message: profileForm.welcome_message || null,
+        brand_logo_url: profileForm.brand_logo_url || null,
+        brand_accent: profileForm.brand_accent,
       });
       queryClient.invalidateQueries({ queryKey: ["auth-profile"] });
       toast.success(t("saved"));
@@ -160,6 +177,55 @@ export default function SettingsPage() {
             <Button onClick={handleSaveProfile} disabled={saving}>
               {saving ? tc("loading") : tc("save")}
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden border-primary/15 bg-gradient-to-br from-primary/5 via-card to-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Palette className="h-4 w-4" />
+            {t("clientBrand")}
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">{t("clientBrandDescription")}</p>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="rounded-2xl border border-border/60 bg-background/55 p-4">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t("preview")}</p>
+            <TrainerBrand
+              trainerName={profile?.full_name}
+              avatarUrl={profile?.avatar_url}
+              settings={{ professional_name: profileForm.professional_name, brand_logo_url: profileForm.brand_logo_url, brand_accent: profileForm.brand_accent }}
+              signature={t("poweredByTrainHub")}
+            />
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+              {profileForm.welcome_message || t("welcomeMessagePreview")}
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t("professionalName")}</Label>
+            <Input value={profileForm.professional_name} onChange={(e) => setProfileForm((form) => ({ ...form, professional_name: e.target.value }))} placeholder={profile?.full_name || t("professionalNamePlaceholder")} maxLength={60} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t("welcomeMessage")}</Label>
+            <Textarea value={profileForm.welcome_message} onChange={(e) => setProfileForm((form) => ({ ...form, welcome_message: e.target.value }))} placeholder={t("welcomeMessagePlaceholder")} rows={3} maxLength={180} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t("logoUrl")}</Label>
+            <Input type="url" value={profileForm.brand_logo_url} onChange={(e) => setProfileForm((form) => ({ ...form, brand_logo_url: e.target.value }))} placeholder="https://..." />
+          </div>
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-medium">{t("brandAccent")}</legend>
+            <div className="flex flex-wrap gap-2">
+              {(Object.keys(TRAINER_BRAND_ACCENTS) as TrainerBrandAccent[]).map((accent) => (
+                <button key={accent} type="button" onClick={() => setProfileForm((form) => ({ ...form, brand_accent: accent }))} className="grid h-10 w-10 place-items-center rounded-xl border transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" style={{ borderColor: profileForm.brand_accent === accent ? `hsl(${TRAINER_BRAND_ACCENTS[accent]})` : "hsl(var(--border))" }} aria-label={t(`accent_${accent}`)} aria-pressed={profileForm.brand_accent === accent}>
+                  <span className="h-5 w-5 rounded-full" style={{ background: `hsl(${TRAINER_BRAND_ACCENTS[accent]})` }} />
+                </button>
+              ))}
+            </div>
+          </fieldset>
+          <div className="flex justify-end">
+            <Button onClick={handleSaveProfile} disabled={saving}>{saving ? tc("loading") : tc("save")}</Button>
           </div>
         </CardContent>
       </Card>

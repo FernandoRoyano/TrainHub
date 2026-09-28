@@ -231,20 +231,23 @@ export const messagesService = {
     const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
-    // Find client record
-    const { data: client } = await supabase
+    // Find client record. Un fallo real se lanza: si no, la pantalla decía
+    // "sin conversación" cuando lo que había era un error de red.
+    const { data: client, error: clientError } = await supabase
       .from("clients")
       .select("id")
       .eq("user_id", user.id)
       .maybeSingle();
+    if (clientError) throw clientError;
     if (!client) return null;
 
     // Find conversation
-    const { data: conv } = await supabase
+    const { data: conv, error: convError } = await supabase
       .from("conversations")
       .select("*")
       .eq("client_id", client.id)
       .maybeSingle();
+    if (convError) throw convError;
 
     return conv as Conversation | null;
   },

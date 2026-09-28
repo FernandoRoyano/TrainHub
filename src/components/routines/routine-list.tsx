@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { STATUS_STYLES } from "@/lib/ui-tokens";
+import { WorkspaceHeader } from "@/components/shared/workspace-header";
 
 export function RoutineList() {
   const t = useTranslations("routines");
@@ -49,25 +50,28 @@ export function RoutineList() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
-        <Button asChild>
+      <WorkspaceHeader
+        eyebrow={t("workspaceLabel")}
+        title={t("title")}
+        description={t("workspaceDescription")}
+        metric={routines.length}
+        metricLabel={t("availableRoutines")}
+        actions={<Button asChild>
           <Link href="/routines/new">
             <Plus className="mr-2 h-4 w-4" />
             {t("addRoutine")}
           </Link>
-        </Button>
-      </div>
+        </Button>}
+      />
 
       {/* Search */}
-      <div className="relative">
+      <div className="relative rounded-2xl border border-border/50 bg-card/35 p-3">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder={tc("search") + "..."}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 max-w-md"
+          className="pl-9 max-w-md bg-background/60"
         />
       </div>
 
@@ -100,16 +104,17 @@ export function RoutineList() {
           {routines.map((routine) => (
             <Card
               key={routine.id}
-              className="cursor-pointer hover:bg-accent/50 transition-colors overflow-hidden"
+              className="group cursor-pointer overflow-hidden border-border/60 bg-card/45 shadow-none transition-colors hover:border-primary/25 hover:bg-card/70"
               onClick={() => router.push(`/routines/${routine.id}`)}
             >
               {routine.cover_image && (
-                <div className="h-32 w-full overflow-hidden">
+                <div className="relative h-32 w-full overflow-hidden">
                   <img
                     src={routine.cover_image}
                     alt=""
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                   />
+                  <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-card/70 to-transparent" />
                 </div>
               )}
               <CardContent className="p-4">

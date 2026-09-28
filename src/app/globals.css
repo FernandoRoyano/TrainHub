@@ -214,12 +214,12 @@
     background:
       radial-gradient(
         ellipse 80% 50% at 10% 20%,
-        hsl(var(--section-hue) 60% 20% / 0.3) 0%,
+        hsl(var(--section-hue) 55% 20% / 0.18) 0%,
         transparent 60%
       ),
       radial-gradient(
         ellipse 50% 70% at 85% 75%,
-        hsl(calc(var(--section-hue) + 60) 50% 18% / 0.2) 0%,
+        hsl(calc(var(--section-hue) + 18) 45% 18% / 0.10) 0%,
         transparent 60%
       ),
       radial-gradient(

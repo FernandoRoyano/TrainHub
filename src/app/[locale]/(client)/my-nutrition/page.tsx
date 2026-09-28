@@ -8,12 +8,15 @@ import { MealCard } from "@/components/nutrition/meal-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { QueryErrorState } from "@/components/shared/query-error-state";
 import { UtensilsCrossed } from "lucide-react";
+import { ClientSectionHeader } from "@/components/shared/client-section-header";
 
 function MyNutritionPageContent() {
   const t = useTranslations("nutrition");
   const tc = useTranslations("clientApp");
-  const { data: mealPlan, isLoading } = useMyMealPlan();
+  const tx = useTranslations("clientExperience");
+  const { data: mealPlan, isLoading, isError, refetch, isRefetching } = useMyMealPlan();
 
   if (isLoading) {
     return (
@@ -21,6 +24,16 @@ function MyNutritionPageContent() {
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  // Un fallo de red no es "tu entrenador no te ha asignado plan"
+  if (isError) {
+    return (
+      <div className="space-y-4">
+        <h1 className="font-display text-2xl font-bold">{t("myMealPlan")}</h1>
+        <QueryErrorState onRetry={() => refetch()} isRetrying={isRefetching} />
       </div>
     );
   }
@@ -54,18 +67,17 @@ function MyNutritionPageContent() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="font-display text-2xl font-bold">{t("myMealPlan")}</h1>
-        <p className="text-muted-foreground">{mealPlan.name}</p>
-        {mealPlan.description && (
-          <p className="text-sm text-muted-foreground mt-1">
-            {mealPlan.description}
-          </p>
-        )}
-      </div>
+      <ClientSectionHeader
+        icon={UtensilsCrossed}
+        eyebrow={tx("nutritionEyebrow")}
+        title={mealPlan.name || t("myMealPlan")}
+        description={mealPlan.description || tx("nutritionDescription")}
+        metric={mealPlan.daily_calories ? String(mealPlan.daily_calories) : undefined}
+        metricLabel={mealPlan.daily_calories ? tx("dailyCalories") : undefined}
+      />
 
       {/* Daily Macro Targets */}
-      <Card>
+      <Card className="border-primary/15 bg-gradient-to-br from-primary/5 via-card to-card shadow-none">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">{t("dailyTargets")}</CardTitle>
         </CardHeader>

@@ -6,18 +6,31 @@ import { useClientConversation } from "@/hooks/use-messages";
 import { MessageThread } from "@/components/messages/message-thread";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
+import { QueryErrorState } from "@/components/shared/query-error-state";
 import { MessageCircle } from "lucide-react";
+import { ClientSectionHeader } from "@/components/shared/client-section-header";
 
 function MyMessagesPageContent() {
   const t = useTranslations("messages");
   const te = useTranslations("empty");
-  const { data: conversation, isLoading } = useClientConversation();
+  const tx = useTranslations("clientExperience");
+  const { data: conversation, isLoading, isError, refetch, isRefetching } = useClientConversation();
 
   if (isLoading) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
+
+  // Un fallo de red no es "todavía no tienes conversación"
+  if (isError) {
+    return (
+      <div>
+        <h1 className="font-display text-2xl font-bold mb-4">{t("title")}</h1>
+        <QueryErrorState onRetry={() => refetch()} isRetrying={isRefetching} />
       </div>
     );
   }
@@ -37,8 +50,13 @@ function MyMessagesPageContent() {
 
   return (
     <div className="space-y-4">
-      <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
-      <div className="border rounded-lg h-[calc(100vh-12rem)] overflow-hidden">
+      <ClientSectionHeader
+        icon={MessageCircle}
+        eyebrow={tx("messagesEyebrow")}
+        title={t("title")}
+        description={tx("messagesDescription")}
+      />
+      <div className="h-[calc(100vh-20rem)] min-h-[420px] overflow-hidden rounded-3xl border border-border/60 bg-card/45 shadow-xl shadow-background/20">
         <MessageThread conversationId={conversation.id} />
       </div>
     </div>

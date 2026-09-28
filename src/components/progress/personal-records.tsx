@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy } from "lucide-react";
 import type { WorkoutWithExercises } from "@/services/client-app.service";
 import { useWeightUnit } from "@/hooks/use-weight-unit";
+import { exerciseKey, topSetWeightKg } from "@/lib/exercise-log-metrics";
 
 interface PersonalRecordsProps {
   workouts: WorkoutWithExercises[];
@@ -27,13 +28,15 @@ export function PersonalRecords({ workouts }: PersonalRecordsProps) {
     for (const w of workouts) {
       for (const el of w.exercise_logs) {
         const name = el.routine_exercise?.exercise?.name;
-        if (!name || !el.weight_used) continue;
+        const top = topSetWeightKg(el);
+        if (!name || !top) continue;
 
-        const existing = prMap.get(name);
-        if (!existing || el.weight_used > existing.weight) {
-          prMap.set(name, {
+        const key = exerciseKey(el);
+        const existing = prMap.get(key);
+        if (!existing || top > existing.weight) {
+          prMap.set(key, {
             exerciseName: name,
-            weight: el.weight_used,
+            weight: top,
             date: w.date,
           });
         }

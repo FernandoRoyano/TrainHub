@@ -5,11 +5,12 @@ import { useTranslations } from "next-intl";
 import { useBlock } from "@/hooks/use-blocks";
 import { BlockBuilder } from "@/components/blocks/block-builder";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/shared/query-error-state";
 
 export default function EditBlockPage() {
   const { blockId } = useParams<{ blockId: string }>();
   const tc = useTranslations("common");
-  const { data: block, isLoading } = useBlock(blockId);
+  const { data: block, isLoading, isError, refetch, isRefetching } = useBlock(blockId);
 
   if (isLoading) {
     return (
@@ -18,6 +19,10 @@ export default function EditBlockPage() {
         <Skeleton className="h-96 w-full" />
       </div>
     );
+  }
+
+  if (isError) {
+    return <QueryErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
   }
 
   if (!block) {

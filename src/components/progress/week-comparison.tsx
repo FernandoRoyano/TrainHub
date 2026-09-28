@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import type { WorkoutWithExercises } from "@/services/client-app.service";
 import { useWeightUnit } from "@/hooks/use-weight-unit";
+import { volumeKg } from "@/lib/exercise-log-metrics";
 
 interface WeekComparisonProps {
   workouts: WorkoutWithExercises[];
@@ -34,7 +35,7 @@ export function WeekComparison({ workouts }: WeekComparisonProps) {
     for (const w of workouts) {
       const d = new Date(w.date + "T00:00:00");
       const volume = w.exercise_logs.reduce(
-        (acc, el) => acc + el.sets_completed * (toDisplay(el.weight_used) ?? 0),
+        (acc, el) => acc + (toDisplay(volumeKg(el)) ?? 0),
         0
       );
 

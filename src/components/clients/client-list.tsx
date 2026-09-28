@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useClients, useDeleteClient, useUpdateClient, useClientsActivity } from "@/hooks/use-clients";
@@ -20,6 +20,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
+import { QueryErrorState } from "@/components/shared/query-error-state";
+import { WorkspaceHeader } from "@/components/shared/workspace-header";
 import {
   Search,
   UserPlus,
@@ -33,10 +35,13 @@ import {
   AlertTriangle,
   UserX,
   UserCheck,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/use-debounce";
 import { STATUS_STYLES } from "@/lib/ui-tokens";
+import { cn } from "@/lib/utils";
 
 function getComplianceDotClass(
   workoutsThisWeek: number,
@@ -74,6 +79,9 @@ function getAccessText(
   return `${t("lastAccessLabel")}: ${rel}`;
 }
 
+// 24 llena la rejilla de 2 y 3 columnas sin dejar huecos
+const PAGE_SIZE = 24;
+
 export function ClientList() {
   const t = useTranslations("clients");
   const tc = useTranslations("common");
@@ -81,18 +89,34 @@ export function ClientList() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
+  const [page, setPage] = useState(0);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const debouncedSearch = useDebounce(search, 300);
-  const { data, isLoading } = useClients({
+  const { data, isLoading, isError, refetch, isRefetching } = useClients({
     search: debouncedSearch,
     status,
+    page,
+    pageSize: PAGE_SIZE,
   });
   const deleteClient = useDeleteClient();
   const updateClient = useUpdateClient();
   const { data: sub } = useSubscription();
 
   const clients = data?.data ?? [];
+  const totalCount = data?.count ?? 0;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+  // Al filtrar se vuelve a la primera página; si se borra el último cliente
+  // de una página, se retrocede a la anterior en vez de mostrarla vacía.
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedSearch, status]);
+  useEffect(() => {
+    if (data && page > 0 && page >= totalPages) {
+      setPage(Math.max(totalPages - 1, 0));
+    }
+  }, [data, page, totalPages]);
 
   const clientIds = useMemo(
     () => clients.map((c) => c.id),
@@ -103,10 +127,14 @@ export function ClientList() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
-        <div className="flex gap-2">
+      <WorkspaceHeader
+        eyebrow={t("workspaceLabel")}
+        title={t("title")}
+        description={t("workspaceDescription")}
+        metric={totalCount}
+        metricLabel={t("totalClients")}
+        actions={
+          <div className="flex gap-2">
           {sub?.canAddClient !== false ? (
             <Button asChild>
               <Link href="/clients/new">
@@ -122,8 +150,9 @@ export function ClientList() {
               </Link>
             </Button>
           )}
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       {/* Subscription limit warning */}
       {sub && !sub.canAddClient && (
@@ -140,7 +169,7 @@ export function ClientList() {
       )}
 
       {/* Search + Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col gap-3 rounded-2xl border border-border/50 bg-card/35 p-3 sm:flex-row">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -161,7 +190,9 @@ export function ClientList() {
       </div>
 
       {/* Client List */}
-      {isLoading ? (
+      {isError ? (
+        <QueryErrorState onRetry={() => refetch()} isRetrying={isRefetching} />
+      ) : isLoading ? (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Card key={i}>
@@ -211,13 +242,16 @@ export function ClientList() {
             return (
               <Card
                 key={client.id}
-                className="cursor-pointer hover:bg-accent/50 transition-colors"
+                className={cn(
+                  "group cursor-pointer overflow-hidden border-border/60 bg-card/45 shadow-none transition-colors hover:border-primary/25 hover:bg-card/70",
+                  isInactive && "border-l-2 border-l-warning/70"
+                )}
                 onClick={() => router.push(`/clients/${client.id}`)}
               >
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback className="text-sm">
+                    <Avatar className="h-11 w-11 border border-border/60">
+                      <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
                         {initials}
                       </AvatarFallback>
                     </Avatar>
@@ -318,7 +352,7 @@ export function ClientList() {
                     </div>
                   )}
                   {/* Quick action buttons */}
-                  <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/50">
+                  <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/40 opacity-80 transition-opacity group-hover:opacity-100">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -360,6 +394,39 @@ export function ClientList() {
               </Card>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!isError && totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            {t("showingClients", {
+              from: page * PAGE_SIZE + 1,
+              to: Math.min((page + 1) * PAGE_SIZE, totalCount),
+              total: totalCount,
+            })}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 0}
+              onClick={() => setPage(page - 1)}
+              aria-label={tc("previous")}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= totalPages - 1}
+              onClick={() => setPage(page + 1)}
+              aria-label={tc("next")}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
 

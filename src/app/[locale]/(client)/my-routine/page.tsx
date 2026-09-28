@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
+import { QueryErrorState } from "@/components/shared/query-error-state";
 import { Dumbbell, Check, Play, Timer, Loader2, MessageSquare, Plus, X } from "lucide-react";
 import { RestTimer } from "@/components/workout/rest-timer";
 import { WorkoutTimer } from "@/components/workout/workout-timer";
@@ -94,7 +95,7 @@ function ExerciseCard({
     <Card
       key={ex.id}
       className={cn(
-        "transition-all duration-300 relative",
+        "relative transition-[border-color,background-color,opacity] duration-300",
         isLogged
           ? "border-2 border-primary bg-primary/10 opacity-70"
           : "border border-border"
@@ -112,6 +113,7 @@ function ExerciseCard({
             type="button"
             onClick={() => ex.exercise && setSelectedExercise(ex.exercise as Exercise)}
             className="shrink-0"
+            aria-label={ex.exercise?.name ?? t("exerciseDetails")}
           >
             <ExerciseAnimation
               thumbnailUrl={ex.exercise?.thumbnail_url}
@@ -124,6 +126,7 @@ function ExerciseCard({
               type="button"
               onClick={() => ex.exercise && setSelectedExercise(ex.exercise as Exercise)}
               className="text-left"
+              aria-label={ex.exercise?.name ?? t("exerciseDetails")}
             >
               <p className="font-medium text-sm md:text-base hover:text-primary transition-colors leading-tight">
                 {(locale === "es" ? ex.exercise?.name_es : null) ?? ex.exercise?.name ?? ""}
@@ -139,6 +142,7 @@ function ExerciseCard({
                   onClick={() => startCountdown(ex.rest_seconds, ex.exercise?.name)}
                   className="text-muted-foreground hover:text-primary transition-colors"
                   title={t("startRestTimer")}
+                  aria-label={t("startRestTimer")}
                 >
                   <Timer className="h-3.5 w-3.5" />
                 </button>
@@ -177,6 +181,7 @@ function ExerciseCard({
                       inputMode="numeric"
                       pattern="[0-9]*"
                       value={set.reps}
+                      aria-label={`${t("repsShort")} ${si + 1}`}
                       onChange={(e) => updateField("reps", e.target.value)}
                       className="h-11 text-base text-center flex-1 font-semibold px-1"
                       placeholder={ex.reps ?? ""}
@@ -186,6 +191,7 @@ function ExerciseCard({
                       inputMode="decimal"
                       step="0.5"
                       value={set.weight}
+                      aria-label={`${t("weightShort")} ${si + 1}`}
                       onChange={(e) => updateField("weight", e.target.value)}
                       className="h-11 text-base text-center flex-1 font-semibold px-1"
                       placeholder={unit}
@@ -196,6 +202,7 @@ function ExerciseCard({
                       disabled={setDetails.length <= 1}
                       className="w-7 flex items-center justify-center text-muted-foreground hover:text-destructive disabled:opacity-30 disabled:cursor-not-allowed"
                       title={t("removeSet")}
+                      aria-label={`${t("removeSet")} ${si + 1}`}
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -208,6 +215,7 @@ function ExerciseCard({
                         type="number"
                         inputMode="numeric"
                         value={set.rir}
+                        aria-label={`${t("rirShort")} ${si + 1}`}
                         onChange={(e) => updateField("rir", e.target.value)}
                         className="h-9 text-sm text-center flex-1 px-1"
                         placeholder="—"
@@ -219,6 +227,7 @@ function ExerciseCard({
                         type="number"
                         inputMode="numeric"
                         value={set.rest}
+                        aria-label={`${t("restShort")} ${si + 1}`}
                         onChange={(e) => updateField("rest", e.target.value)}
                         className="h-9 text-sm text-center flex-1 px-1"
                         placeholder={ex.rest_seconds > 0 ? String(ex.rest_seconds) : "s"}
@@ -230,6 +239,7 @@ function ExerciseCard({
                     <Input
                       type="text"
                       value={set.note}
+                      aria-label={`${t("setNotePlaceholder")} ${si + 1}`}
                       onChange={(e) => updateField("note", e.target.value)}
                       className="h-8 text-xs text-muted-foreground"
                       placeholder={t("setNotePlaceholder")}
@@ -250,7 +260,7 @@ function ExerciseCard({
             <Button
               size="sm"
               variant="default"
-              className="w-full mt-1 h-9 active:scale-[0.98] transition-all"
+              className="w-full mt-1 h-9 active:scale-[0.98] transition-transform"
               disabled={logExercise.isPending}
               onClick={() => handleLogExercise(ex.id)}
             >
@@ -287,7 +297,13 @@ function MyRoutinePageContent() {
   const tr = useTranslations("routines");
   const locale = useLocale();
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
-  const { data: routine, isLoading } = useMyRoutine();
+  const {
+    data: routine,
+    isLoading,
+    isError: routineError,
+    refetch: refetchRoutine,
+    isRefetching: isRefetchingRoutine,
+  } = useMyRoutine();
   const { data: client } = useMyClient();
   const { data: logs } = useWorkoutLogs(routine?.id ?? "");
   useMyRoutineRealtime(
@@ -363,6 +379,13 @@ function MyRoutinePageContent() {
     );
   }
 
+  // Un fallo de red no es "no tienes rutina asignada"
+  if (routineError) {
+    return (
+      <QueryErrorState onRetry={() => refetchRoutine()} isRetrying={isRefetchingRoutine} />
+    );
+  }
+
   if (!routine) {
     return (
       <EmptyState
@@ -386,6 +409,14 @@ function MyRoutinePageContent() {
   );
   const isExerciseLogged = (exId: string) =>
     serverLoggedIds.has(exId) || loggedExercises.includes(exId);
+
+  const exerciseCount = activeDay?.exercises.length ?? 0;
+  const completedExerciseCount = activeDay?.exercises.filter((exercise) =>
+    isExerciseLogged(exercise.id)
+  ).length ?? 0;
+  const sessionProgress = exerciseCount > 0
+    ? Math.round((completedExerciseCount / exerciseCount) * 100)
+    : 0;
 
   // Last completed log for this day (not today) — to show previous weights
   const lastLog = logs
@@ -461,20 +492,47 @@ function MyRoutinePageContent() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold">{t("myRoutine")}</h1>
-          <p className="text-muted-foreground text-sm">{routine.routine?.name}</p>
+    <div className="space-y-5">
+      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/65 p-5 shadow-xl shadow-background/20">
+        <div
+          aria-hidden
+          className="absolute inset-y-0 right-0 w-2/3"
+          style={{
+            background:
+              "radial-gradient(circle at 90% 10%, hsl(var(--primary) / 0.18), transparent 52%)",
+          }}
+        />
+        <div className="relative flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("myRoutine")}</p>
+            <h1 className="mt-2 truncate font-display text-2xl font-bold tracking-tight sm:text-3xl">
+              {routine.routine?.name}
+            </h1>
+            {activeDay?.name && (
+              <p className="mt-1 text-sm text-muted-foreground">{activeDay.name}</p>
+            )}
+          </div>
+          <div
+            className="grid h-14 w-14 shrink-0 place-items-center rounded-full"
+            style={{
+              background: `conic-gradient(hsl(var(--primary)) ${sessionProgress}%, hsl(var(--muted)) ${sessionProgress}% 100%)`,
+            }}
+            aria-label={t("sessionProgress", { completed: completedExerciseCount, total: exerciseCount })}
+          >
+            <span className="grid h-11 w-11 place-items-center rounded-full bg-card font-display text-xs font-bold tabular-nums">
+              {completedExerciseCount}/{exerciseCount}
+            </span>
+          </div>
         </div>
         <Button
           variant={simpleView ? "default" : "outline"}
           size="sm"
           onClick={() => setSimpleView(!simpleView)}
+          className="absolute bottom-4 right-4 h-8 text-xs"
         >
           {simpleView ? t("fullView") : t("simpleView")}
         </Button>
-      </div>
+      </section>
 
       {/* Day selector */}
       <div className="flex flex-wrap gap-2">
@@ -490,10 +548,6 @@ function MyRoutinePageContent() {
           </Button>
         ))}
       </div>
-      {activeDay?.name && (
-        <p className="text-sm font-medium text-muted-foreground -mt-1">{activeDay.name}</p>
-      )}
-
       {activeDay?.description && (
         <div className="rounded-lg border bg-muted/50 px-4 py-3">
           <p className="text-sm text-muted-foreground">{activeDay.description}</p>
@@ -506,7 +560,7 @@ function MyRoutinePageContent() {
       {activeDay && (
         <div className="space-y-3">
           {!todayLog && !activeWorkoutId ? (
-            <Button onClick={handleStartWorkout} className="w-full" disabled={startWorkout.isPending}>
+            <Button onClick={handleStartWorkout} className="h-12 w-full rounded-2xl text-sm" disabled={startWorkout.isPending}>
               {startWorkout.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
               {t("startWorkout")}
             </Button>
@@ -523,11 +577,11 @@ function MyRoutinePageContent() {
               )}
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="sticky top-2 z-20 space-y-3 rounded-2xl border border-primary/20 bg-background/90 p-3 shadow-xl backdrop-blur-xl">
               {/* Workout Timer */}
               <div className="flex items-center justify-between">
                 <WorkoutTimer startedAt={workoutStartedAt || (todayLog as any)?.started_at || new Date().toISOString()} />
-                <Badge variant="outline" className="text-xs text-primary animate-pulse">
+                <Badge variant="outline" className="border-primary/25 bg-primary/10 text-xs text-primary">
                   {t("inProgress")}
                 </Badge>
               </div>
@@ -551,7 +605,7 @@ function MyRoutinePageContent() {
               </div>
               <Button
                 variant="secondary"
-                className="w-full"
+                className="h-11 w-full rounded-xl"
                 disabled={completeWorkout.isPending}
                 onClick={() => {
                   const id = activeWorkoutId ?? todayLog?.id;

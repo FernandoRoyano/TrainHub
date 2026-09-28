@@ -6,6 +6,8 @@ import { useActionItems } from "@/hooks/use-action-center";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/shared/query-error-state";
+import { WorkspaceHeader } from "@/components/shared/workspace-header";
 import {
   CreditCard,
   UserX,
@@ -50,7 +52,7 @@ function Row({
   return (
     <Link
       href={`/clients/${clientId}`}
-      className="flex items-center gap-3 text-sm rounded-lg border p-3 hover:bg-accent/50 hover:border-border transition-all active:scale-[0.98]"
+      className="group flex items-center gap-3 rounded-xl border border-border/50 bg-background/35 p-3 text-sm transition-colors hover:border-primary/25 hover:bg-card active:scale-[0.99]"
     >
       <ClientAvatar name={name} />
       <span className="font-medium truncate flex-1">{name || "—"}</span>
@@ -73,7 +75,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <Card className="border-border/50">
+    <Card className="border-border/60 bg-card/45 shadow-none">
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <Icon className={`h-4 w-4 ${iconClass}`} />
@@ -94,7 +96,7 @@ export default function ActionCenterPage() {
   const t = useTranslations("actionCenter");
   const locale = useLocale();
   const dfLocale = locale === "es" ? es : enUS;
-  const { data, isLoading } = useActionItems();
+  const { data, isLoading, isError, refetch, isRefetching } = useActionItems();
 
   const fmtDate = (d: string) => format(new Date(d), "d MMM", { locale: dfLocale });
   const fmtMoney = (amount: number, currency = "EUR") =>
@@ -115,19 +117,31 @@ export default function ActionCenterPage() {
     );
   }
 
-  const allClear = !data || data.total === 0;
+  // Sin datos no se puede afirmar "todo al día": antes un fallo de red
+  // mostraba el check verde aunque hubiera pagos vencidos.
+  if (isError || !data) {
+    return (
+      <div className="space-y-4">
+        <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
+        <QueryErrorState onRetry={() => refetch()} isRetrying={isRefetching} />
+      </div>
+    );
+  }
+
+  const allClear = data.total === 0;
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="font-display text-2xl font-bold">{t("title")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {allClear ? t("subtitleClear") : t("subtitle", { count: data!.total })}
-        </p>
-      </div>
+      <WorkspaceHeader
+        eyebrow={t("workspaceLabel")}
+        title={t("title")}
+        description={allClear ? t("subtitleClear") : t("subtitle", { count: data.total })}
+        metric={data.total}
+        metricLabel={t("pendingItems")}
+      />
 
       {allClear && (
-        <Card className="border-border/50">
+        <Card className="border-success/20 bg-success/5 shadow-none">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <CheckCircle2 className="h-10 w-10 text-success mb-3" />
             <p className="text-sm text-muted-foreground">{t("empty")}</p>

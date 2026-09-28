@@ -4,13 +4,13 @@ import { usePathname } from "@/i18n/navigation";
 
 const sectionHues: Record<string, number> = {
   "/dashboard": 105,
-  "/clients": 200,
-  "/exercises": 270,
-  "/blocks": 310,
-  "/routines": 35,
-  "/messages": 210,
-  "/calendar": 170,
-  "/settings": 240,
+  "/clients": 115,
+  "/exercises": 95,
+  "/blocks": 100,
+  "/routines": 110,
+  "/messages": 125,
+  "/calendar": 120,
+  "/settings": 105,
 };
 
 export function SectionBackground({ children }: { children: React.ReactNode }) {

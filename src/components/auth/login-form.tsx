@@ -48,7 +48,7 @@ export function LoginForm({ urlError }: LoginFormProps) {
     try {
       const { user } = await authService.signIn(data.email, data.password);
       const role = user?.user_metadata?.role;
-      router.push(role === "client" ? "/my-routine" : "/dashboard");
+      router.push(role === "client" ? "/today" : "/dashboard");
       router.refresh();
     } catch (error) {
       const code = (error as { code?: string })?.code;

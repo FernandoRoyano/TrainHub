@@ -5,11 +5,12 @@ import { useTranslations } from "next-intl";
 import { useClient } from "@/hooks/use-clients";
 import { ClientForm } from "@/components/clients/client-form";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/shared/query-error-state";
 
 export default function EditClientPage() {
   const { clientId } = useParams<{ clientId: string }>();
   const tc = useTranslations("common");
-  const { data: client, isLoading } = useClient(clientId);
+  const { data: client, isLoading, isError, refetch, isRefetching } = useClient(clientId);
 
   if (isLoading) {
     return (
@@ -18,6 +19,10 @@ export default function EditClientPage() {
         <Skeleton className="h-96 w-full" />
       </div>
     );
+  }
+
+  if (isError) {
+    return <QueryErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
   }
 
   if (!client) {

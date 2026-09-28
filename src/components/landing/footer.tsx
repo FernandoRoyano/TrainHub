@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { Dumbbell } from "lucide-react";
+import { EcosystemSignature } from "@/components/shared/ecosystem-signature";
 
 interface FooterLinkConfig {
   titleKey: string;
@@ -46,7 +47,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-4">
+            <Link href="/" className="mb-4 flex min-h-11 items-center gap-2">
               <Dumbbell className="h-5 w-5 text-primary" />
               <span className="font-display text-lg font-bold tracking-tight">
                 Train<span className="text-primary">Hub</span>
@@ -68,7 +69,7 @@ export function Footer() {
                   <li key={link.labelKey}>
                     <Link
                       href={link.localized ? `/${locale}${link.href}` : link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="flex min-h-11 items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {t(link.labelKey)}
                     </Link>
@@ -83,22 +84,23 @@ export function Footer() {
           <p className="text-xs text-muted-foreground">
             {t("footerCopyright", { year: new Date().getFullYear() })}
           </p>
-          <div className="flex items-center gap-4">
+          <EcosystemSignature locale={locale === "en" ? "en" : "es"} compact />
+          <div className="flex flex-wrap items-center justify-center gap-x-4">
             <Link
               href="#"
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="flex min-h-11 min-w-11 items-center justify-center text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
               Twitter
             </Link>
             <Link
               href="#"
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="flex min-h-11 min-w-11 items-center justify-center text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
               Instagram
             </Link>
             <Link
               href="#"
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="flex min-h-11 min-w-11 items-center justify-center text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
               LinkedIn
             </Link>

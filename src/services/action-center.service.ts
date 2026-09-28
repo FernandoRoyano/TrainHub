@@ -111,6 +111,15 @@ export const actionCenterService = {
       endingPromise,
     ]);
 
+    // Un fallo de consulta no puede leerse como "todo al día". Única excepción:
+    // last_active_at, que no existe mientras 00048 siga sin aplicar.
+    if (paymentsRes.error) throw paymentsRes.error;
+    if (reviewsRes.error) throw reviewsRes.error;
+    if (endingRes.error) throw endingRes.error;
+    if (clientsRes.error && !clientsRes.error.message?.includes("last_active_at")) {
+      throw clientsRes.error;
+    }
+
     // Inactivos: activos que nunca han entrado o llevan >= umbral sin abrir la app.
     const inactive: InactiveItem[] = [];
     if (!clientsRes.error) {

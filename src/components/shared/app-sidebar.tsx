@@ -28,6 +28,7 @@ import {
   ListChecks,
 } from "lucide-react";
 import { useUIStore } from "@/stores/ui-store";
+import { ProductMark } from "@/components/shared/product-mark";
 
 interface NavItem {
   key: string;
@@ -81,6 +82,7 @@ const navEntries: NavEntry[] = [
 
 export function AppSidebar() {
   const t = useTranslations("nav");
+  const tCommon = useTranslations("common");
   const pathname = usePathname();
   const { profile, signOut, isSigningOut, isAdmin } = useAuth();
   const { sidebarOpen, toggleSidebar } = useUIStore();
@@ -114,7 +116,7 @@ export function AppSidebar() {
         key={item.key}
         href={item.href}
         className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 relative",
+          "relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-[color,background-color,transform] duration-200",
           isActive
             ? "bg-primary/10 text-primary before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-full before:bg-primary"
             : "text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -157,7 +159,7 @@ export function AppSidebar() {
         <button
           onClick={() => sidebarOpen && toggleGroup(group.key)}
           className={cn(
-            "w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+            "w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-[color,background-color,transform] duration-200",
             hasActive
               ? "text-primary"
               : "text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -188,27 +190,18 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col glass-sidebar transition-all duration-300 scrollbar-thin",
+        "hidden md:flex flex-col glass-sidebar transition-[width] duration-300 scrollbar-thin",
         sidebarOpen ? "w-64" : "w-[68px]"
       )}
     >
       {/* Logo */}
       <div className="flex items-center justify-between px-4 h-16">
-        {sidebarOpen && (
-          <div className="flex items-center gap-2">
-            <Dumbbell className="h-6 w-6 text-primary" />
-            <h2 className="font-display text-lg font-bold tracking-tight">
-              Train<span className="text-primary">Hub</span>
-            </h2>
-          </div>
-        )}
-        {!sidebarOpen && (
-          <Dumbbell className="h-6 w-6 text-primary mx-auto" />
-        )}
+        <ProductMark compact={!sidebarOpen} descriptor={sidebarOpen ? t("trainerWorkspace") : undefined} className={!sidebarOpen ? "mx-auto" : undefined} />
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
+          aria-label={tCommon("close")}
           className={cn("h-7 w-7 text-muted-foreground", !sidebarOpen && "hidden")}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -221,7 +214,7 @@ export function AppSidebar() {
           <Link
             href="/admin"
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 mb-2 border border-primary/20 bg-primary/5",
+              "mb-2 flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm font-medium transition-[color,background-color,transform] duration-200",
               "text-primary hover:bg-primary/10",
               !sidebarOpen && "justify-center px-2"
             )}

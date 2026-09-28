@@ -78,3 +78,14 @@ export const CHART_COLORS = [
   "hsl(var(--chart-4))",
   "hsl(var(--chart-5))",
 ];
+
+// PersonalizaciÃ³n controlada del espacio del cliente. Los valores se guardan
+// como claves estables en users.settings; no se aceptan colores arbitrarios.
+export const TRAINER_BRAND_ACCENTS = {
+  green: "105 62% 62%",
+  blue: "199 85% 60%",
+  violet: "262 75% 68%",
+  orange: "38 92% 58%",
+} as const;
+
+export type TrainerBrandAccent = keyof typeof TRAINER_BRAND_ACCENTS;

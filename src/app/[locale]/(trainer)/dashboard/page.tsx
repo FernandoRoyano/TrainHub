@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/shared/query-error-state";
 import { Badge } from "@/components/ui/badge";
 import {
   Users,
@@ -27,7 +28,6 @@ import {
   BarChart3,
   CheckCircle2,
   Inbox,
-  ListChecks,
   ChevronRight,
 } from "lucide-react";
 import {
@@ -95,7 +95,7 @@ export default function DashboardPage() {
   const tAction = useTranslations("actionCenter");
   const locale = useLocale();
   const { profile } = useAuth();
-  const { data: stats, isLoading } = useDashboardStats();
+  const { data: stats, isLoading, isError, refetch, isRefetching } = useDashboardStats();
   const { data: actionItems } = useActionItems();
 
   if (isLoading) {
@@ -112,6 +112,11 @@ export default function DashboardPage() {
         <Skeleton className="h-48" />
       </div>
     );
+  }
+
+  // Sin esto, un fallo de red pintaba todos los indicadores a cero
+  if (isError) {
+    return <QueryErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
   }
 
   // Map day codes to translated labels for the chart
@@ -186,17 +191,18 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="relative overflow-hidden rounded-2xl px-5 py-6 sm:px-6 sm:py-8 animate-fade-in-up">
+      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/65 px-5 py-6 shadow-2xl shadow-background/30 sm:px-7 sm:py-8 animate-fade-in-up">
         <div
           aria-hidden
-          className="absolute inset-0 -z-10 opacity-60"
+          className="absolute inset-0 opacity-70"
           style={{
             background:
-              "radial-gradient(60% 80% at 0% 0%, hsl(var(--primary) / 0.16), transparent 60%), radial-gradient(50% 80% at 100% 0%, hsl(var(--chart-2) / 0.10), transparent 60%)",
+              "radial-gradient(55% 100% at 100% 0%, hsl(var(--primary) / 0.18), transparent 64%), radial-gradient(45% 80% at 82% 100%, hsl(var(--chart-2) / 0.10), transparent 65%)",
           }}
         />
-        <p className="text-xs sm:text-sm text-muted-foreground capitalize">{today}</p>
-        <h1 className="mt-1 font-display text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+        <div className="relative max-w-3xl">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary capitalize">{today}</p>
+        <h1 className="mt-3 font-display text-3xl sm:text-5xl font-bold tracking-tight">
           {greeting}
           {trainerName ? (
             <>
@@ -205,10 +211,11 @@ export default function DashboardPage() {
           ) : null}{" "}
           👋
         </h1>
-        <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
+        <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
           {t("greetingSubtitle")}
         </p>
-      </div>
+        </div>
+      </section>
 
       {/* Quick actions - táctiles, lo primero al alcance del pulgar */}
       <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
@@ -234,12 +241,12 @@ export default function DashboardPage() {
       </div>
 
       {/* Centro de acción - solo si hay algo que atender */}
-      {actionItems && actionItems.total > 0 && (
+      {actionItems && (
         <Link href="/action-center" className="block">
-          <Card className="border-warning/30 bg-warning/5 transition-colors hover:bg-warning/10">
-            <CardContent className="flex items-center gap-3 p-4">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning/15 text-warning">
-                <ListChecks className="h-5 w-5" />
+          <Card className="group overflow-hidden border-warning/25 bg-gradient-to-r from-warning/10 via-card to-card shadow-none transition-colors hover:border-warning/40">
+            <CardContent className="flex items-center gap-4 p-4 sm:p-5">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-warning/15 text-warning">
+                <span className="font-display text-xl font-bold tabular-nums">{actionItems.total}</span>
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold">{tAction("title")}</p>
@@ -247,7 +254,7 @@ export default function DashboardPage() {
                   {tAction("dashboardSummary", { count: actionItems.total })}
                 </p>
               </div>
-              <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
+              <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />
             </CardContent>
           </Card>
         </Link>
@@ -261,7 +268,7 @@ export default function DashboardPage() {
             <Card
               key={kpi.label}
               style={{ animationDelay: `${idx * 80}ms` }}
-              className={`glass-elevated shadow-xl border-t-2 ${kpi.accent.borderT} transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-default animate-fade-in-up ${kpi.accent.glow}`}
+              className="border-border/60 bg-card/55 shadow-none transition-colors duration-200 hover:border-primary/25 cursor-default animate-fade-in-up"
             >
               <CardContent className="pt-4 pb-4 sm:pt-6 sm:pb-6">
                 <div className="flex items-start justify-between gap-3">
@@ -269,7 +276,7 @@ export default function DashboardPage() {
                     <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                       {kpi.label}
                     </p>
-                    <p className={`font-display text-3xl sm:text-5xl font-bold mt-1.5 sm:mt-2 tabular-nums tracking-tight ${kpi.urgent ? "text-destructive animate-pulse" : ""}`}>
+                    <p className={`font-display text-3xl sm:text-4xl font-bold mt-1.5 sm:mt-2 tabular-nums tracking-tight ${kpi.urgent ? "text-destructive" : ""}`}>
                       {kpi.value}
                     </p>
                     {kpi.subtitle && (
@@ -304,7 +311,7 @@ export default function DashboardPage() {
             <Card
               key={kpi.label}
               style={{ animationDelay: `${(idx + 2) * 80}ms` }}
-              className={`glass-elevated shadow-md border-t-2 ${kpi.accent.borderT} transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-default animate-fade-in-up ${kpi.accent.glow}`}
+              className="border-border/60 bg-card/40 shadow-none transition-colors duration-200 hover:border-primary/20 cursor-default animate-fade-in-up"
             >
               <CardContent className="pt-4 pb-4">
                 <div className="flex items-center gap-3">
@@ -317,7 +324,7 @@ export default function DashboardPage() {
                     <p className="text-[11px] font-medium text-muted-foreground truncate uppercase tracking-wide">
                       {kpi.label}
                     </p>
-                    <p className={`font-display text-2xl font-bold tabular-nums leading-tight ${kpi.urgent ? "text-destructive animate-pulse" : ""}`}>
+                    <p className={`font-display text-2xl font-bold tabular-nums leading-tight ${kpi.urgent ? "text-destructive" : ""}`}>
                       {kpi.value}
                     </p>
                   </div>

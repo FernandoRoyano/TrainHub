@@ -24,6 +24,7 @@ import {
 import { TrendingUp, Weight, BarChart3 } from "lucide-react";
 import type { WorkoutWithExercises } from "@/services/client-app.service";
 import { useWeightUnit } from "@/hooks/use-weight-unit";
+import { exerciseKey, topSetWeightKg, volumeKg } from "@/lib/exercise-log-metrics";
 
 interface ProgressChartsProps {
   workouts: WorkoutWithExercises[];
@@ -40,14 +41,14 @@ export function ProgressCharts({ workouts }: ProgressChartsProps) {
     for (const w of workouts) {
       for (const el of w.exercise_logs) {
         const name = el.routine_exercise?.exercise?.name;
-        const id = el.routine_exercise_id;
+        const id = exerciseKey(el);
         if (name && id) map.set(id, name);
       }
     }
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
   }, [workouts]);
 
-  // Volume per workout (total sets * weight)
+  // Volume per workout (reps × weight per set)
   const volumeData = useMemo(() => {
     return workouts
       .filter((w) => w.exercise_logs.length > 0)
@@ -55,10 +56,10 @@ export function ProgressCharts({ workouts }: ProgressChartsProps) {
         const logs =
           selectedExercise === "all"
             ? w.exercise_logs
-            : w.exercise_logs.filter((el) => el.routine_exercise_id === selectedExercise);
+            : w.exercise_logs.filter((el) => exerciseKey(el) === selectedExercise);
 
         const totalVolume = logs.reduce((acc, el) => {
-          return acc + el.sets_completed * (toDisplay(el.weight_used) ?? 0);
+          return acc + (toDisplay(volumeKg(el)) ?? 0);
         }, 0);
 
         const totalSets = logs.reduce((acc, el) => acc + el.sets_completed, 0);
@@ -78,12 +79,13 @@ export function ProgressCharts({ workouts }: ProgressChartsProps) {
     return workouts
       .map((w) => {
         const log = w.exercise_logs.find(
-          (el) => el.routine_exercise_id === selectedExercise
+          (el) => exerciseKey(el) === selectedExercise
         );
-        if (!log || !log.weight_used) return null;
+        const top = log ? topSetWeightKg(log) : null;
+        if (!log || !top) return null;
         return {
           date: w.date,
-          weight: toDisplay(log.weight_used),
+          weight: toDisplay(top),
           sets: log.sets_completed,
         };
       })

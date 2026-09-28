@@ -18,6 +18,22 @@ export interface ClientRoutineView {
   routine: Routine & { days: RoutineDay[] };
 }
 
+export interface ClientTrainerProfile {
+  full_name: string | null;
+  avatar_url: string | null;
+  settings: Record<string, unknown> | null;
+}
+
+export interface MyClientRecord {
+  id: string;
+  trainer_id: string;
+  user_id: string | null;
+  full_name: string;
+  gender: "male" | "female" | null;
+  trainer: ClientTrainerProfile | null;
+  [key: string]: unknown;
+}
+
 export interface WorkoutLog {
   id: string;
   client_id: string;
@@ -88,11 +104,11 @@ export const clientAppService = {
 
     const { data, error } = await supabase
       .from("clients")
-      .select("*")
+      .select("*, trainer:users!clients_trainer_id_fkey(full_name, avatar_url, settings)")
       .eq("user_id", user.id)
       .single();
     if (error) throw error;
-    return data;
+    return data as unknown as MyClientRecord;
   },
 
   async getMyActiveRoutine() {
@@ -103,12 +119,14 @@ export const clientAppService = {
     const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
-    // Get client record
-    const { data: client } = await supabase
+    // Get client record. maybeSingle: "sin ficha" es null, no un error; un
+    // fallo real se lanza para que la pantalla no diga "sin rutina asignada".
+    const { data: client, error: clientError } = await supabase
       .from("clients")
       .select("id")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
+    if (clientError) throw clientError;
     if (!client) return null;
 
     // Get active assignment
@@ -379,12 +397,14 @@ export const clientAppService = {
     const user = session?.user;
     if (!user) throw new Error("Not authenticated");
 
-    // Get client record
-    const { data: client } = await supabase
+    // Get client record. maybeSingle: "sin ficha" es null, no un error; un
+    // fallo real se lanza para que la pantalla no diga "sin plan asignado".
+    const { data: client, error: clientError } = await supabase
       .from("clients")
       .select("id")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
+    if (clientError) throw clientError;
     if (!client) return null;
 
     // Get active meal plan assignment
@@ -554,6 +574,7 @@ export interface WorkoutWithExercises extends WorkoutLog {
   exercise_logs: (ExerciseLog & {
     routine_exercise: {
       id: string;
+      exercise_id: string | null;
       exercise: { name: string; name_es: string | null } | null;
     } | null;
   })[];

@@ -1,14 +1,18 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useQuestionnaireTemplate } from "@/hooks/use-questionnaires";
 import { QuestionnaireTemplateForm } from "@/components/questionnaires/questionnaire-template-form";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/shared/query-error-state";
 
 export default function EditQuestionnairePage() {
   const params = useParams();
   const templateId = params.templateId as string;
-  const { data: template, isLoading } = useQuestionnaireTemplate(templateId);
+  const tc = useTranslations("common");
+  const { data: template, isLoading, isError, refetch, isRefetching } =
+    useQuestionnaireTemplate(templateId);
 
   if (isLoading) {
     return (
@@ -21,7 +25,13 @@ export default function EditQuestionnairePage() {
     );
   }
 
-  if (!template) return null;
+  if (isError) {
+    return <QueryErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
+  }
+
+  if (!template) {
+    return <p className="text-muted-foreground">{tc("notFound")}</p>;
+  }
 
   return <QuestionnaireTemplateForm mode="edit" template={template} />;
 }

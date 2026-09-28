@@ -133,16 +133,19 @@ export function Pricing() {
               {t("pricingMonthly")}
             </span>
             <button
+              type="button"
               onClick={() => setYearly(!yearly)}
               className={cn(
-                "relative h-7 w-12 rounded-full transition-colors",
+                "relative h-11 w-14 rounded-full transition-colors",
                 yearly ? "bg-primary" : "bg-muted"
               )}
+              aria-label={t("pricingBillingToggle")}
+              aria-pressed={yearly}
             >
               <div
                 className={cn(
-                  "absolute top-1 h-5 w-5 rounded-full bg-white transition-transform",
-                  yearly ? "translate-x-6" : "translate-x-1"
+                  "absolute top-3 h-5 w-5 rounded-full bg-white transition-transform",
+                  yearly ? "translate-x-8" : "translate-x-1.5"
                 )}
               />
             </button>
@@ -205,13 +208,13 @@ export function Pricing() {
                   </ul>
 
                   {isFree ? (
-                    <Button variant="outline" className="w-full" asChild>
+                    <Button variant="outline" className="min-h-11 w-full" asChild>
                       <Link href="/register">{t(plan.ctaKey)}</Link>
                     </Button>
                   ) : (
                     <Button
                       variant={plan.popular ? "default" : "outline"}
-                      className="w-full"
+                      className="min-h-11 w-full"
                       disabled={!!loadingTier}
                       onClick={() => handleCheckout(plan.tier as "pro" | "elite")}
                     >

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Briefcase, Users as UsersIcon } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, BookOpen, Briefcase, Sparkles, Users as UsersIcon } from "lucide-react";
+import { WELLNESSREAL_LINKS } from "@/lib/ecosystem";
 
 type Locale = "es" | "en";
 type Role = "trainer" | "client" | "admin";
@@ -36,7 +37,7 @@ const t = {
 
 export function HelpContent({ locale, role }: Props) {
   const i = t[locale];
-  const homeHref = role === "client" ? `/${locale}/my-routine` : `/${locale}/dashboard`;
+  const homeHref = role === "client" ? `/${locale}/today` : `/${locale}/dashboard`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,10 +80,52 @@ export function HelpContent({ locale, role }: Props) {
             >
               {locale === "es" ? <ClientEs /> : <ClientEn />}
             </SectionGroup>
+
+            {role !== "client" && <WellnessRealResource locale={locale} />}
           </div>
         </div>
       </main>
     </div>
+  );
+}
+
+function WellnessRealResource({ locale }: { locale: Locale }) {
+  const copy = locale === "es"
+    ? {
+        eyebrow: "Recurso del ecosistema",
+        title: "Fitness real para gente con vida real",
+        body: "Una guía gratuita de WellnessReal para reforzar la educación del cliente con criterios prácticos de entrenamiento, nutrición y hábitos.",
+        action: "Ver la guía gratuita",
+      }
+    : {
+        eyebrow: "Ecosystem resource",
+        title: "Real fitness for real life",
+        body: "A free WellnessReal guide with practical criteria around training, nutrition and habits to support client education.",
+        action: "View the free guide",
+      };
+
+  return (
+    <aside className="overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.08] via-background to-background p-6 shadow-sm">
+      <div className="flex items-start gap-4">
+        <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
+          <Sparkles className="h-5 w-5" aria-hidden="true" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{copy.eyebrow}</p>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight">{copy.title}</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">{copy.body}</p>
+          <a
+            href={WELLNESSREAL_LINKS.freeGuide}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
+          >
+            {copy.action}
+            <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+          </a>
+        </div>
+      </div>
+    </aside>
   );
 }
 

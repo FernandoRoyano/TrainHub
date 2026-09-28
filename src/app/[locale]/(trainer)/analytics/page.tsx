@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useAnalytics } from "@/hooks/use-analytics";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/shared/query-error-state";
 import {
   Select,
   SelectContent,
@@ -72,7 +73,7 @@ export default function AnalyticsPage() {
   const t = useTranslations("analytics");
   const tc = useTranslations("common");
   const [days, setDays] = useState(90);
-  const { data, isLoading } = useAnalytics(days);
+  const { data, isLoading, isError, refetch, isRefetching } = useAnalytics(days);
 
   if (isLoading) {
     return (
@@ -94,7 +95,9 @@ export default function AnalyticsPage() {
     );
   }
 
-  if (!data) return null;
+  if (isError || !data) {
+    return <QueryErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
+  }
 
   const { thisWeek, lastWeek } = data.weeklyComparison;
 
