@@ -77,7 +77,20 @@ export function useStartWorkout() {
       routineDayId: string;
     }) =>
       clientAppService.startWorkout(clientId, clientRoutineId, routineDayId),
-    onSuccess: () => {
+    onSuccess: (startedWorkout, variables) => {
+      // Keep the active-routine cache in sync immediately. This prevents the
+      // persisted mobile session from looking stale before the refetch lands.
+      queryClient.setQueryData(
+        ["workout-logs", variables.clientRoutineId],
+        (current: unknown) => {
+          if (!Array.isArray(current)) return [startedWorkout];
+          return current.some((workout) =>
+            workout && typeof workout === "object" && "id" in workout && workout.id === startedWorkout.id
+          )
+            ? current
+            : [startedWorkout, ...current];
+        }
+      );
       queryClient.invalidateQueries({ queryKey: ["workout-logs"] });
     },
     onError: () => {

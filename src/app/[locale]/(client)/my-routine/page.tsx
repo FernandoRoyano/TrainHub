@@ -341,18 +341,33 @@ function MyRoutinePageContent() {
   const dayCount = routine?.routine?.days?.length ?? 0;
   const selectedDayIndex = dayCount > 0 ? Math.min(storedDayIndex, dayCount - 1) : 0;
 
-  // Clear stale session: if no active workout and store has leftover data, clean up
+  // Reconcile the session persisted on the device with the server. A workout
+  // can disappear after completion or routine reassignment while an installed
+  // PWA keeps its old activeWorkoutId, leaving the completion panel stuck.
   useEffect(() => {
-    if (!isLoading && routine) {
-      const todayLogForCleanup = logs?.find(
-        (l) => l.date === today && l.routine_day_id === (routine.routine?.days ?? [])[selectedDayIndex]?.id
-      );
-      const hasActiveWorkout = activeWorkoutId || (todayLogForCleanup && !todayLogForCleanup.completed);
-      if (!hasActiveWorkout && loggedExercises.length > 0) {
-        sessionEnd();
+    if (isLoading || !routine || !logs) return;
+
+    const selectedDayId = (routine.routine?.days ?? [])[selectedDayIndex]?.id;
+    const todayLogForCleanup = logs.find(
+      (log) => log.date === today && log.routine_day_id === selectedDayId
+    );
+
+    if (activeWorkoutId) {
+      const persistedWorkout = logs.find((log) => log.id === activeWorkoutId);
+      if (!persistedWorkout || persistedWorkout.completed) {
+        if (todayLogForCleanup && !todayLogForCleanup.completed) {
+          sessionStart(todayLogForCleanup.id);
+        } else {
+          sessionEnd();
+        }
       }
+      return;
     }
-  }, [isLoading, routine, logs, today, selectedDayIndex]);
+
+    if (!todayLogForCleanup && loggedExercises.length > 0) {
+      sessionEnd();
+    }
+  }, [activeWorkoutId, isLoading, loggedExercises.length, logs, routine, selectedDayIndex, sessionEnd, sessionStart, today]);
 
   // Helper to match old Set-based API
   const setExerciseData: React.Dispatch<React.SetStateAction<typeof exerciseData>> = (action) => {
@@ -608,7 +623,9 @@ function MyRoutinePageContent() {
                 className="h-11 w-full rounded-xl"
                 disabled={completeWorkout.isPending}
                 onClick={() => {
-                  const id = activeWorkoutId ?? todayLog?.id;
+                  // Prefer the server-backed log. The persisted id may belong
+                  // to an older session on mobile/PWA installations.
+                  const id = todayLog?.id ?? activeWorkoutId;
                   if (id) completeWorkout.mutate({ id, notes: workoutNotes || undefined, customDate: completionDate }, {
                     onSuccess: () => {
                       sessionEnd();
