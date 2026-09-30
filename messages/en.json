@@ -828,6 +828,7 @@
     "selectDay": "Select a day",
     "startWorkout": "Start workout",
     "completeWorkout": "Complete workout",
+    "completeWorkoutDescription": "Add your notes and confirm the date before finishing the session.",
     "workoutInProgress": "Workout in progress",
     "workoutCompleted": "Workout completed",
     "sessionProgress": "{completed} of {total} exercises completed",

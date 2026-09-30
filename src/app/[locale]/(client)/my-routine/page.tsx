@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -623,6 +624,7 @@ function MyRoutinePageContent() {
                 <DialogContent className="w-[calc(100%-2rem)] rounded-2xl sm:max-w-md">
                   <DialogHeader>
                     <DialogTitle>{t("completeWorkout")}</DialogTitle>
+                    <DialogDescription>{t("completeWorkoutDescription")}</DialogDescription>
                   </DialogHeader>
                   <Textarea
                     placeholder={t("workoutNotesPlaceholder")}
