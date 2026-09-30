@@ -17,6 +17,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { QueryErrorState } from "@/components/shared/query-error-state";
@@ -333,6 +341,7 @@ function MyRoutinePageContent() {
   const setSelectedDayIndex = useWorkoutSessionStore((s) => s.setSelectedDayIndex);
 
   const [simpleView, setSimpleView] = useState(false);
+  const [completionOpen, setCompletionOpen] = useState(false);
   const today = localDateString();
   const [completionDate, setCompletionDate] = useState<string>(today);
 
@@ -354,7 +363,12 @@ function MyRoutinePageContent() {
 
     if (activeWorkoutId) {
       const persistedWorkout = logs.find((log) => log.id === activeWorkoutId);
-      if (!persistedWorkout || persistedWorkout.completed) {
+      const belongsToSelectedSession = persistedWorkout
+        && !persistedWorkout.completed
+        && persistedWorkout.date === today
+        && persistedWorkout.routine_day_id === selectedDayId;
+
+      if (!belongsToSelectedSession) {
         if (todayLogForCleanup && !todayLogForCleanup.completed) {
           sessionStart(todayLogForCleanup.id);
         } else {
@@ -592,51 +606,63 @@ function MyRoutinePageContent() {
               )}
             </div>
           ) : (
-            <div className="sticky top-2 z-20 space-y-3 rounded-2xl border border-primary/20 bg-background/90 p-3 shadow-xl backdrop-blur-xl">
-              {/* Workout Timer */}
-              <div className="flex items-center justify-between">
+            <div className="sticky top-2 z-20 flex items-center justify-between gap-2 rounded-2xl border border-primary/20 bg-background/90 p-2 shadow-xl backdrop-blur-xl">
+              <div className="flex min-w-0 items-center gap-2">
                 <WorkoutTimer startedAt={workoutStartedAt || (todayLog as any)?.started_at || new Date().toISOString()} />
-                <Badge variant="outline" className="border-primary/25 bg-primary/10 text-xs text-primary">
+                <Badge variant="outline" className="hidden border-primary/25 bg-primary/10 text-xs text-primary sm:inline-flex">
                   {t("inProgress")}
                 </Badge>
               </div>
-
-              <Textarea
-                placeholder={t("workoutNotesPlaceholder")}
-                value={workoutNotes}
-                onChange={(e) => setWorkoutNotes(e.target.value)}
-                className="text-sm resize-none"
-                rows={2}
-              />
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">{t("workoutDate")}</label>
-                <Input
-                  type="date"
-                  value={completionDate}
-                  onChange={(e) => setCompletionDate(e.target.value)}
-                  max={today}
-                  className="text-sm h-9"
-                />
-              </div>
-              <Button
-                variant="secondary"
-                className="h-11 w-full rounded-xl"
-                disabled={completeWorkout.isPending}
-                onClick={() => {
-                  // Prefer the server-backed log. The persisted id may belong
-                  // to an older session on mobile/PWA installations.
-                  const id = todayLog?.id ?? activeWorkoutId;
-                  if (id) completeWorkout.mutate({ id, notes: workoutNotes || undefined, customDate: completionDate }, {
-                    onSuccess: () => {
-                      sessionEnd();
-                      setCompletionDate(today);
-                    },
-                  });
-                }}
-              >
-                {completeWorkout.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
-                {t("completeWorkout")}
-              </Button>
+              <Dialog open={completionOpen} onOpenChange={setCompletionOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="secondary" size="sm" className="shrink-0 rounded-xl">
+                    <Check className="h-4 w-4" />
+                    {t("completeWorkout")}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="w-[calc(100%-2rem)] rounded-2xl sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>{t("completeWorkout")}</DialogTitle>
+                  </DialogHeader>
+                  <Textarea
+                    placeholder={t("workoutNotesPlaceholder")}
+                    value={workoutNotes}
+                    onChange={(e) => setWorkoutNotes(e.target.value)}
+                    className="resize-none text-sm"
+                    rows={3}
+                  />
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-muted-foreground">{t("workoutDate")}</label>
+                    <Input
+                      type="date"
+                      value={completionDate}
+                      onChange={(e) => setCompletionDate(e.target.value)}
+                      max={today}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      variant="secondary"
+                      className="h-11 w-full rounded-xl"
+                      disabled={completeWorkout.isPending}
+                      onClick={() => {
+                        const id = todayLog?.id ?? activeWorkoutId;
+                        if (id) completeWorkout.mutate({ id, notes: workoutNotes || undefined, customDate: completionDate }, {
+                          onSuccess: () => {
+                            setCompletionOpen(false);
+                            sessionEnd();
+                            setCompletionDate(today);
+                          },
+                        });
+                      }}
+                    >
+                      {completeWorkout.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                      {t("completeWorkout")}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           )}
 
